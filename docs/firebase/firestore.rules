@@ -1,0 +1,293 @@
+rules_version = '2';
+
+// Kazi — Firestore security rules (v1 starter)
+// Contract: docs/03-TDD.md §4–§5. Every branch must have allow + deny tests in functions/test/rules.
+// Server-only fields are written by Cloud Functions (Admin SDK bypasses these rules).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+    function signedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+    function isAdmin() { return signedIn() && request.auth.token.admin == true; }
+    function isModerator() { return signedIn() && (request.auth.token.moderator == true || isAdmin()); }
+
+    function data() { return request.resource.data; }
+    function prev() { return resource.data; }
+    function onlyKeys(keys) { return data().keys().hasOnly(keys); }
+    function hasKeys(keys) { return data().keys().hasAll(keys); }
+    function changedOnly(keys) { return data().diff(prev()).affectedKeys().hasOnly(keys); }
+
+    function str(v, min, max) { return v is string && v.size() >= min && v.size() <= max; }
+    function optStr(field, min, max) { return !(field in data()) || data()[field] == null || str(data()[field], min, max); }
+    function e164(v) { return v is string && v.matches('^\\+[1-9][0-9]{7,14}$'); }
+    function isNow(field) { return data()[field] == request.time; }
+
+    function userDoc(id) { return get(/databases/$(database)/documents/users/$(id)); }
+    function providerDoc(id) { return get(/databases/$(database)/documents/providers/$(id)); }
+    function userActive() { return userDoc(uid()).data.status == 'active'; }
+
+    // ---------- users ----------
+    match /users/{userId} {
+      function isOwner() { return signedIn() && uid() == userId; }
+      function userClientKeys() {
+        return ['displayName', 'photoUrl', 'phone', 'locale', 'city', 'commune',
+                'termsVersion', 'termsAcceptedAt', 'status', 'createdAt', 'updatedAt'];
+      }
+      function validUser() {
+        return str(data().displayName, 2, 60)
+          && data().locale in ['fr', 'en']
+          && str(data().city, 2, 40)
+          && optStr('commune', 2, 40)
+          && optStr('photoUrl', 10, 2048)
+          && str(data().termsVersion, 1, 20);
+      }
+
+      allow read: if isOwner() || isModerator();
+
+      allow create: if isOwner()
+        && onlyKeys(userClientKeys())
+        && hasKeys(['displayName', 'phone', 'locale', 'city', 'termsVersion', 'termsAcceptedAt', 'status', 'createdAt', 'updatedAt'])
+        && data().phone == request.auth.token.phone_number
+        && data().status == 'active'
+        && isNow('createdAt') && isNow('updatedAt') && isNow('termsAcceptedAt')
+        && validUser();
+
+      allow update: if isOwner()
+        && prev().status == 'active'
+        && changedOnly(['displayName', 'photoUrl', 'locale', 'city', 'commune', 'termsVersion', 'termsAcceptedAt', 'updatedAt'])
+        && isNow('updatedAt')
+        && validUser();
+
+      allow delete: if false; // deleteAccount callable
+
+      match /favorites/{providerId} {
+        allow read, delete: if isOwner();
+        allow create: if isOwner()
+          && onlyKeys(['providerId', 'displayName', 'photoUrl', 'headline', 'createdAt'])
+          && data().providerId == providerId
+          && str(data().displayName, 1, 60)
+          && isNow('createdAt');
+        allow update: if false;
+      }
+
+      match /blocks/{blockedUid} {
+        allow read, delete: if isOwner();
+        allow create: if isOwner() && blockedUid != userId && onlyKeys(['createdAt']) && isNow('createdAt');
+        allow update: if false;
+      }
+
+      match /devices/{deviceId} {
+        allow read, delete: if isOwner();
+        allow create, update: if isOwner()
+          && onlyKeys(['fcmToken', 'platform', 'locale', 'updatedAt'])
+          && str(data().fcmToken, 10, 4096)
+          && data().platform in ['android', 'ios', 'web']
+          && isNow('updatedAt');
+      }
+    }
+
+    // ---------- providers ----------
+    match /providers/{providerId} {
+      function isOwner() { return signedIn() && uid() == providerId; }
+      function providerClientKeys() {
+        return ['displayName', 'bio', 'photoUrl', 'coverUrl', 'categoryIds', 'city', 'baseCommune',
+                'communes', 'whatsappNumber', 'callNumber', 'yearsExperience', 'portfolio', 'updatedAt'];
+      }
+      function validProvider() {
+        return str(data().displayName, 2, 60)
+          && optStr('bio', 0, 600)
+          && optStr('photoUrl', 10, 2048)
+          && optStr('coverUrl', 10, 2048)
+          && data().categoryIds is list && data().categoryIds.size() >= 1 && data().categoryIds.size() <= 3
+          && str(data().city, 2, 40)
+          && str(data().baseCommune, 2, 40)
+          && data().communes is list && data().communes.size() >= 1 && data().communes.size() <= 10
+          && e164(data().whatsappNumber)
+          && (!('callNumber' in data()) || data().callNumber == null || e164(data().callNumber))
+          && data().yearsExperience is int && data().yearsExperience >= 0 && data().yearsExperience <= 60
+          && (!('portfolio' in data()) || (data().portfolio is list && data().portfolio.size() <= 12));
+      }
+
+      allow read: if isOwner() || isModerator() || resource.data.status == 'approved';
+
+      allow create: if isOwner()
+        && userActive()
+        && onlyKeys(providerClientKeys().concat(['status', 'verified', 'ratingAvg', 'ratingCount', 'ratingSum', 'listingCount', 'createdAt']))
+        && data().status == 'pending'
+        && data().verified == false
+        && data().ratingAvg == 0 && data().ratingCount == 0 && data().ratingSum == 0
+        && data().listingCount == 0
+        && isNow('createdAt') && isNow('updatedAt')
+        && validProvider();
+
+      allow update: if isOwner()
+        && prev().status != 'suspended'
+        && isNow('updatedAt')
+        && validProvider()
+        && (
+          changedOnly(providerClientKeys())
+          || (prev().status == 'rejected' && data().status == 'pending'
+              && changedOnly(providerClientKeys().concat(['status'])))
+        );
+
+      allow delete: if false; // deleteAccount callable
+
+      // ----- reviews -----
+      match /reviews/{reviewerId} {
+        function isAuthor() { return signedIn() && uid() == reviewerId; }
+        function validReview() {
+          return data().rating is int && data().rating >= 1 && data().rating <= 5
+            && optStr('text', 0, 500)
+            && str(data().authorName, 1, 60)
+            && optStr('authorPhotoUrl', 10, 2048);
+        }
+
+        allow read: if true;
+
+        allow create: if isAuthor()
+          && reviewerId != providerId
+          && userActive()
+          && exists(/databases/$(database)/documents/contacts/$(reviewerId + '_' + providerId))
+          && onlyKeys(['authorUid', 'authorName', 'authorPhotoUrl', 'rating', 'text', 'createdAt', 'updatedAt'])
+          && data().authorUid == reviewerId
+          && isNow('createdAt') && isNow('updatedAt')
+          && validReview();
+
+        allow update: if (isAuthor()
+            && changedOnly(['rating', 'text', 'authorName', 'authorPhotoUrl', 'updatedAt'])
+            && isNow('updatedAt')
+            && validReview())
+          // P2: provider reply
+          || (signedIn() && uid() == providerId
+            && changedOnly(['providerReply', 'providerReplyAt'])
+            && str(data().providerReply, 1, 500)
+            && isNow('providerReplyAt'));
+
+        allow delete: if isAuthor() || isModerator();
+      }
+    }
+
+    // ---------- listings ----------
+    match /listings/{listingId} {
+      function isOwner() { return signedIn() && resource.data.providerId == uid(); }
+      function listingClientKeys() {
+        return ['providerId', 'title', 'description', 'categoryId', 'priceType', 'priceAmount',
+                'currency', 'photos', 'city', 'communes', 'status', 'createdAt', 'updatedAt'];
+      }
+      function validListing() {
+        return str(data().title, 4, 80)
+          && optStr('description', 0, 1000)
+          && str(data().categoryId, 2, 40)
+          && data().priceType in ['fixed', 'from', 'quote']
+          && (
+            (data().priceType == 'quote' && (!('priceAmount' in data()) || data().priceAmount == null))
+            || (data().priceType != 'quote' && data().priceAmount is number && data().priceAmount >= 0 && data().priceAmount <= 100000000)
+          )
+          && data().currency in ['USD', 'CDF']
+          && data().photos is list && data().photos.size() <= 6
+          && str(data().city, 2, 40)
+          && data().communes is list && data().communes.size() >= 1 && data().communes.size() <= 10
+          && data().status in ['draft', 'active', 'paused'];
+      }
+      function ownerProvider() { return providerDoc(uid()).data; }
+
+      allow read: if resource.data.visible == true
+        || (signedIn() && resource.data.providerId == uid())
+        || isModerator();
+
+      allow create: if signedIn()
+        && data().providerId == uid()
+        && onlyKeys(listingClientKeys())
+        && ownerProvider().status in ['pending', 'approved', 'rejected']
+        && ownerProvider().listingCount < 10
+        && isNow('createdAt') && isNow('updatedAt')
+        && validListing();
+
+      allow update: if isOwner()
+        && data().providerId == prev().providerId
+        && changedOnly(['title', 'description', 'categoryId', 'priceType', 'priceAmount', 'currency',
+                        'photos', 'city', 'communes', 'status', 'updatedAt'])
+        && providerDoc(uid()).data.status != 'suspended'
+        && isNow('updatedAt')
+        && validListing();
+
+      allow delete: if isOwner();
+    }
+
+    // ---------- contacts ----------
+    match /contacts/{contactId} {
+      function validContact() {
+        return data().channel in ['whatsapp', 'call']
+          && str(data().providerName, 1, 60)
+          && optStr('providerPhotoUrl', 10, 2048)
+          && optStr('listingId', 1, 64);
+      }
+
+      allow read: if signedIn()
+        && (resource.data.clientUid == uid() || resource.data.providerId == uid() || isModerator());
+
+      allow create: if signedIn()
+        && contactId == uid() + '_' + data().providerId
+        && data().clientUid == uid()
+        && data().providerId != uid()
+        && onlyKeys(['clientUid', 'providerId', 'providerName', 'providerPhotoUrl', 'listingId', 'channel', 'firstAt', 'lastAt'])
+        && isNow('firstAt') && isNow('lastAt')
+        && validContact();
+
+      allow update: if signedIn()
+        && resource.data.clientUid == uid()
+        && changedOnly(['providerName', 'providerPhotoUrl', 'listingId', 'channel', 'lastAt'])
+        && isNow('lastAt')
+        && validContact();
+
+      allow delete: if false;
+    }
+
+    // ---------- reports ----------
+    match /reports/{reportId} {
+      allow read: if isModerator();
+
+      allow create: if signedIn()
+        && reportId == uid() + '_' + data().targetType + '_' + data().targetKey
+        && data().reporterUid == uid()
+        && onlyKeys(['reporterUid', 'targetType', 'targetKey', 'reason', 'details', 'status', 'createdAt'])
+        && data().targetType in ['listing', 'provider', 'review']
+        && str(data().targetKey, 1, 200)
+        && data().reason in ['scam', 'inappropriate', 'fake', 'wrong_category', 'other']
+        && optStr('details', 0, 500)
+        && data().status == 'open'
+        && isNow('createdAt');
+
+      allow update, delete: if false;
+    }
+
+    // ---------- verification requests (callable-only writes) ----------
+    match /verificationRequests/{userId} {
+      allow read: if (signedIn() && uid() == userId) || isModerator();
+      allow write: if false;
+    }
+
+    // ---------- public reference data ----------
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ---------- admin ----------
+    match /adminLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Collection-group read for reviews (provider profile pages, account deletion uses Admin SDK)
+    match /{path=**}/reviews/{reviewerId} {
+      allow read: if true;
+    }
+  }
+}

@@ -1,0 +1,39 @@
+rules_version = '2';
+
+// Kazi — Cloud Storage security rules (v1 starter)
+// Contract: docs/03-TDD.md §5 and §7.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function signedIn() { return request.auth != null; }
+    function isOwner(userId) { return signedIn() && request.auth.uid == userId; }
+    function isDelete() { return request.resource == null; }
+    function isImageUnder(mb) {
+      return request.resource.contentType.matches('image/(jpeg|png|webp)')
+        && request.resource.size < mb * 1024 * 1024;
+    }
+
+    // Public user media: avatar, cover, portfolio, listing photos (+ extension thumbnails)
+    match /media/{userId}/{kind}/{rest=**} {
+      allow read: if true;
+      allow write: if isOwner(userId)
+        && kind in ['avatar', 'cover', 'portfolio', 'listings']
+        && !(rest.matches('.*/thumbs/.*') || rest.matches('^thumbs/.*'))
+        && (isDelete() || isImageUnder(2));
+    }
+
+    // Private ID verification documents — never publicly readable.
+    // Admins view them through short-lived signed URLs from admin_getVerificationFiles.
+    match /private/verification/{userId}/{fileName} {
+      allow read: if false;
+      allow create: if isOwner(userId) && isImageUnder(5);
+      allow update, delete: if false;
+    }
+
+    // Everything else denied
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
