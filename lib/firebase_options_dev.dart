@@ -18,30 +18,28 @@ class DefaultFirebaseOptions {
   }
 
   // TODO(KZ-002): replace placeholders with values from flutterfire configure.
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'TODO',
-    appId: 'TODO',
-    messagingSenderId: 'TODO',
-    projectId: 'kazi-dev-8099c',
-    storageBucket: 'kazi-dev-8099c.appspot.com',
-  );
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'TODO',
-    appId: 'TODO',
-    messagingSenderId: 'TODO',
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyCRgPowiikvzNZSYooto1oOhhpZp4wxaIs',
+    appId: '1:128757829097:android:0f276c997a2582bfb14f78',
+    messagingSenderId: '128757829097',
     projectId: 'kazi-dev-8099c',
-    storageBucket: 'kazi-dev-8099c.appspot.com',
-    iosClientId: 'TODO',
+    storageBucket: 'kazi-dev-8099c.firebasestorage.app',
+  );
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyCUfmi_4kHXxWkeqwhLHve0V6GmEGRTua4',
+    appId: '1:128757829097:ios:90667243939760fdb14f78',
+    messagingSenderId: '128757829097',
+    projectId: 'kazi-dev-8099c',
+    storageBucket: 'kazi-dev-8099c.firebasestorage.app',
     iosBundleId: 'com.arkepios.kazi.dev',
   );
-
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'TODO',
-    appId: 'TODO',
-    messagingSenderId: 'TODO',
+    apiKey: 'AIzaSyDt0kOzsh_vgz8EXy07Xg5NSc9xIQ5xS1A',
+    appId: '1:128757829097:web:df421fbf58fabfb7b14f78',
+    messagingSenderId: '128757829097',
     projectId: 'kazi-dev-8099c',
-    storageBucket: 'kazi-dev-8099c.appspot.com',
     authDomain: 'kazi-dev-8099c.firebaseapp.com',
+    storageBucket: 'kazi-dev-8099c.firebasestorage.app',
   );
 }

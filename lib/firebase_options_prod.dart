@@ -19,29 +19,26 @@ class DefaultFirebaseOptionsProd {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'TODO',
-    appId: 'TODO',
-    messagingSenderId: 'TODO',
-    projectId: 'kazi-prod',
-    storageBucket: 'kazi-prod.appspot.com',
+    apiKey: 'AIzaSyA6Q_cpoLV-lNGBMgl4hOj0ypnSfnox0_Q',
+    appId: '1:189505543196:android:0cf42294280d944e1f93d9',
+    messagingSenderId: '189505543196',
+    projectId: 'kazi-prod-d9c00',
+    storageBucket: 'kazi-prod-d9c00.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'TODO',
-    appId: 'TODO',
-    messagingSenderId: 'TODO',
-    projectId: 'kazi-prod',
-    storageBucket: 'kazi-prod.appspot.com',
-    iosClientId: 'TODO',
+    apiKey: 'AIzaSyBndDT5gaWB46goNSlIwocfzAmd2wHTNAk',
+    appId: '1:189505543196:ios:2b159ec8e11fd3ec1f93d9',
+    messagingSenderId: '189505543196',
+    projectId: 'kazi-prod-d9c00',
+    storageBucket: 'kazi-prod-d9c00.firebasestorage.app',
     iosBundleId: 'com.arkepios.kazi',
   );
-
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'TODO',
-    appId: 'TODO',
-    messagingSenderId: 'TODO',
-    projectId: 'kazi-prod',
-    storageBucket: 'kazi-prod.appspot.com',
-    authDomain: 'kazi-prod.firebaseapp.com',
+    apiKey: 'AIzaSyDZCq7DR9_ZPuxkdWXWAmFt7oBBvRLTKlo',
+    appId: '1:189505543196:web:5acf7e0d967871b11f93d9',
+    messagingSenderId: '189505543196',
+    projectId: 'kazi-prod-d9c00',
+    authDomain: 'kazi-prod-d9c00.firebaseapp.com',
+    storageBucket: 'kazi-prod-d9c00.firebasestorage.app',
   );
 }

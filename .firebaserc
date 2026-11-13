@@ -1,5 +1,6 @@
 {
   "projects": {
-    "dev": "kazi-dev-8099c"
+    "dev": "kazi-dev-8099c",
+    "prod": "kazi-prod-d9c00"
   }
 }

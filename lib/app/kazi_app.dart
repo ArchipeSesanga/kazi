@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
+import '../core/l10n/app_localizations.dart';
+import '../core/theme/kazi_theme.dart';
 import 'router/app_router.dart';
 
-// TODO(KZ-006): wire KaziTheme
-// TODO(KZ-012): wire AppLocalizations
 class KaziApp extends StatelessWidget {
   const KaziApp({super.key, this.admin = false});
 
@@ -14,6 +15,14 @@ class KaziApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'Kazi',
       debugShowCheckedModeBanner: false,
+      theme: KaziTheme.light,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: appRouter,
     );
   }
