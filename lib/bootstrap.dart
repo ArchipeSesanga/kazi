@@ -8,6 +8,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/app_providers.dart';
 import 'app/kazi_app.dart';
@@ -77,8 +78,11 @@ Future<void> bootstrap({bool admin = false}) async {
   // 7. Remote Config — set defaults then fetch with a 3 s timeout.
   await _initRemoteConfig();
 
-  // 8. Run the app.
-  runApp(AppProviders(child: KaziApp(admin: admin)));
+  // 8. SharedPreferences — needed by LocaleController.
+  final prefs = await SharedPreferences.getInstance();
+
+  // 9. Run the app.
+  runApp(AppProviders(prefs: prefs, child: KaziApp(admin: admin)));
 }
 
 Future<void> _initRemoteConfig() async {
