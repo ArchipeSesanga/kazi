@@ -3,6 +3,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,8 +15,10 @@ import '../core/services/firebase_analytics_service.dart';
 import '../core/services/launcher_service.dart';
 import '../core/services/url_launcher_service.dart';
 import '../features/auth/application/auth_controller.dart';
+import '../features/auth/application/session_controller.dart';
 import '../features/auth/data/firebase_auth_repository.dart';
 import '../features/auth/domain/auth_repository.dart';
+import 'router/app_router.dart';
 
 class AppProviders extends StatelessWidget {
   const AppProviders({
@@ -54,6 +57,17 @@ class AppProviders extends StatelessWidget {
         ChangeNotifierProxyProvider<AuthRepository, AuthController>(
           create: (ctx) => AuthController(ctx.read<AuthRepository>()),
           update: (_, repo, prev) => prev ?? AuthController(repo),
+        ),
+        ChangeNotifierProxyProvider<AuthRepository, SessionController>(
+          create: (ctx) => SessionController(ctx.read<AuthRepository>()),
+          update: (_, repo, prev) => prev ?? SessionController(repo),
+        ),
+
+        // Router — created once, refreshes on SessionController changes.
+        ProxyProvider<SessionController, GoRouter>(
+          create: (ctx) => createAppRouter(ctx.read<SessionController>()),
+          update: (_, session, prev) => prev ?? createAppRouter(session),
+          dispose: (_, router) => router.dispose(),
         ),
 
         // TODO(KZ-023): SessionController (needs UserRepository).

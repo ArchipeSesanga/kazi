@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/application/session_controller.dart';
 import '../../features/auth/presentation/otp_screen.dart';
 import '../../features/auth/presentation/phone_screen.dart';
 import '../../features/auth/presentation/setup_profile_screen.dart';
@@ -32,8 +33,36 @@ import '../../features/welcome/presentation/welcome_screen.dart';
 import '../shell/app_shell.dart';
 import 'routes.dart';
 
-final appRouter = GoRouter(
+// Routes that unauthenticated users may visit freely.
+const _publicRoutes = {
+  Routes.splash,
+  Routes.welcome,
+  Routes.authPhone,
+  Routes.authOtp,
+  Routes.authSetupProfile,
+  Routes.legalTerms,
+  Routes.legalPrivacy,
+  Routes.updateRequired,
+  Routes.maintenance,
+};
+
+GoRouter createAppRouter(SessionController session) => GoRouter(
   initialLocation: Routes.splash,
+  refreshListenable: session,
+  redirect: (context, state) {
+    final location = state.matchedLocation;
+    final isLoading = session.isLoading;
+    if (isLoading) return Routes.splash;
+
+    final authed = session.isAuthenticated;
+    final isPublic = _publicRoutes.any((r) => location.startsWith(r));
+
+    if (!authed && !isPublic) return Routes.welcome;
+    if (authed && (location == Routes.welcome || location.startsWith('/auth'))) {
+      return Routes.home;
+    }
+    return null;
+  },
   routes: [
     // ── Splash & Welcome ────────────────────────────────────────────────────
     GoRoute(

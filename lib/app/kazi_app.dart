@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../core/controllers/locale_controller.dart';
 import '../core/l10n/app_localizations.dart';
 import '../core/theme/kazi_theme.dart';
-import 'router/app_router.dart';
 
 class KaziApp extends StatelessWidget {
   const KaziApp({super.key, this.admin = false});
@@ -15,6 +15,7 @@ class KaziApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = context.watch<LocaleController>().locale;
+    final router = context.watch<GoRouter>();
     return MaterialApp.router(
       title: 'Kazi',
       debugShowCheckedModeBanner: false,
@@ -27,7 +28,7 @@ class KaziApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      routerConfig: appRouter,
+      routerConfig: router,
     );
   }
 }
