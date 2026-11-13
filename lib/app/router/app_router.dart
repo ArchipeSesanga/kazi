@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/application/session_controller.dart';
@@ -8,6 +9,7 @@ import '../../features/catalog/presentation/category_screen.dart';
 import '../../features/dev/presentation/dev_components_screen.dart';
 import '../../features/explore/presentation/explore_screen.dart';
 import '../../features/favorites/presentation/favorites_screen.dart';
+import '../../features/gate/application/gate_controller.dart';
 import '../../features/gate/presentation/maintenance_screen.dart';
 import '../../features/gate/presentation/update_required_screen.dart';
 import '../../features/help/presentation/help_screen.dart';
@@ -46,12 +48,28 @@ const _publicRoutes = {
   Routes.maintenance,
 };
 
-GoRouter createAppRouter(SessionController session) => GoRouter(
+GoRouter createAppRouter(SessionController session, GateController gate) =>
+    GoRouter(
   initialLocation: Routes.splash,
-  refreshListenable: session,
+  refreshListenable: Listenable.merge([session, gate]),
   redirect: (context, state) {
     final location = state.matchedLocation;
-    if (session.isLoading) return Routes.splash;
+
+    // Stay on splash until both session and gate checks resolve.
+    if (session.isLoading || gate.isChecking) return Routes.splash;
+
+    // Gate checks are highest priority and un-escapable.
+    if (gate.isMaintenanceMode) {
+      return location == Routes.maintenance ? null : Routes.maintenance;
+    }
+    if (gate.isUpdateRequired) {
+      return location == Routes.updateRequired ? null : Routes.updateRequired;
+    }
+
+    // If sitting on a gate screen but gates are open, redirect away.
+    if (location == Routes.maintenance || location == Routes.updateRequired) {
+      return Routes.welcome;
+    }
 
     final authed = session.isAuthenticated;
     final incomplete = session.isProfileIncomplete;

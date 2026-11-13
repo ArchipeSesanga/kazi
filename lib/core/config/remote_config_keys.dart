@@ -7,4 +7,5 @@ abstract final class RemoteConfigKeys {
   static const String supportWhatsapp = 'support_whatsapp';
   static const String termsVersion = 'terms_version';
   static const String maxListingPhotos = 'max_listing_photos';
+  static const String storeUrl = 'store_url';
 }

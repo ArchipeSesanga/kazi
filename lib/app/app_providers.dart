@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +21,9 @@ import '../features/auth/data/firebase_auth_repository.dart';
 import '../features/auth/data/firebase_user_repository.dart';
 import '../features/auth/domain/auth_repository.dart';
 import '../features/auth/domain/user_repository.dart';
+import '../features/gate/application/gate_controller.dart';
+import '../features/gate/data/remote_config_gate_service.dart';
+import '../features/gate/domain/gate_service.dart';
 import 'router/app_router.dart';
 
 class AppProviders extends StatelessWidget {
@@ -43,6 +47,7 @@ class AppProviders extends StatelessWidget {
         Provider<FirebaseFunctions>.value(
           value: FirebaseFunctions.instanceFor(region: Env.functionsRegion),
         ),
+        Provider<FirebaseRemoteConfig>.value(value: FirebaseRemoteConfig.instance),
 
         // Services.
         Provider<AnalyticsService>(create: (_) => FirebaseAnalyticsService()),
@@ -54,6 +59,9 @@ class AppProviders extends StatelessWidget {
         ),
         ProxyProvider2<FirebaseFirestore, FirebaseAuth, UserRepository>(
           update: (_, db, auth, __) => FirebaseUserRepository(db, auth),
+        ),
+        ProxyProvider<FirebaseRemoteConfig, GateService>(
+          update: (_, rc, __) => RemoteConfigGateService(rc),
         ),
 
         // Global controllers.
@@ -71,11 +79,19 @@ class AppProviders extends StatelessWidget {
           update: (_, authRepo, userRepo, prev) =>
               prev ?? SessionController(authRepo, userRepo),
         ),
+        ChangeNotifierProxyProvider<GateService, GateController>(
+          create: (ctx) => GateController(ctx.read<GateService>()),
+          update: (_, service, prev) => prev ?? GateController(service),
+        ),
 
-        // Router — created once, refreshes on SessionController changes.
-        ProxyProvider<SessionController, GoRouter>(
-          create: (ctx) => createAppRouter(ctx.read<SessionController>()),
-          update: (_, session, prev) => prev ?? createAppRouter(session),
+        // Router — created once, refreshes on SessionController + GateController.
+        ProxyProvider2<SessionController, GateController, GoRouter>(
+          create: (ctx) => createAppRouter(
+            ctx.read<SessionController>(),
+            ctx.read<GateController>(),
+          ),
+          update: (_, session, gate, prev) =>
+              prev ?? createAppRouter(session, gate),
           dispose: (_, router) => router.dispose(),
         ),
 
