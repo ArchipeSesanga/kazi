@@ -96,6 +96,7 @@ Future<void> _initRemoteConfig() async {
     RemoteConfigKeys.supportWhatsapp: '',
     RemoteConfigKeys.termsVersion: '2026-11',
     RemoteConfigKeys.maxListingPhotos: 6,
+    RemoteConfigKeys.storeUrl: '',
   });
   try {
     await remoteConfig
