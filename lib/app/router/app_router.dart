@@ -51,15 +51,19 @@ GoRouter createAppRouter(SessionController session) => GoRouter(
   refreshListenable: session,
   redirect: (context, state) {
     final location = state.matchedLocation;
-    final isLoading = session.isLoading;
-    if (isLoading) return Routes.splash;
+    if (session.isLoading) return Routes.splash;
 
     final authed = session.isAuthenticated;
+    final incomplete = session.isProfileIncomplete;
     final isPublic = _publicRoutes.any((r) => location.startsWith(r));
 
-    if (!authed && !isPublic) return Routes.welcome;
-    if (authed && (location == Routes.welcome || location.startsWith('/auth'))) {
-      return Routes.home;
+    if (!authed && !incomplete && !isPublic) return Routes.welcome;
+    if (incomplete && location != Routes.authSetupProfile) {
+      return Routes.authSetupProfile;
+    }
+    if ((authed || incomplete) &&
+        (location == Routes.welcome || location.startsWith('/auth/phone') || location.startsWith('/auth/otp'))) {
+      return authed ? Routes.home : Routes.authSetupProfile;
     }
     return null;
   },

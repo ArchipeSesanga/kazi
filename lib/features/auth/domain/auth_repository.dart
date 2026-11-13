@@ -7,6 +7,7 @@ export 'phone_verification.dart';
 abstract interface class AuthRepository {
   Stream<AuthUser?> authStateChanges();
   Future<PhoneVerification> sendOtp(String e164Phone, {int? resendToken});
-  Future<void> confirmOtp(PhoneVerification verification, String smsCode);
+  /// Returns true if this is the user's first sign-in.
+  Future<bool> confirmOtp(PhoneVerification verification, String smsCode);
   Future<void> signOut();
 }

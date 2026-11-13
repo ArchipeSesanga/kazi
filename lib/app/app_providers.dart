@@ -17,7 +17,9 @@ import '../core/services/url_launcher_service.dart';
 import '../features/auth/application/auth_controller.dart';
 import '../features/auth/application/session_controller.dart';
 import '../features/auth/data/firebase_auth_repository.dart';
+import '../features/auth/data/firebase_user_repository.dart';
 import '../features/auth/domain/auth_repository.dart';
+import '../features/auth/domain/user_repository.dart';
 import 'router/app_router.dart';
 
 class AppProviders extends StatelessWidget {
@@ -50,6 +52,9 @@ class AppProviders extends StatelessWidget {
         ProxyProvider<FirebaseAuth, AuthRepository>(
           update: (_, auth, __) => FirebaseAuthRepository(auth),
         ),
+        ProxyProvider2<FirebaseFirestore, FirebaseAuth, UserRepository>(
+          update: (_, db, auth, __) => FirebaseUserRepository(db, auth),
+        ),
 
         // Global controllers.
         ChangeNotifierProvider(create: (_) => ConnectivityController()),
@@ -58,9 +63,13 @@ class AppProviders extends StatelessWidget {
           create: (ctx) => AuthController(ctx.read<AuthRepository>()),
           update: (_, repo, prev) => prev ?? AuthController(repo),
         ),
-        ChangeNotifierProxyProvider<AuthRepository, SessionController>(
-          create: (ctx) => SessionController(ctx.read<AuthRepository>()),
-          update: (_, repo, prev) => prev ?? SessionController(repo),
+        ChangeNotifierProxyProvider2<AuthRepository, UserRepository, SessionController>(
+          create: (ctx) => SessionController(
+            ctx.read<AuthRepository>(),
+            ctx.read<UserRepository>(),
+          ),
+          update: (_, authRepo, userRepo, prev) =>
+              prev ?? SessionController(authRepo, userRepo),
         ),
 
         // Router — created once, refreshes on SessionController changes.

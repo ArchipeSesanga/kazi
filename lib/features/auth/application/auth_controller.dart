@@ -13,11 +13,13 @@ class AuthController extends ChangeNotifier {
   PhoneVerification? _verification;
   String? _errorKey;
   String? _phone;
+  bool _isNewUser = false; // reassigned in confirmOtp
 
   AuthStep get step => _step;
   PhoneVerification? get verification => _verification;
   String? get errorKey => _errorKey;
   String? get phone => _phone;
+  bool get isNewUser => _isNewUser;
 
   Future<void> sendOtp(String e164Phone, {int? resendToken}) async {
     _step = AuthStep.sendingOtp;
@@ -42,7 +44,7 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _repo.confirmOtp(_verification!, smsCode);
+      _isNewUser = await _repo.confirmOtp(_verification!, smsCode);
       _step = AuthStep.done;
     } catch (e) {
       _step = AuthStep.error;

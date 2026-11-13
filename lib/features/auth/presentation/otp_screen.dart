@@ -91,9 +91,9 @@ class _OtpScreenState extends State<OtpScreen> {
     if (_code.length < _codeLength) return;
     await context.read<AuthController>().confirmOtp(_code);
     if (mounted) {
-      final step = context.read<AuthController>().step;
-      if (step == AuthStep.done) {
-        context.go(Routes.home);
+      final auth = context.read<AuthController>();
+      if (auth.step == AuthStep.done) {
+        context.go(auth.isNewUser ? Routes.authSetupProfile : Routes.home);
       }
     }
   }

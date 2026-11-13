@@ -23,6 +23,7 @@ class KaziTextField extends StatelessWidget {
     this.enabled = true,
     this.autofocus = false,
     this.focusNode,
+    this.textCapitalization = TextCapitalization.none,
     super.key,
   });
 
@@ -43,6 +44,7 @@ class KaziTextField extends StatelessWidget {
   final bool enabled;
   final bool autofocus;
   final FocusNode? focusNode;
+  final TextCapitalization textCapitalization;
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +75,7 @@ class KaziTextField extends StatelessWidget {
           enabled: enabled,
           autofocus: autofocus,
           focusNode: focusNode,
+          textCapitalization: textCapitalization,
           style: const TextStyle(
             fontFamily: 'Montserrat',
             fontSize: 15,

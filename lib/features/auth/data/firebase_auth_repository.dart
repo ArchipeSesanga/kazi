@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../domain/auth_repository.dart';
@@ -19,36 +21,40 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<PhoneVerification> sendOtp(
     String e164Phone, {
     int? resendToken,
-  }) async {
-    late PhoneVerification result;
-    Object? caught;
+  }) {
+    // verifyPhoneNumber returns immediately; codeSent fires later (after reCAPTCHA).
+    // Use a Completer so callers can await the actual callback.
+    final completer = Completer<PhoneVerification>();
 
-    await _auth.verifyPhoneNumber(
+    _auth.verifyPhoneNumber(
       phoneNumber: e164Phone,
       forceResendingToken: resendToken,
       timeout: const Duration(seconds: 60),
       verificationCompleted: (_) {},
-      verificationFailed: (e) => caught = e,
+      verificationFailed: (e) {
+        if (!completer.isCompleted) completer.completeError(e);
+      },
       codeSent: (verificationId, token) {
-        result = PhoneVerification(
-          verificationId: verificationId,
-          resendToken: token,
-        );
+        if (!completer.isCompleted) {
+          completer.complete(
+            PhoneVerification(verificationId: verificationId, resendToken: token),
+          );
+        }
       },
       codeAutoRetrievalTimeout: (_) {},
     );
 
-    if (caught != null) throw caught!;
-    return result;
+    return completer.future;
   }
 
   @override
-  Future<void> confirmOtp(PhoneVerification verification, String smsCode) async {
+  Future<bool> confirmOtp(PhoneVerification verification, String smsCode) async {
     final credential = PhoneAuthProvider.credential(
       verificationId: verification.verificationId,
       smsCode: smsCode,
     );
-    await _auth.signInWithCredential(credential);
+    final result = await _auth.signInWithCredential(credential);
+    return result.additionalUserInfo?.isNewUser ?? false;
   }
 
   @override
