@@ -21,6 +21,9 @@ import '../features/auth/data/firebase_auth_repository.dart';
 import '../features/auth/data/firebase_user_repository.dart';
 import '../features/auth/domain/auth_repository.dart';
 import '../features/auth/domain/user_repository.dart';
+import '../features/catalog/application/catalog_controller.dart';
+import '../features/catalog/data/firestore_catalog_repository.dart';
+import '../features/catalog/domain/catalog_repository.dart';
 import '../features/gate/application/gate_controller.dart';
 import '../features/gate/data/remote_config_gate_service.dart';
 import '../features/gate/domain/gate_service.dart';
@@ -52,6 +55,7 @@ class AppProviders extends StatelessWidget {
         // Services.
         Provider<AnalyticsService>(create: (_) => FirebaseAnalyticsService()),
         Provider<LauncherService>(create: (_) => UrlLauncherService()),
+        Provider<SharedPreferences>.value(value: prefs),
 
         // Repositories.
         ProxyProvider<FirebaseAuth, AuthRepository>(
@@ -63,10 +67,17 @@ class AppProviders extends StatelessWidget {
         ProxyProvider<FirebaseRemoteConfig, GateService>(
           update: (_, rc, __) => RemoteConfigGateService(rc),
         ),
+        ProxyProvider2<FirebaseFirestore, SharedPreferences, CatalogRepository>(
+          update: (_, db, sp, __) => FirestoreCatalogRepository(db, sp),
+        ),
 
         // Global controllers.
         ChangeNotifierProvider(create: (_) => ConnectivityController()),
         ChangeNotifierProvider(create: (_) => LocaleController(prefs)),
+        ChangeNotifierProxyProvider<CatalogRepository, CatalogController>(
+          create: (ctx) => CatalogController(ctx.read<CatalogRepository>())..load(),
+          update: (_, repo, prev) => prev ?? (CatalogController(repo)..load()),
+        ),
         ChangeNotifierProxyProvider<AuthRepository, AuthController>(
           create: (ctx) => AuthController(ctx.read<AuthRepository>()),
           update: (_, repo, prev) => prev ?? AuthController(repo),
@@ -95,8 +106,6 @@ class AppProviders extends StatelessWidget {
           dispose: (_, router) => router.dispose(),
         ),
 
-        // TODO(KZ-023): SessionController (needs UserRepository).
-        // TODO(KZ-031): CatalogController (needs CatalogRepository).
         // TODO(KZ-023): FavoritesController (needs FavoritesRepository + SessionController).
       ],
       child: child,
