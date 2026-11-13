@@ -55,15 +55,24 @@ GoRouter createAppRouter(SessionController session) => GoRouter(
 
     final authed = session.isAuthenticated;
     final incomplete = session.isProfileIncomplete;
+
+    // Always leave the splash screen once session is resolved.
+    if (location == Routes.splash) {
+      if (authed) return Routes.home;
+      if (incomplete) return Routes.authSetupProfile;
+      return Routes.welcome;
+    }
+
     final isPublic = _publicRoutes.any((r) => location.startsWith(r));
 
     if (!authed && !incomplete && !isPublic) return Routes.welcome;
     if (incomplete && location != Routes.authSetupProfile) {
       return Routes.authSetupProfile;
     }
-    if ((authed || incomplete) &&
-        (location == Routes.welcome || location.startsWith('/auth/phone') || location.startsWith('/auth/otp'))) {
-      return authed ? Routes.home : Routes.authSetupProfile;
+    if (authed && (location == Routes.welcome ||
+        location.startsWith('/auth/phone') ||
+        location.startsWith('/auth/otp'))) {
+      return Routes.home;
     }
     return null;
   },
