@@ -93,7 +93,11 @@ Future<void> _initRemoteConfig() async {
     RemoteConfigKeys.termsVersion: '2026-11',
     RemoteConfigKeys.maxListingPhotos: 6,
   });
-  await remoteConfig
-      .fetchAndActivate()
-      .timeout(const Duration(seconds: 3), onTimeout: () => false);
+  try {
+    await remoteConfig
+        .fetchAndActivate()
+        .timeout(const Duration(seconds: 3), onTimeout: () => false);
+  } catch (_) {
+    // Fetch failed — defaults already applied above, app continues normally.
+  }
 }
