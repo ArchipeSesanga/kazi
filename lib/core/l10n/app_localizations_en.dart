@@ -216,6 +216,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeEmptyProviders => 'No providers yet.';
 
   @override
+  String get homeCommunePickerTitle => 'Choose your commune';
+
+  @override
+  String get homePromoTitle => 'Offer your services';
+
+  @override
+  String get homePromoSubtitle =>
+      'Post your listings for free and reach thousands of clients.';
+
+  @override
+  String get homePromoCta => 'Start now';
+
+  @override
+  String get homeEmptyRecent => 'No recent listings yet.';
+
+  @override
   String get exploreTitle => 'Explore';
 
   @override

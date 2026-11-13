@@ -494,6 +494,36 @@ abstract class AppLocalizations {
   /// **'Aucun prestataire pour l\'instant.'**
   String get homeEmptyProviders;
 
+  /// Title of commune picker bottom sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez votre commune'**
+  String get homeCommunePickerTitle;
+
+  /// Promo banner title on home screen
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposez vos services'**
+  String get homePromoTitle;
+
+  /// Promo banner subtitle on home screen
+  ///
+  /// In fr, this message translates to:
+  /// **'Publiez vos annonces gratuitement et touchez des milliers de clients.'**
+  String get homePromoSubtitle;
+
+  /// Promo banner CTA button on home screen
+  ///
+  /// In fr, this message translates to:
+  /// **'Commencer'**
+  String get homePromoCta;
+
+  /// Empty recent listings state on home screen
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune annonce récente pour l\'instant.'**
+  String get homeEmptyRecent;
+
   /// Explore screen title
   ///
   /// In fr, this message translates to:

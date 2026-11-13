@@ -221,6 +221,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeEmptyProviders => 'Aucun prestataire pour l\'instant.';
 
   @override
+  String get homeCommunePickerTitle => 'Choisissez votre commune';
+
+  @override
+  String get homePromoTitle => 'Proposez vos services';
+
+  @override
+  String get homePromoSubtitle =>
+      'Publiez vos annonces gratuitement et touchez des milliers de clients.';
+
+  @override
+  String get homePromoCta => 'Commencer';
+
+  @override
+  String get homeEmptyRecent => 'Aucune annonce récente pour l\'instant.';
+
+  @override
   String get exploreTitle => 'Explorer';
 
   @override

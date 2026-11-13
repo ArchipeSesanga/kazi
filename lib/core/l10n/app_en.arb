@@ -76,6 +76,11 @@
   "homeRecentListings": "Recently added",
   "homeLocationLabel": "Kinshasa",
   "homeEmptyProviders": "No providers yet.",
+  "homeCommunePickerTitle": "Choose your commune",
+  "homePromoTitle": "Offer your services",
+  "homePromoSubtitle": "Post your listings for free and reach thousands of clients.",
+  "homePromoCta": "Start now",
+  "homeEmptyRecent": "No recent listings yet.",
 
   "exploreTitle": "Explore",
   "exploreSearchHint": "What are you looking for?",

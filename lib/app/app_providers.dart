@@ -27,6 +27,9 @@ import '../features/catalog/domain/catalog_repository.dart';
 import '../features/gate/application/gate_controller.dart';
 import '../features/gate/data/remote_config_gate_service.dart';
 import '../features/gate/domain/gate_service.dart';
+import '../features/home/application/home_controller.dart';
+import '../features/provider_profile/data/stub_provider_repository.dart';
+import '../features/provider_profile/domain/provider_repository.dart';
 import 'router/app_router.dart';
 
 class AppProviders extends StatelessWidget {
@@ -70,6 +73,9 @@ class AppProviders extends StatelessWidget {
         ProxyProvider2<FirebaseFirestore, SharedPreferences, CatalogRepository>(
           update: (_, db, sp, __) => FirestoreCatalogRepository(db, sp),
         ),
+        Provider<ProviderRepository>(
+          create: (_) => const StubProviderRepository(),
+        ),
 
         // Global controllers.
         ChangeNotifierProvider(create: (_) => ConnectivityController()),
@@ -77,6 +83,10 @@ class AppProviders extends StatelessWidget {
         ChangeNotifierProxyProvider<CatalogRepository, CatalogController>(
           create: (ctx) => CatalogController(ctx.read<CatalogRepository>())..load(),
           update: (_, repo, prev) => prev ?? (CatalogController(repo)..load()),
+        ),
+        ChangeNotifierProxyProvider<ProviderRepository, HomeController>(
+          create: (ctx) => HomeController(ctx.read<ProviderRepository>())..load(),
+          update: (_, repo, prev) => prev ?? (HomeController(repo)..load()),
         ),
         ChangeNotifierProxyProvider<AuthRepository, AuthController>(
           create: (ctx) => AuthController(ctx.read<AuthRepository>()),
