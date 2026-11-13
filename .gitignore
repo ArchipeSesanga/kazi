@@ -46,3 +46,7 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Seed scripts
+scripts/node_modules/
+scripts/dist/

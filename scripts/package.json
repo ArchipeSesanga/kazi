@@ -1,0 +1,19 @@
+{
+  "name": "kazi-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "seed-categories": "tsx seed-categories.ts",
+    "seed-locations": "tsx seed-locations.ts",
+    "seed-demo": "tsx seed-demo.ts"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  }
+}
