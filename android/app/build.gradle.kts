@@ -13,9 +13,13 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    buildFeatures {
+        resValues = true
+    }
+
     defaultConfig {
         // applicationId is overridden per flavor below.
-        minSdk = 23 // TDD §1.1
+        minSdk = flutter.minSdkVersion // TDD §1.1
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

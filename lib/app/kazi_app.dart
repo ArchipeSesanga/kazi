@@ -4,7 +4,6 @@ import 'router/app_router.dart';
 
 // TODO(KZ-006): wire KaziTheme
 // TODO(KZ-012): wire AppLocalizations
-// TODO(KZ-002): wrap with AppProviders once Firebase is wired
 class KaziApp extends StatelessWidget {
   const KaziApp({super.key, this.admin = false});
 
