@@ -513,5 +513,17 @@
   "maintenanceTitle": "Maintenance en cours",
   "@maintenanceTitle": { "description": "Maintenance title" },
   "maintenanceBody": "Kazi est temporairement indisponible. Revenez dans quelques minutes.",
-  "@maintenanceBody": { "description": "Default maintenance body" }
+  "@maintenanceBody": { "description": "Default maintenance body" },
+
+  "profileFirstNameLabel": "Prénom",
+  "profileFirstNameHint": "Ex. : Jean",
+  "profileLastNameLabel": "Nom de famille",
+  "profileLastNameHint": "Ex. : Mukendi",
+  "profileCommuneLabel": "Votre commune",
+  "profileCommuneHint": "Choisissez votre commune",
+  "profileSaved": "Profil enregistré",
+  "profileSaveButton": "Enregistrer",
+  "profileSignOutConfirmBody": "Voulez-vous vraiment vous déconnecter ?",
+  "errorSaveFailed": "Échec de l'enregistrement. Veuillez réessayer.",
+  "errorDeleteFailed": "Échec de la suppression du compte. Veuillez réessayer."
 }

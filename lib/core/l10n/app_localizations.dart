@@ -1435,6 +1435,72 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Kazi est temporairement indisponible. Revenez dans quelques minutes.'**
   String get maintenanceBody;
+
+  /// No description provided for @profileFirstNameLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prénom'**
+  String get profileFirstNameLabel;
+
+  /// No description provided for @profileFirstNameHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. : Jean'**
+  String get profileFirstNameHint;
+
+  /// No description provided for @profileLastNameLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom de famille'**
+  String get profileLastNameLabel;
+
+  /// No description provided for @profileLastNameHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. : Mukendi'**
+  String get profileLastNameHint;
+
+  /// No description provided for @profileCommuneLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre commune'**
+  String get profileCommuneLabel;
+
+  /// No description provided for @profileCommuneHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez votre commune'**
+  String get profileCommuneHint;
+
+  /// No description provided for @profileSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil enregistré'**
+  String get profileSaved;
+
+  /// No description provided for @profileSaveButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get profileSaveButton;
+
+  /// No description provided for @profileSignOutConfirmBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voulez-vous vraiment vous déconnecter ?'**
+  String get profileSignOutConfirmBody;
+
+  /// No description provided for @errorSaveFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échec de l\'enregistrement. Veuillez réessayer.'**
+  String get errorSaveFailed;
+
+  /// No description provided for @errorDeleteFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échec de la suppression du compte. Veuillez réessayer.'**
+  String get errorDeleteFailed;
 }
 
 class _AppLocalizationsDelegate

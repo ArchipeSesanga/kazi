@@ -743,4 +743,37 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get maintenanceBody =>
       'Kazi is temporarily unavailable. Please check back in a few minutes.';
+
+  @override
+  String get profileFirstNameLabel => 'First name';
+
+  @override
+  String get profileFirstNameHint => 'e.g. Jean';
+
+  @override
+  String get profileLastNameLabel => 'Last name';
+
+  @override
+  String get profileLastNameHint => 'e.g. Mukendi';
+
+  @override
+  String get profileCommuneLabel => 'Your commune';
+
+  @override
+  String get profileCommuneHint => 'Choose your commune';
+
+  @override
+  String get profileSaved => 'Profile saved';
+
+  @override
+  String get profileSaveButton => 'Save';
+
+  @override
+  String get profileSignOutConfirmBody => 'Are you sure you want to sign out?';
+
+  @override
+  String get errorSaveFailed => 'Failed to save. Please try again.';
+
+  @override
+  String get errorDeleteFailed => 'Failed to delete account. Please try again.';
 }

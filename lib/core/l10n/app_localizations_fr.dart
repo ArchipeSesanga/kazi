@@ -750,4 +750,40 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get maintenanceBody =>
       'Kazi est temporairement indisponible. Revenez dans quelques minutes.';
+
+  @override
+  String get profileFirstNameLabel => 'Prénom';
+
+  @override
+  String get profileFirstNameHint => 'Ex. : Jean';
+
+  @override
+  String get profileLastNameLabel => 'Nom de famille';
+
+  @override
+  String get profileLastNameHint => 'Ex. : Mukendi';
+
+  @override
+  String get profileCommuneLabel => 'Votre commune';
+
+  @override
+  String get profileCommuneHint => 'Choisissez votre commune';
+
+  @override
+  String get profileSaved => 'Profil enregistré';
+
+  @override
+  String get profileSaveButton => 'Enregistrer';
+
+  @override
+  String get profileSignOutConfirmBody =>
+      'Voulez-vous vraiment vous déconnecter ?';
+
+  @override
+  String get errorSaveFailed =>
+      'Échec de l\'enregistrement. Veuillez réessayer.';
+
+  @override
+  String get errorDeleteFailed =>
+      'Échec de la suppression du compte. Veuillez réessayer.';
 }

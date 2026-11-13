@@ -4,7 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../theme/kazi_colors.dart';
 import '../theme/kazi_spacing.dart';
 
-enum KaziButtonVariant { accent, primary, outline, whatsapp, text }
+enum KaziButtonVariant { accent, primary, outline, whatsapp, text, danger }
 enum KaziButtonSize { large, small }
 
 class KaziButton extends StatelessWidget {
@@ -113,6 +113,7 @@ class KaziButton extends StatelessWidget {
         KaziButtonVariant.accent => KaziColors.accent,
         KaziButtonVariant.primary => KaziColors.primary,
         KaziButtonVariant.whatsapp => KaziColors.whatsapp,
+        KaziButtonVariant.danger => KaziColors.error,
         _ => KaziColors.primary,
       };
 

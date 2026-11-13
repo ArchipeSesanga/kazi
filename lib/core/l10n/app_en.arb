@@ -253,5 +253,17 @@
   "updateRequiredBody": "A new version of Kazi is available. Please update the app to continue.",
   "updateRequiredButton": "Update",
   "maintenanceTitle": "Maintenance in progress",
-  "maintenanceBody": "Kazi is temporarily unavailable. Please check back in a few minutes."
+  "maintenanceBody": "Kazi is temporarily unavailable. Please check back in a few minutes.",
+
+  "profileFirstNameLabel": "First name",
+  "profileFirstNameHint": "e.g. Jean",
+  "profileLastNameLabel": "Last name",
+  "profileLastNameHint": "e.g. Mukendi",
+  "profileCommuneLabel": "Your commune",
+  "profileCommuneHint": "Choose your commune",
+  "profileSaved": "Profile saved",
+  "profileSaveButton": "Save",
+  "profileSignOutConfirmBody": "Are you sure you want to sign out?",
+  "errorSaveFailed": "Failed to save. Please try again.",
+  "errorDeleteFailed": "Failed to delete account. Please try again."
 }
