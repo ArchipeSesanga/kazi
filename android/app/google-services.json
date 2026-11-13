@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "128757829097",
+    "project_id": "kazi-dev-8099c",
+    "storage_bucket": "kazi-dev-8099c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:128757829097:android:0f276c997a2582bfb14f78",
+        "android_client_info": {
+          "package_name": "com.arkepios.kazi.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRgPowiikvzNZSYooto1oOhhpZp4wxaIs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

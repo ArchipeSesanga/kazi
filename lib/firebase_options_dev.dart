@@ -28,11 +28,11 @@ class DefaultFirebaseOptions {
   );
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCUfmi_4kHXxWkeqwhLHve0V6GmEGRTua4',
-    appId: '1:128757829097:ios:90667243939760fdb14f78',
+    appId: '1:128757829097:ios:a83e8d88db1086b6b14f78',
     messagingSenderId: '128757829097',
     projectId: 'kazi-dev-8099c',
     storageBucket: 'kazi-dev-8099c.firebasestorage.app',
-    iosBundleId: 'com.arkepios.kazi.dev',
+    iosBundleId: 'com.arkepios.kazi',
   );
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyDt0kOzsh_vgz8EXy07Xg5NSc9xIQ5xS1A',
