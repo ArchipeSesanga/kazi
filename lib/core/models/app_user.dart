@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../config/app_defaults.dart';
 import 'enums.dart';
 import 'timestamp_converter.dart';
 
@@ -37,9 +38,10 @@ extension AppUserWrite on AppUser {
         'locale': locale,
         'city': city,
         if (commune != null) 'commune': commune,
-        if (termsVersion != null) 'termsVersion': termsVersion,
-        if (termsAcceptedAt != null)
-          'termsAcceptedAt': Timestamp.fromDate(termsAcceptedAt!),
+        // termsVersion and termsAcceptedAt are required by security rules.
+        // isNow('termsAcceptedAt') requires FieldValue.serverTimestamp().
+        'termsVersion': termsVersion ?? AppDefaults.termsVersion,
+        'termsAcceptedAt': FieldValue.serverTimestamp(),
         'status': 'active',
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),

@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../app/router/routes.dart';
+import '../../../core/config/app_defaults.dart';
 import '../../../core/l10n/app_localizations.dart';
-
 import '../../../core/models/app_user.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
@@ -22,19 +22,21 @@ class SetupProfileScreen extends StatefulWidget {
 }
 
 class _SetupProfileScreenState extends State<SetupProfileScreen> {
-  final _nameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _saving = false;
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     super.dispose();
   }
 
-  String? _validateName(String? value) {
+  String? _validateRequired(String? value) {
     if (value == null || value.trim().length < 2) {
-      return 'Entrez au moins 2 caractères.';
+      return AppLocalizations.of(context).authProfileNameHint;
     }
     return null;
   }
@@ -43,16 +45,18 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _saving = true);
 
-    final session = context.read<SessionController>();
-    final uid = session.uid;
+    final uid = context.read<SessionController>().uid;
     if (uid == null) return;
 
     final phone = FirebaseAuth.instance.currentUser?.phoneNumber ?? '';
+    final displayName =
+        '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
 
     final user = AppUser(
       uid: uid,
-      displayName: _nameController.text.trim(),
+      displayName: displayName,
       phone: phone,
+      termsVersion: AppDefaults.termsVersion,
     );
 
     try {
@@ -103,12 +107,23 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                 ],
                 const SizedBox(height: KaziSpacing.xxxl),
                 KaziTextField(
-                  controller: _nameController,
-                  label: l.authProfileNameLabel,
-                  hint: l.authProfileNameHint,
+                  controller: _firstNameController,
+                  label: l.profileFirstNameLabel,
+                  hint: l.profileFirstNameHint,
                   keyboardType: TextInputType.name,
                   textCapitalization: TextCapitalization.words,
-                  validator: _validateName,
+                  textInputAction: TextInputAction.next,
+                  validator: _validateRequired,
+                ),
+                const SizedBox(height: KaziSpacing.lg),
+                KaziTextField(
+                  controller: _lastNameController,
+                  label: l.profileLastNameLabel,
+                  hint: l.profileLastNameHint,
+                  keyboardType: TextInputType.name,
+                  textCapitalization: TextCapitalization.words,
+                  textInputAction: TextInputAction.done,
+                  validator: _validateRequired,
                 ),
                 const SizedBox(height: KaziSpacing.xxxl),
                 KaziButton(
