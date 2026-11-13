@@ -12,6 +12,7 @@ class SessionController extends ChangeNotifier {
   SessionController(AuthRepository authRepo, UserRepository userRepo) {
     _authSub = authRepo.authStateChanges().listen((authUser) {
       _userSub?.cancel();
+      _timeout?.cancel();
       _uid = authUser?.uid;
       if (authUser == null) {
         _appUser = null;
@@ -20,19 +21,40 @@ class SessionController extends ChangeNotifier {
       } else {
         _status = SessionStatus.loading;
         notifyListeners();
-        _userSub = userRepo.watchUser(authUser.uid).listen((appUser) {
-          _appUser = appUser;
-          _status = (appUser == null || appUser.displayName.trim().isEmpty)
-              ? SessionStatus.profileIncomplete
-              : SessionStatus.authenticated;
-          notifyListeners();
+
+        // Fallback: if Firestore doesn't emit within 5 s (e.g. rules deny read),
+        // treat the session as profileIncomplete so the user isn't stuck on splash.
+        _timeout = Timer(const Duration(seconds: 5), () {
+          if (_status == SessionStatus.loading) {
+            _status = SessionStatus.profileIncomplete;
+            notifyListeners();
+          }
         });
+
+        _userSub = userRepo.watchUser(authUser.uid).listen(
+          (appUser) {
+            _timeout?.cancel();
+            _appUser = appUser;
+            _status = (appUser == null || appUser.displayName.trim().isEmpty)
+                ? SessionStatus.profileIncomplete
+                : SessionStatus.authenticated;
+            notifyListeners();
+          },
+          onError: (_) {
+            _timeout?.cancel();
+            if (_status == SessionStatus.loading) {
+              _status = SessionStatus.profileIncomplete;
+              notifyListeners();
+            }
+          },
+        );
       }
     });
   }
 
   late final StreamSubscription<AuthUser?> _authSub;
   StreamSubscription<AppUser?>? _userSub;
+  Timer? _timeout;
 
   SessionStatus _status = SessionStatus.loading;
   String? _uid;
@@ -50,6 +72,7 @@ class SessionController extends ChangeNotifier {
   void dispose() {
     _authSub.cancel();
     _userSub?.cancel();
+    _timeout?.cancel();
     super.dispose();
   }
 }
