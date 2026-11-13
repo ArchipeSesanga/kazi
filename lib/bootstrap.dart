@@ -31,11 +31,15 @@ Future<void> bootstrap({bool admin = false}) async {
   );
 
   // 3. App Check — debug provider in dev, Play Integrity in prod.
-  await FirebaseAppCheck.instance.activate(
-    androidProvider:
-        Env.isDev ? AndroidProvider.debug : AndroidProvider.playIntegrity,
-    webProvider: ReCaptchaEnterpriseProvider(''), // TODO: set prod site key
-  );
+  //    Wrapped in a timeout so a network hiccup never freezes the launch.
+  await FirebaseAppCheck.instance
+      .activate(
+        androidProvider:
+            Env.isDev ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+        webProvider: ReCaptchaEnterpriseProvider(''), // TODO: set prod site key
+      )
+      .timeout(const Duration(seconds: 5), onTimeout: () {})
+      .catchError((_) {});
 
   // 4 + 5. Emulator wiring (combined with Firestore settings to avoid double-write).
   if (Env.useEmulators) {
