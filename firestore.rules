@@ -222,7 +222,10 @@ service cloud.firestore {
         return data().channel in ['whatsapp', 'call']
           && str(data().providerName, 1, 60)
           && optStr('providerPhotoUrl', 10, 2048)
-          && optStr('listingId', 1, 64);
+          && optStr('listingId', 1, 64)
+          && bool(data().providerVerified)
+          && str(data().whatsappNumber, 5, 20)
+          && optStr('callNumber', 5, 20);
       }
 
       allow read: if signedIn()
@@ -232,13 +235,13 @@ service cloud.firestore {
         && contactId == uid() + '_' + data().providerId
         && data().clientUid == uid()
         && data().providerId != uid()
-        && onlyKeys(['clientUid', 'providerId', 'providerName', 'providerPhotoUrl', 'listingId', 'channel', 'firstAt', 'lastAt'])
+        && onlyKeys(['clientUid', 'providerId', 'providerName', 'providerPhotoUrl', 'listingId', 'channel', 'providerVerified', 'whatsappNumber', 'callNumber', 'firstAt', 'lastAt'])
         && isNow('firstAt') && isNow('lastAt')
         && validContact();
 
       allow update: if signedIn()
         && resource.data.clientUid == uid()
-        && changedOnly(['providerName', 'providerPhotoUrl', 'listingId', 'channel', 'lastAt'])
+        && changedOnly(['providerName', 'providerPhotoUrl', 'listingId', 'channel', 'providerVerified', 'whatsappNumber', 'callNumber', 'lastAt'])
         && isNow('lastAt')
         && validContact();
 
