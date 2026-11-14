@@ -49,9 +49,6 @@ dependencies:
   # Phone numbers
   phone_numbers_parser: ^5.0.0+1
 
-  # OTP input
-  pinput: ^5.0.0
-
   # Icons
   lucide_icons_flutter: ^4.0.3
 

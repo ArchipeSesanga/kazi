@@ -50,3 +50,7 @@ app.*.map.json
 # Seed scripts
 scripts/node_modules/
 scripts/dist/
+
+# Cloud Functions
+functions/node_modules/
+functions/lib/

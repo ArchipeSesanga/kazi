@@ -51,6 +51,7 @@ extension AppUserWrite on AppUser {
   Map<String, dynamic> toUpdateMap() => {
         'displayName': displayName,
         if (photoUrl != null) 'photoUrl': photoUrl,
+        if (phone.isNotEmpty) 'phone': phone,
         'locale': locale,
         'city': city,
         if (commune != null) 'commune': commune,

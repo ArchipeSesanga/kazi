@@ -6,7 +6,7 @@
 
 Kazi is a free Android-first marketplace app for local services in the DRC (Kinshasa first). Clients find providers and contact them via WhatsApp or a phone call. Providers publish service listings. Admins moderate through a Flutter Web panel.
 
-**Stack (non-negotiable):** Flutter (Dart 3) · Firebase (Auth phone OTP, Firestore, Storage, Functions 2nd gen in TypeScript, FCM, Remote Config, App Check, Analytics, Crashlytics, Hosting) · **Provider** for state management · go_router · freezed.
+**Stack (non-negotiable):** Flutter (Dart 3) · Firebase (Auth email/password, Firestore, Storage, Functions 2nd gen in TypeScript, FCM, Remote Config, App Check, Analytics, Crashlytics, Hosting) · **Provider** for state management · go_router · freezed.
 
 ## 2. Read before coding (in this order)
 

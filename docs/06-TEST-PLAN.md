@@ -37,7 +37,7 @@
 
 | Path | Allow | Deny |
 |---|---|---|
-| users create | owner with matching phone | phone ≠ token phone; extra field `isProvider`; status `suspended` |
+| users create | owner with matching phone or email account with empty phone | phone ≠ token phone; extra field `isProvider`; status `suspended` |
 | users update | name change | changing `phone`, `status`, `isProvider` |
 | providers create | pending with zeroed server fields | `verified: true`; `status: approved`; `ratingAvg: 5`; 4 categories |
 | providers update | bio change; rejected → pending | pending → approved; owner when suspended; set `verified` |
@@ -61,7 +61,7 @@
 - Admin callables: reject without claim, reject without App Check (in an emulator with enforcement on), log every action.
 
 ### 2.5 Controllers (examples)
-- `AuthController`: code sent → wrong code → `otpInvalid` → resend disabled for 60 s.
+- `AuthController`: email registration, sign-in, password reset, and Firebase auth error mapping.
 - `SearchResultsController`: debounce; filter change resets pagination; client-side commune filter when keyword present; auto-fetch extra pages when the filtered result is short.
 - `ListingFormController`: validation messages; quote clears amount; upload progress; publish sets `status active`; can't add a 7th photo.
 - `ContactController`: guest → redirect to sign-in; signed in → records the contact once, then launches the URL.
@@ -70,7 +70,7 @@
 
 | ID | Journey |
 |---|---|
-| J1 | Guest opens app → picks French → browses category Plomberie → opens provider → taps WhatsApp → asked to sign in → OTP (emulator code) → profile setup → returns to provider → WhatsApp intent launched |
+| J1 | App opens → picks French → sees onboarding → continues to email/password sign-in or registration → completes profile setup → reaches the app |
 | J2 | New user → becomes a provider (5 steps) → sees "En attente" → admin approves (callable in test) → provider creates listing with 2 photos → listing appears in search for its commune |
 | J3 | Client who contacted provider → leaves 4-star review → provider rating shows 4,0 (1 avis) |
 | J4 | Three users report a listing → listing disappears from search → admin un-hides it → visible again |

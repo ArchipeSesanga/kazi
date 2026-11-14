@@ -40,7 +40,9 @@ Future<void> bootstrap({bool admin = false}) async {
         webProvider: ReCaptchaEnterpriseProvider(''), // TODO: set prod site key
       )
       .timeout(const Duration(seconds: 5), onTimeout: () {})
-      .catchError((_) {});
+      .catchError((Object e) {
+        if (Env.isDev) debugPrint('[AppCheck] activate failed: $e');
+      });
 
   // 4 + 5. Emulator wiring (combined with Firestore settings to avoid double-write).
   if (Env.useEmulators) {

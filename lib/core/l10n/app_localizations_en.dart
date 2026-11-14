@@ -56,12 +56,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorRateLimited => 'Too many attempts. Please wait.';
 
   @override
-  String get errorOtpInvalid => 'Incorrect code. Check and try again.';
-
-  @override
-  String get errorOtpExpired => 'Code expired. Request a new code.';
-
-  @override
   String get errorTooManyRequests => 'Too many requests. Try again later.';
 
   @override
@@ -128,58 +122,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeSkip => 'Skip';
 
   @override
-  String get authPhoneTitle => 'Enter your number';
-
-  @override
-  String get authPhoneSubtitle => 'We\'ll send you a confirmation code.';
-
-  @override
-  String get authPhoneLabel => 'Phone number';
-
-  @override
-  String get authPhoneHint => '081 234 5678';
-
-  @override
-  String get authPhoneSend => 'Send code';
-
-  @override
-  String get authPhoneTermsPrefix => 'By continuing, you agree to our ';
-
-  @override
-  String get authPhoneTermsLink => 'Terms of Use';
-
-  @override
-  String get authPhoneTermsAnd => ' and our ';
-
-  @override
-  String get authPhonePrivacyLink => 'Privacy Policy';
-
-  @override
-  String get authPhoneTermsError => 'Please accept the terms to continue.';
-
-  @override
-  String get authPhoneInvalid => 'Invalid number. Check and try again.';
-
-  @override
-  String get authOtpTitle => 'Enter the code';
-
-  @override
-  String authOtpSubtitle(String phone) {
-    return 'Code sent to $phone';
-  }
-
-  @override
-  String authOtpResendIn(int seconds) {
-    return 'Resend in ${seconds}s';
-  }
-
-  @override
-  String get authOtpResend => 'Resend code';
-
-  @override
-  String get authOtpChangeNumber => 'Change number';
-
-  @override
   String get authProfileTitle => 'Create your profile';
 
   @override
@@ -235,12 +177,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authEmailResetSent => 'Password reset email sent.';
-
-  @override
-  String get authEmailUsePhone => 'Sign in with phone';
-
-  @override
-  String get authPhoneUseEmail => 'Sign in with email';
 
   @override
   String get authEmailInUse => 'This email is already in use.';
@@ -702,7 +638,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingFormAmountHint => '0';
 
   @override
-  String get listingFormCommuneHint => 'Select service zones (max 10)';
+  String get listingFormBaseCommuneLabel => 'Main commune';
+
+  @override
+  String get listingFormBaseCommuneHint => 'Choose your main commune';
+
+  @override
+  String get listingFormBaseCommuneError => 'Choose your main commune';
+
+  @override
+  String get listingFormCommuneHint =>
+      'Select additional service zones (max 10)';
 
   @override
   String get listingFormTitleError => '4–80 characters required';
@@ -718,6 +664,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get listingFormDraftSaved => 'Draft saved';
+
+  @override
+  String get listingFormDraftDialogTitle => 'Keep draft?';
+
+  @override
+  String get listingFormDraftDialogBody =>
+      'You have an unsaved draft. Do you want to keep it or discard it?';
+
+  @override
+  String get listingFormDraftKeep => 'Keep';
+
+  @override
+  String get listingFormDraftDiscard => 'Discard';
+
+  @override
+  String get listingFormPhotoUploadError =>
+      'Photo upload failed. Tap Retry to resume.';
 
   @override
   String get dashboardTitle => 'My space';

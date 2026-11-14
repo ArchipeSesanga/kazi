@@ -57,12 +57,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get errorRateLimited => 'Trop de tentatives. Veuillez patienter.';
 
   @override
-  String get errorOtpInvalid => 'Code incorrect. Vérifiez et réessayez.';
-
-  @override
-  String get errorOtpExpired => 'Code expiré. Demandez un nouveau code.';
-
-  @override
   String get errorTooManyRequests => 'Trop de demandes. Réessayez plus tard.';
 
   @override
@@ -131,60 +125,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get welcomeSkip => 'Passer';
 
   @override
-  String get authPhoneTitle => 'Entrez votre numéro';
-
-  @override
-  String get authPhoneSubtitle =>
-      'Nous vous enverrons un code de confirmation.';
-
-  @override
-  String get authPhoneLabel => 'Numéro de téléphone';
-
-  @override
-  String get authPhoneHint => '081 234 5678';
-
-  @override
-  String get authPhoneSend => 'Recevoir le code';
-
-  @override
-  String get authPhoneTermsPrefix => 'En continuant, vous acceptez nos ';
-
-  @override
-  String get authPhoneTermsLink => 'Conditions d\'utilisation';
-
-  @override
-  String get authPhoneTermsAnd => ' et notre ';
-
-  @override
-  String get authPhonePrivacyLink => 'Politique de confidentialité';
-
-  @override
-  String get authPhoneTermsError =>
-      'Veuillez accepter les conditions pour continuer.';
-
-  @override
-  String get authPhoneInvalid => 'Numéro invalide. Vérifiez et réessayez.';
-
-  @override
-  String get authOtpTitle => 'Entrez le code';
-
-  @override
-  String authOtpSubtitle(String phone) {
-    return 'Code envoyé au $phone';
-  }
-
-  @override
-  String authOtpResendIn(int seconds) {
-    return 'Renvoyer dans ${seconds}s';
-  }
-
-  @override
-  String get authOtpResend => 'Renvoyer le code';
-
-  @override
-  String get authOtpChangeNumber => 'Changer de numéro';
-
-  @override
   String get authProfileTitle => 'Créez votre profil';
 
   @override
@@ -240,12 +180,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get authEmailResetSent => 'E-mail de réinitialisation envoyé.';
-
-  @override
-  String get authEmailUsePhone => 'Se connecter par téléphone';
-
-  @override
-  String get authPhoneUseEmail => 'Se connecter par e-mail';
 
   @override
   String get authEmailInUse => 'Cet e-mail est déjà utilisé.';
@@ -709,7 +643,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get listingFormAmountHint => '0';
 
   @override
-  String get listingFormCommuneHint => 'Sélectionnez vos zones (max 10)';
+  String get listingFormBaseCommuneLabel => 'Commune principale';
+
+  @override
+  String get listingFormBaseCommuneHint =>
+      'Choisissez votre commune principale';
+
+  @override
+  String get listingFormBaseCommuneError =>
+      'Choisissez votre commune principale';
+
+  @override
+  String get listingFormCommuneHint =>
+      'Sélectionnez des zones supplémentaires (max 10)';
 
   @override
   String get listingFormTitleError => '4 à 80 caractères requis';
@@ -725,6 +671,23 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get listingFormDraftSaved => 'Brouillon enregistré';
+
+  @override
+  String get listingFormDraftDialogTitle => 'Garder le brouillon ?';
+
+  @override
+  String get listingFormDraftDialogBody =>
+      'Vous avez un brouillon non enregistré. Voulez-vous le garder ou le supprimer ?';
+
+  @override
+  String get listingFormDraftKeep => 'Garder';
+
+  @override
+  String get listingFormDraftDiscard => 'Supprimer';
+
+  @override
+  String get listingFormPhotoUploadError =>
+      'L\'envoi de la photo a échoué. Appuyez sur Réessayer.';
 
   @override
   String get dashboardTitle => 'Mon espace';

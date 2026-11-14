@@ -122,7 +122,7 @@ class _GuestView extends StatelessWidget {
       message: l.publishHubGuestCta,
       child: KaziButton(
         label: l.profileSignInButton,
-        onPressed: () => context.go(Routes.authPhone),
+        onPressed: () => context.go(Routes.authEmail),
       ),
     );
   }

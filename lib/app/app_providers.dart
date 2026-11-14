@@ -42,6 +42,7 @@ import '../features/provider_profile/domain/media_repository.dart';
 import '../features/provider_profile/domain/provider_repository.dart';
 import '../features/search/data/firestore_search_repository.dart';
 import '../features/search/domain/search_repository.dart';
+import '../features/welcome/application/onboarding_controller.dart';
 import 'router/app_router.dart';
 
 class AppProviders extends StatelessWidget {
@@ -104,6 +105,7 @@ class AppProviders extends StatelessWidget {
         // Global controllers.
         ChangeNotifierProvider(create: (_) => ConnectivityController()),
         ChangeNotifierProvider(create: (_) => LocaleController(prefs)),
+        ChangeNotifierProvider(create: (_) => OnboardingController(prefs)),
         ChangeNotifierProxyProvider<CatalogRepository, CatalogController>(
           create: (ctx) => CatalogController(ctx.read<CatalogRepository>())..load(),
           update: (_, repo, prev) => prev ?? (CatalogController(repo)..load()),
@@ -122,11 +124,11 @@ class AppProviders extends StatelessWidget {
         ),
         ChangeNotifierProxyProvider2<AuthRepository, UserRepository, SessionController>(
           create: (ctx) => SessionController(
-            ctx.read<AuthRepository>(),
             ctx.read<UserRepository>(),
+            ctx.read<AuthRepository>(),
           ),
           update: (_, authRepo, userRepo, prev) =>
-              prev ?? SessionController(authRepo, userRepo),
+              prev ?? SessionController(userRepo, authRepo),
         ),
         // MediaRepository depends on SessionController.uid — must come after it.
         ProxyProvider2<FirebaseStorage, SessionController, MediaRepository>(
@@ -154,14 +156,15 @@ class AppProviders extends StatelessWidget {
           update: (_, service, prev) => prev ?? GateController(service),
         ),
 
-        // Router — created once, refreshes on SessionController + GateController.
-        ProxyProvider2<SessionController, GateController, GoRouter>(
+        // Router — created once, refreshes on session, gate, and onboarding.
+        ProxyProvider3<SessionController, GateController, OnboardingController, GoRouter>(
           create: (ctx) => createAppRouter(
             ctx.read<SessionController>(),
             ctx.read<GateController>(),
+            ctx.read<OnboardingController>(),
           ),
-          update: (_, session, gate, prev) =>
-              prev ?? createAppRouter(session, gate),
+          update: (_, session, gate, onboarding, prev) =>
+              prev ?? createAppRouter(session, gate, onboarding),
           dispose: (_, router) => router.dispose(),
         ),
 

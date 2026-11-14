@@ -1,7 +1,8 @@
 import 'dart:async';
-import 'dart:typed_data';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 import '../../../core/errors/app_exception.dart';
@@ -25,27 +26,50 @@ class FirebaseMediaRepository implements MediaRepository {
   }) async {
     try {
       final path = _storagePath(kind, listingId: listingId);
-      final bytes = await _compress(file.path);
-      final ref = _storage.ref(path);
-      final task = ref.putData(
-        bytes,
-        SettableMetadata(contentType: 'image/jpeg'),
-      );
-      StreamSubscription<TaskSnapshot>? sub;
-      if (onProgress != null) {
-        sub = task.snapshotEvents.listen((snapshot) {
-          if (snapshot.totalBytes > 0) {
-            onProgress(snapshot.bytesTransferred / snapshot.totalBytes);
-          }
-        });
-      }
+      final authUid = FirebaseAuth.instance.currentUser?.uid;
+      debugPrint('[MediaRepo] upload: repoUid=$_uid authUid=$authUid path=$path bucket=${_storage.bucket}');
+      debugPrint('[MediaRepo] compressing: ${file.path}');
+      Uint8List bytes;
       try {
-        final snapshot = await task;
-        final url = await snapshot.ref.getDownloadURL();
-        return UploadedImage(path: path, url: url);
-      } finally {
-        await sub?.cancel();
+        bytes = await _compress(file.path);
+      } catch (e) {
+        debugPrint('[MediaRepo] compression failed: $e — trying raw read');
+        bytes = await file.readAsBytes();
       }
+      debugPrint('[MediaRepo] ready: ${bytes.length} bytes');
+      // Retry once on cancellation — the gallery picker causes a background/
+      // foreground cycle that can cancel a task created immediately after resume.
+      for (var attempt = 0; attempt < 2; attempt++) {
+        final ref = _storage.ref(path);
+        final task = ref.putData(
+          bytes,
+          SettableMetadata(contentType: 'image/jpeg'),
+        );
+        StreamSubscription<TaskSnapshot>? sub;
+        if (onProgress != null) {
+          sub = task.snapshotEvents.listen((snapshot) {
+            if (snapshot.totalBytes > 0) {
+              onProgress(snapshot.bytesTransferred / snapshot.totalBytes);
+            }
+          });
+        }
+        try {
+          final snapshot = await task;
+          final url = await snapshot.ref.getDownloadURL();
+          return UploadedImage(path: path, url: url);
+        } on FirebaseException catch (e) {
+          debugPrint('[MediaRepo] FirebaseException: plugin=${e.plugin} code=${e.code} message=${e.message}');
+          await sub?.cancel();
+          if (e.code == 'canceled' && attempt == 0) {
+            await Future<void>.delayed(const Duration(milliseconds: 500));
+            continue;
+          }
+          rethrow;
+        } finally {
+          await sub?.cancel();
+        }
+      }
+      throw const UnknownException('upload-exhausted');
     } catch (e, s) {
       throw mapException(e, s);
     }

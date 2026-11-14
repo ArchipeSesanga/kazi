@@ -70,8 +70,8 @@ Story IDs (`KZ-xxx`) are referenced in branch names and commits. **Agents take o
 **KZ-020 Welcome & language.** S02 screens; locale persisted locally.
 - AC: first launch shows the language picker; second launch skips it; changing language updates the UI immediately.
 
-**KZ-021 Phone sign-in + OTP.** `AuthRepository`, `AuthController`, S03/S04 with country picker (default CD), terms checkbox, 60 s resend, error mapping.
-- AC: emulator test number signs in; wrong code shows `error_otpInvalid`; resend disabled for 60 s; Android SMS auto-retrieval works on a real device.
+**KZ-021 Email/password sign-in and registration.** `AuthRepository`, `AuthController`, S03 with email/password validation, forgot-password flow, and sign-in/register switch.
+- AC: onboarding leads to email/password auth; registration creates an account and collects a profile; existing accounts sign in; password reset sends an email; no phone OTP sign-in remains.
 
 **KZ-022 Profile setup.** S05; creates `users/{uid}` per rules; optional avatar upload.
 - AC: user doc matches TDD §4.3; rules accept it; returning users skip this screen.

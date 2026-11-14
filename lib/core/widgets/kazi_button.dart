@@ -117,7 +117,11 @@ class KaziButton extends StatelessWidget {
         _ => KaziColors.primary,
       };
 
-  Color get _foreground => Colors.white;
+  Color get _foreground => switch (variant) {
+        KaziButtonVariant.outline => KaziColors.primary,
+        KaziButtonVariant.text => KaziColors.primary,
+        _ => Colors.white,
+      };
 }
 
 /// Pre-built WhatsApp contact button with icon.

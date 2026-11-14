@@ -267,7 +267,7 @@ class _GuestBody extends StatelessWidget {
           const SizedBox(height: KaziSpacing.xl),
           KaziButton(
             label: l.profileSignInButton,
-            onPressed: () => context.go(Routes.authPhone),
+            onPressed: () => context.go(Routes.authEmail),
           ),
         ],
       ),

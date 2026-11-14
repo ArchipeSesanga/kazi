@@ -15,7 +15,7 @@ final class NetworkException extends AppException {
 
 final class PermissionDeniedException extends AppException {
   const PermissionDeniedException([String? message])
-      : super('permissionDenied', message);
+    : super('permissionDenied', message);
 }
 
 final class NotFoundException extends AppException {
@@ -24,35 +24,26 @@ final class NotFoundException extends AppException {
 
 final class InvalidInputException extends AppException {
   const InvalidInputException([String? message])
-      : super('invalidInput', message);
+    : super('invalidInput', message);
 }
 
 final class RateLimitedException extends AppException {
-  const RateLimitedException([String? message])
-      : super('rateLimited', message);
-}
-
-final class OtpInvalidException extends AppException {
-  const OtpInvalidException([String? message]) : super('otpInvalid', message);
-}
-
-final class OtpExpiredException extends AppException {
-  const OtpExpiredException([String? message]) : super('otpExpired', message);
+  const RateLimitedException([String? message]) : super('rateLimited', message);
 }
 
 final class TooManyRequestsException extends AppException {
   const TooManyRequestsException([String? message])
-      : super('tooManyRequests', message);
+    : super('tooManyRequests', message);
 }
 
 final class QuotaExceededException extends AppException {
   const QuotaExceededException([String? message])
-      : super('quotaExceeded', message);
+    : super('quotaExceeded', message);
 }
 
 final class UnauthenticatedException extends AppException {
   const UnauthenticatedException([String? message])
-      : super('unauthenticated', message);
+    : super('unauthenticated', message);
 }
 
 final class UnknownException extends AppException {

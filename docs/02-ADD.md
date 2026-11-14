@@ -33,7 +33,7 @@ flowchart LR
   Admin([Admin\nweb browser]) -->|approve, moderate| Kazi
   Kazi -->|deep link| WhatsApp[WhatsApp]
   Kazi -->|tel: link| Phone[Phone dialer]
-  Kazi -->|SMS OTP| SMS[Firebase Phone Auth / SMS carriers]
+  Kazi -->|Email / password| AUTH[Firebase Authentication]
   Kazi -->|push| FCM[Firebase Cloud Messaging]
 ```
 
@@ -49,7 +49,7 @@ flowchart TB
   end
 
   subgraph Firebase["Firebase project (kazi-prod)"]
-    AUTH[Firebase Auth\nphone OTP + admin email]
+    AUTH[Firebase Auth\nemail/password]
     FS[(Cloud Firestore\nafrica-south1)]
     ST[(Cloud Storage\nimages, private ID docs)]
     CF[Cloud Functions 2nd gen\nTypeScript]
@@ -94,7 +94,7 @@ flowchart TB
 | **Resize Images extension** | `storage-resize-images` | Generates `200x200` and `800x800` WebP versions of uploaded images |
 | **FCM** | Firebase Cloud Messaging | Status notifications to providers |
 | **Remote Config** | | Feature flags, minimum supported version, maintenance banner |
-| **App Check** | Play Integrity (Android), reCAPTCHA Enterprise (web), debug provider (dev) | Blocks non-genuine clients from Firestore, Storage, Functions and Phone Auth abuse |
+| **App Check** | Play Integrity (Android), reCAPTCHA Enterprise (web), debug provider (dev) | Blocks non-genuine clients from Firestore, Storage and Functions |
 | **Analytics / Crashlytics** | | Product metrics, crash reporting |
 | **Hosting** | Firebase Hosting | Admin panel, Terms/Privacy pages, share-link landing page |
 
@@ -207,8 +207,8 @@ ID verification documents go to `private/verification/{uid}/…`. They are never
 
 | Layer | Control |
 |---|---|
-| **Identity** | Phone OTP for users; email/password + custom claim for admins. Claims are set only via a CLI script/callable restricted to `superAdmin` |
-| **Device integrity** | App Check enforced on Firestore, Storage, Functions; Play Integrity on Android; Phone Auth abuse protection via App Check / SMS region policy (allow `CD`, `ZA`, other selected regions) |
+| **Identity** | Email/password for users and admins; admin access requires a custom claim. Claims are set only via a CLI script/callable restricted to `superAdmin` |
+| **Device integrity** | App Check enforced on Firestore, Storage, Functions; Play Integrity on Android |
 | **Data access** | Firestore and Storage rules, **deny by default**, field-level validation (types, lengths, enums, immutable fields), ownership checks, role checks via `request.auth.token.admin` |
 | **Privileged operations** | Only via callable Functions that verify claims and write `adminLogs` |
 | **PII minimisation** | Phone number stored once in `users` (private); providers choose which **WhatsApp/public phone** number to expose; ID documents ephemeral |

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -90,6 +92,32 @@ class _ListingFormScreenState extends State<ListingFormScreen> {
     super.dispose();
   }
 
+  Future<bool> _onPop() async {
+    final ctrl = context.read<ListingFormController>();
+    if (!ctrl.hasDraft || ctrl.savedStatus != null) return true;
+    final l = AppLocalizations.of(context);
+    final keep = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.listingFormDraftDialogTitle),
+        content: Text(l.listingFormDraftDialogBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l.listingFormDraftDiscard),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l.listingFormDraftKeep),
+          ),
+        ],
+      ),
+    );
+    if (keep == null) return false;
+    if (!keep) await ctrl.discardDraft();
+    return true;
+  }
+
   Future<void> _pickPhoto() async {
     final l = AppLocalizations.of(context);
     final source = await showModalBottomSheet<ImageSource>(
@@ -121,9 +149,10 @@ class _ListingFormScreenState extends State<ListingFormScreen> {
   String _errorMessage(BuildContext context, String code) {
     final l = AppLocalizations.of(context);
     return switch (code) {
-      'errorNetwork' => l.errorNetwork,
-      'errorPermissionDenied' => l.errorPermissionDenied,
-      'errorSaveFailed' => l.errorSaveFailed,
+      'network' => l.errorNetwork,
+      'permissionDenied' => l.errorPermissionDenied,
+      'notFound' => l.errorNotFound,
+      'unauthenticated' => l.errorUnauthenticated,
       _ => l.errorUnknown,
     };
   }
@@ -153,7 +182,15 @@ class _ListingFormScreenState extends State<ListingFormScreen> {
       );
     }
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        if (await _onPop()) {
+          if (context.mounted) Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: Text(ctrl.isEditing ? l.listingFormEditTitle : l.listingFormTitle),
       ),
@@ -223,6 +260,7 @@ class _ListingFormScreenState extends State<ListingFormScreen> {
         onDraft: ctrl.saveDraft,
         onPublish: ctrl.publish,
       ),
+    ),
     );
   }
 }
@@ -303,6 +341,15 @@ class _PhotoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget image;
+    if (entry.url != null) {
+      image = Image.network(entry.url!, fit: BoxFit.cover);
+    } else if (entry.localFile != null) {
+      image = Image.file(File(entry.localFile!.path), fit: BoxFit.cover);
+    } else {
+      image = const SizedBox.shrink();
+    }
+
     return Stack(
       children: [
         Container(
@@ -314,23 +361,38 @@ class _PhotoTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(KaziRadius.card),
           ),
           clipBehavior: Clip.antiAlias,
-          child: entry.url != null
-              ? Image.network(entry.url!, fit: BoxFit.cover)
-              : entry.hasError
-                  ? const Center(
-                      child: Icon(
-                        LucideIcons.alertTriangle,
-                        color: KaziColors.error,
-                      ),
-                    )
-                  : Center(
-                      child: CircularProgressIndicator(
-                        value: entry.progress,
-                        strokeWidth: 2,
-                        color: KaziColors.accent,
-                      ),
-                    ),
+          child: image,
         ),
+        if (entry.isUploading)
+          Positioned.fill(
+            child: Container(
+              margin: const EdgeInsets.only(right: KaziSpacing.sm),
+              decoration: BoxDecoration(
+                color: Colors.black38,
+                borderRadius: BorderRadius.circular(KaziRadius.card),
+              ),
+              child: Center(
+                child: CircularProgressIndicator(
+                  value: entry.progress,
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        if (entry.hasError)
+          Positioned.fill(
+            child: Container(
+              margin: const EdgeInsets.only(right: KaziSpacing.sm),
+              decoration: BoxDecoration(
+                color: Colors.black38,
+                borderRadius: BorderRadius.circular(KaziRadius.card),
+              ),
+              child: const Center(
+                child: Icon(LucideIcons.alertTriangle, color: KaziColors.error),
+              ),
+            ),
+          ),
         if (!entry.isUploading)
           Positioned(
             top: 4,
@@ -480,7 +542,7 @@ class _PriceSection extends StatelessWidget {
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
+                    FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
                   ],
                 ),
               ),

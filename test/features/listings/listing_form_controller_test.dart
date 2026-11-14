@@ -1,6 +1,8 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:kazi/core/errors/app_exception.dart';
 import 'package:kazi/core/models/enums.dart';
 import 'package:kazi/features/auth/application/session_controller.dart';
 import 'package:kazi/features/auth/data/firebase_auth_repository.dart';
@@ -12,11 +14,22 @@ import 'package:mocktail/mocktail.dart';
 
 class _MockMediaRepository extends Mock implements MediaRepository {}
 
+class _FakeXFile extends Fake implements XFile {
+  _FakeXFile(this.path);
+  @override
+  final String path;
+}
+
 void main() {
   late FakeFirebaseFirestore fakeDb;
   late FirestoreListingRepository listingRepo;
   late _MockMediaRepository mediaRepo;
   late SessionController session;
+
+  setUpAll(() {
+    registerFallbackValue(_FakeXFile('/fallback'));
+    registerFallbackValue(MediaKind.listingPhoto);
+  });
 
   setUp(() async {
     fakeDb = FakeFirebaseFirestore();
@@ -25,8 +38,8 @@ void main() {
 
     final auth = MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: 'uid1'));
     session = SessionController(
-      FirebaseAuthRepository(auth),
       FirebaseUserRepository(fakeDb, auth),
+      FirebaseAuthRepository(auth),
     );
     // Let session resolve.
     await Future<void>.delayed(Duration.zero);
@@ -184,6 +197,124 @@ void main() {
       expect(ctrl.categoryId, 'reparation_telephones');
       expect(ctrl.currency, Currency.cdf);
       expect(ctrl.communes, ['gombe']);
+    });
+  });
+
+  group('upload-on-submit', () {
+    void fillValidForm(ListingFormController ctrl) {
+      ctrl.setTitle('Plomberie rapide à domicile');
+      ctrl.setCategory('plomberie');
+      ctrl.toggleCommune('gombe');
+    }
+
+    test('invalid form → zero uploads', () async {
+      final ctrl = makeCtrl();
+      ctrl.setTitle('hi'); // too short
+      ctrl.setCategory('plomberie');
+      ctrl.toggleCommune('gombe');
+
+      await ctrl.addPhoto(_FakeXFile('/photo1.jpg'));
+      await ctrl.publish();
+
+      expect(ctrl.titleError, isNotNull);
+      expect(ctrl.savedStatus, isNull);
+      verifyNever(() => mediaRepo.upload(any(), any(),
+          listingId: any(named: 'listingId'),
+          onProgress: any(named: 'onProgress')));
+    });
+
+    test('upload fails on photo 2 → photo 1 kept, retry uploads only photo 2',
+        () async {
+      final ctrl = makeCtrl();
+      fillValidForm(ctrl);
+
+      await ctrl.addPhoto(_FakeXFile('/photo1.jpg'));
+      await ctrl.addPhoto(_FakeXFile('/photo2.jpg'));
+      expect(ctrl.photos.length, 2);
+
+      var uploadCallCount = 0;
+      when(() => mediaRepo.upload(any(), any(),
+          listingId: any(named: 'listingId'),
+          onProgress: any(named: 'onProgress'))).thenAnswer((_) async {
+        uploadCallCount++;
+        if (uploadCallCount == 2) {
+          throw const NetworkException();
+        }
+        return UploadedImage(
+            path: 'media/uid1/listings/draft1/photo$uploadCallCount.jpg',
+            url: 'https://storage/photo$uploadCallCount.jpg');
+      });
+
+      await ctrl.publish();
+
+      // Photo 1 was uploaded, photo 2 failed.
+      expect(ctrl.photos[0].isUploaded, isTrue);
+      expect(ctrl.photos[1].hasError, isTrue);
+      expect(ctrl.error, isNotNull);
+      expect(ctrl.savedStatus, isNull);
+
+      // Retry: only photo 2 should upload.
+      uploadCallCount = 0;
+      when(() => mediaRepo.upload(any(), any(),
+          listingId: any(named: 'listingId'),
+          onProgress: any(named: 'onProgress'))).thenAnswer((_) async {
+        uploadCallCount++;
+        return UploadedImage(
+            path: 'media/uid1/listings/draft1/photo2.jpg',
+            url: 'https://storage/photo2_retry.jpg');
+      });
+
+      ctrl.clearError();
+      await ctrl.publish();
+
+      expect(uploadCallCount, 1);
+      expect(ctrl.photos[0].isUploaded, isTrue);
+      expect(ctrl.photos[1].isUploaded, isTrue);
+      expect(ctrl.savedStatus, ListingStatus.active);
+    });
+
+    test('double tap publish → one draft', () async {
+      final ctrl = makeCtrl();
+      fillValidForm(ctrl);
+
+      // Publish twice concurrently — isSaving guard prevents second call.
+      final f1 = ctrl.publish();
+      final f2 = ctrl.publish(); // should be no-op since isSaving = true
+      await Future.wait([f1, f2]);
+
+      final snap = await fakeDb.collection('listings').get();
+      expect(snap.docs.length, 1);
+    });
+
+    test('discard draft deletes doc and photos', () async {
+      final ctrl = makeCtrl();
+      fillValidForm(ctrl);
+
+      when(() => mediaRepo.upload(any(), any(),
+          listingId: any(named: 'listingId'),
+          onProgress: any(named: 'onProgress'))).thenAnswer((_) async {
+        return UploadedImage(
+            path: 'media/uid1/listings/draft1/photo1.jpg',
+            url: 'https://storage/photo1.jpg');
+      });
+      when(() => mediaRepo.delete(any())).thenAnswer((_) async {});
+
+      await ctrl.addPhoto(_FakeXFile('/photo1.jpg'));
+      await ctrl.saveDraft();
+
+      expect(ctrl.hasDraft, isTrue);
+      final draftId = ctrl.listingId!;
+
+      final before = await fakeDb.collection('listings').doc(draftId).get();
+      expect(before.exists, isTrue);
+
+      await ctrl.discardDraft();
+
+      expect(ctrl.hasDraft, isFalse);
+      final after = await fakeDb.collection('listings').doc(draftId).get();
+      expect(after.exists, isFalse);
+      verify(() => mediaRepo.delete('media/uid1/listings/draft1/photo1.jpg'))
+          .called(1);
     });
   });
 }

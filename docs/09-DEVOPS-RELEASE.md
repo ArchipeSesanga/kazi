@@ -9,7 +9,7 @@
 
 ## 1. One-time setup checklist
 
-1. Create Firebase projects **`kazi-dev`** and **`kazi-prod`**; upgrade both to **Blaze** (needed for Cloud Storage default buckets, Functions and Phone Auth SMS beyond the free allowance). Set **budget alerts** in Google Cloud Billing: $25, $50, $100.
+1. Create Firebase projects **`kazi-dev`** and **`kazi-prod`**; upgrade both to **Blaze** (needed for Cloud Storage default buckets and Functions). Set **budget alerts** in Google Cloud Billing: $25, $50, $100.
 2. Firestore: Native mode, location **`africa-south1`**. This can't be changed later.
 3. Storage: default bucket in the same region if offered; enable the **Resize Images** extension (`storage-resize-images`) with: sizes `200x200,800x800`, format `webp`, paths `/media`, keep originals, cache-control `public, max-age=31536000`.
 4. Auth: enable **Phone** (users) and **Email/Password** (admins only, no public sign-up UI). Set the **SMS region policy** to allow `CD` and the countries you expect. Add test phone numbers for dev.

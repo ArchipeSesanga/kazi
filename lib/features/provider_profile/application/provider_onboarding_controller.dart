@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/errors/app_exception.dart';
 import '../../auth/application/session_controller.dart';
 import '../domain/media_repository.dart';
 import '../domain/provider_repository.dart';
@@ -23,13 +24,13 @@ class OnboardingController extends ChangeNotifier {
   int yearsExperience = 0;
   bool hasConsent = false;
 
-  // Photos
+  // Photos — local until submit
+  XFile? avatarFile;
+  XFile? coverFile;
   String? photoUrl;
   String? coverUrl;
   double? avatarUploadProgress;
   double? coverUploadProgress;
-  bool avatarUploadError = false;
-  bool coverUploadError = false;
 
   // Step 2
   List<String> categoryIds = [];
@@ -39,7 +40,7 @@ class OnboardingController extends ChangeNotifier {
   // Submit
   bool isSubmitting = false;
   bool isDone = false;
-  bool hasError = false;
+  AppException? error;
 
   void goToStep(int s) {
     step = s;
@@ -92,52 +93,20 @@ class OnboardingController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> uploadAvatar(XFile file) async {
-    avatarUploadProgress = 0;
-    avatarUploadError = false;
+  void pickAvatar(XFile file) {
+    avatarFile = file;
+    photoUrl = null;
     notifyListeners();
-    try {
-      final result = await _mediaRepo.upload(
-        file,
-        MediaKind.avatar,
-        onProgress: (p) {
-          avatarUploadProgress = p;
-          notifyListeners();
-        },
-      );
-      photoUrl = result.url;
-    } catch (_) {
-      avatarUploadError = true;
-    } finally {
-      avatarUploadProgress = null;
-      notifyListeners();
-    }
   }
 
-  Future<void> uploadCover(XFile file) async {
-    coverUploadProgress = 0;
-    coverUploadError = false;
+  void pickCover(XFile file) {
+    coverFile = file;
+    coverUrl = null;
     notifyListeners();
-    try {
-      final result = await _mediaRepo.upload(
-        file,
-        MediaKind.cover,
-        onProgress: (p) {
-          coverUploadProgress = p;
-          notifyListeners();
-        },
-      );
-      coverUrl = result.url;
-    } catch (_) {
-      coverUploadError = true;
-    } finally {
-      coverUploadProgress = null;
-      notifyListeners();
-    }
   }
 
   void clearError() {
-    hasError = false;
+    error = null;
     notifyListeners();
   }
 
@@ -145,10 +114,46 @@ class OnboardingController extends ChangeNotifier {
     final uid = _session.uid;
     if (uid == null || isSubmitting) return;
     isSubmitting = true;
-    hasError = false;
+    error = null;
     isDone = false;
     notifyListeners();
     try {
+      // Upload avatar if picked and not yet uploaded.
+      if (avatarFile != null && photoUrl == null) {
+        avatarUploadProgress = 0;
+        notifyListeners();
+        final result = await _mediaRepo.upload(
+          avatarFile!,
+          MediaKind.avatar,
+          onProgress: (p) {
+            avatarUploadProgress = p;
+            notifyListeners();
+          },
+        );
+        photoUrl = result.url;
+        avatarFile = null;
+        avatarUploadProgress = null;
+        notifyListeners();
+      }
+
+      // Upload cover if picked and not yet uploaded.
+      if (coverFile != null && coverUrl == null) {
+        coverUploadProgress = 0;
+        notifyListeners();
+        final result = await _mediaRepo.upload(
+          coverFile!,
+          MediaKind.cover,
+          onProgress: (p) {
+            coverUploadProgress = p;
+            notifyListeners();
+          },
+        );
+        coverUrl = result.url;
+        coverFile = null;
+        coverUploadProgress = null;
+        notifyListeners();
+      }
+
       final profile = ProviderProfile(
         uid: uid,
         displayName: displayName.trim(),
@@ -164,9 +169,14 @@ class OnboardingController extends ChangeNotifier {
       );
       await _repo.createProvider(profile);
       isDone = true;
-    } catch (_) {
-      hasError = true;
+    } on AppException catch (e) {
+      error = e;
+    } catch (e, s) {
+      debugPrint('[Onboarding] submit failed: $e\n$s');
+      error = const UnknownException('submit');
     } finally {
+      avatarUploadProgress = null;
+      coverUploadProgress = null;
       isSubmitting = false;
       notifyListeners();
     }

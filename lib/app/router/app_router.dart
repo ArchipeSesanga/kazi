@@ -4,8 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../features/auth/application/session_controller.dart';
 import '../../features/auth/presentation/email_screen.dart';
-import '../../features/auth/presentation/otp_screen.dart';
-import '../../features/auth/presentation/phone_screen.dart';
 import '../../features/auth/presentation/setup_profile_screen.dart';
 import '../../features/catalog/presentation/category_screen.dart';
 import '../../features/dev/presentation/dev_components_screen.dart';
@@ -35,6 +33,7 @@ import '../../features/settings/presentation/language_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 import '../../features/verification/presentation/verification_screen.dart';
+import '../../features/welcome/application/onboarding_controller.dart';
 import '../../features/welcome/presentation/welcome_screen.dart';
 import '../shell/app_shell.dart';
 import 'routes.dart';
@@ -43,20 +42,23 @@ import 'routes.dart';
 const _publicRoutes = {
   Routes.splash,
   Routes.welcome,
-  Routes.authPhone,
-  Routes.authOtp,
   Routes.authEmail,
   Routes.authSetupProfile,
+  Routes.myLanguage,
   Routes.legalTerms,
   Routes.legalPrivacy,
   Routes.updateRequired,
   Routes.maintenance,
 };
 
-GoRouter createAppRouter(SessionController session, GateController gate) =>
+GoRouter createAppRouter(
+  SessionController session,
+  GateController gate,
+  OnboardingController onboarding,
+) =>
     GoRouter(
   initialLocation: Routes.splash,
-  refreshListenable: Listenable.merge([session, gate]),
+  refreshListenable: Listenable.merge([session, gate, onboarding]),
   redirect: (context, state) {
     final location = state.matchedLocation;
 
@@ -73,29 +75,40 @@ GoRouter createAppRouter(SessionController session, GateController gate) =>
 
     // If sitting on a gate screen but gates are open, redirect away.
     if (location == Routes.maintenance || location == Routes.updateRequired) {
-      return Routes.welcome;
+      return onboarding.isComplete ? Routes.authEmail : Routes.welcome;
     }
 
     final authed = session.isAuthenticated;
     final incomplete = session.isProfileIncomplete;
+    final completedOnboarding = onboarding.isComplete;
 
     // Always leave the splash screen once session is resolved.
     if (location == Routes.splash) {
       if (authed) return Routes.home;
       if (incomplete) return Routes.authSetupProfile;
-      return Routes.welcome;
+      return completedOnboarding ? Routes.authEmail : Routes.welcome;
     }
 
     final isPublic = _publicRoutes.any((r) => location.startsWith(r));
+
+    if (!authed && !incomplete && !completedOnboarding &&
+        location != Routes.welcome &&
+        location != Routes.myLanguage &&
+        location != Routes.legalTerms &&
+        location != Routes.legalPrivacy) {
+      return Routes.welcome;
+    }
+    if (!authed && !incomplete && completedOnboarding &&
+        location == Routes.welcome) {
+      return Routes.authEmail;
+    }
 
     if (!authed && !incomplete && !isPublic) return Routes.welcome;
     if (incomplete && location != Routes.authSetupProfile) {
       return Routes.authSetupProfile;
     }
     if (authed && (location == Routes.welcome ||
-        location.startsWith('/auth/phone') ||
-        location.startsWith('/auth/otp') ||
-        location.startsWith('/auth/email'))) {
+        location.startsWith('/auth/'))) {
       return Routes.home;
     }
     return null;
@@ -113,20 +126,16 @@ GoRouter createAppRouter(SessionController session, GateController gate) =>
 
     // ── Auth flow ────────────────────────────────────────────────────────────
     GoRoute(
-      path: Routes.authPhone,
-      builder: (context, state) => const PhoneScreen(),
-    ),
-    GoRoute(
-      path: Routes.authOtp,
-      builder: (context, state) => const OtpScreen(),
-    ),
-    GoRoute(
       path: Routes.authEmail,
       builder: (context, state) => const EmailScreen(),
     ),
     GoRoute(
       path: Routes.authSetupProfile,
       builder: (context, state) => const SetupProfileScreen(),
+    ),
+    GoRoute(
+      path: Routes.myLanguage,
+      builder: (context, state) => const LanguageScreen(),
     ),
 
     // ── 5-tab shell ──────────────────────────────────────────────────────────
@@ -169,10 +178,6 @@ GoRouter createAppRouter(SessionController session, GateController gate) =>
               GoRoute(
                 path: 'settings',
                 builder: (context, state) => const SettingsScreen(),
-              ),
-              GoRoute(
-                path: 'language',
-                builder: (context, state) => const LanguageScreen(),
               ),
               GoRoute(
                 path: 'delete',

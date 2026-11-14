@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
 import '../../../core/widgets/kazi_button.dart';
+import '../application/onboarding_controller.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -32,11 +34,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      context.go(Routes.authPhone);
+      _completeOnboarding();
     }
   }
 
-  void _skip() => context.go(Routes.authPhone);
+  void _skip() => _completeOnboarding();
+
+  Future<void> _completeOnboarding() async {
+    await context.read<OnboardingController>().complete();
+    if (mounted) context.go(Routes.authEmail);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,12 +121,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   KaziButton(
                     label: _page == _total - 1 ? l.welcomeStart : l.buttonContinue,
                     onPressed: _next,
-                  ),
-                  const SizedBox(height: KaziSpacing.sm),
-                  KaziButton(
-                    label: l.profileSignInButton,
-                    onPressed: _skip,
-                    variant: KaziButtonVariant.outline,
                   ),
                   const SizedBox(height: KaziSpacing.sm),
                   KaziButton(

@@ -13,7 +13,6 @@ abstract final class Limits {
   static const int maxReportDetailsChars = 500;
   static const int maxUploadSizeMb = 2;
   static const int maxPrivateUploadSizeMb = 5;
-  static const int otpResendCooldownSeconds = 60;
   static const int autoHideReportThreshold = 3;
   static const int contactCountCooldownMinutes = 10;
   static const int pageSize = 20;

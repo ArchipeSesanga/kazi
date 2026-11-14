@@ -58,7 +58,11 @@ service cloud.firestore {
 
       allow update: if isOwner()
         && prev().status == 'active'
-        && changedOnly(['displayName', 'photoUrl', 'locale', 'city', 'commune', 'termsVersion', 'termsAcceptedAt', 'updatedAt'])
+        && changedOnly(['displayName', 'photoUrl', 'phone', 'locale', 'city', 'commune', 'termsVersion', 'termsAcceptedAt', 'updatedAt'])
+        && (!('phone' in data().diff(prev()).affectedKeys()) || (
+              'phone_number' in request.auth.token
+              && data().phone == request.auth.token.phone_number
+            ))
         && isNow('updatedAt')
         && validUser();
 
@@ -225,7 +229,7 @@ service cloud.firestore {
           && str(data().providerName, 1, 60)
           && optStr('providerPhotoUrl', 10, 2048)
           && optStr('listingId', 1, 64)
-          && bool(data().providerVerified)
+          && data().providerVerified is bool
           && str(data().whatsappNumber, 5, 20)
           && optStr('callNumber', 5, 20);
       }

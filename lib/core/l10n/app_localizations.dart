@@ -188,18 +188,6 @@ abstract class AppLocalizations {
   /// **'Trop de tentatives. Veuillez patienter.'**
   String get errorRateLimited;
 
-  /// OTP invalid
-  ///
-  /// In fr, this message translates to:
-  /// **'Code incorrect. Vérifiez et réessayez.'**
-  String get errorOtpInvalid;
-
-  /// OTP expired
-  ///
-  /// In fr, this message translates to:
-  /// **'Code expiré. Demandez un nouveau code.'**
-  String get errorOtpExpired;
-
   /// Too many requests
   ///
   /// In fr, this message translates to:
@@ -326,102 +314,6 @@ abstract class AppLocalizations {
   /// **'Passer'**
   String get welcomeSkip;
 
-  /// Phone sign-in title
-  ///
-  /// In fr, this message translates to:
-  /// **'Entrez votre numéro'**
-  String get authPhoneTitle;
-
-  /// Phone sign-in subtitle
-  ///
-  /// In fr, this message translates to:
-  /// **'Nous vous enverrons un code de confirmation.'**
-  String get authPhoneSubtitle;
-
-  /// Phone field label
-  ///
-  /// In fr, this message translates to:
-  /// **'Numéro de téléphone'**
-  String get authPhoneLabel;
-
-  /// Phone field hint
-  ///
-  /// In fr, this message translates to:
-  /// **'081 234 5678'**
-  String get authPhoneHint;
-
-  /// Send OTP button
-  ///
-  /// In fr, this message translates to:
-  /// **'Recevoir le code'**
-  String get authPhoneSend;
-
-  /// Terms prefix text
-  ///
-  /// In fr, this message translates to:
-  /// **'En continuant, vous acceptez nos '**
-  String get authPhoneTermsPrefix;
-
-  /// Terms link text
-  ///
-  /// In fr, this message translates to:
-  /// **'Conditions d\'utilisation'**
-  String get authPhoneTermsLink;
-
-  /// Terms and privacy separator
-  ///
-  /// In fr, this message translates to:
-  /// **' et notre '**
-  String get authPhoneTermsAnd;
-
-  /// Privacy link text
-  ///
-  /// In fr, this message translates to:
-  /// **'Politique de confidentialité'**
-  String get authPhonePrivacyLink;
-
-  /// Terms not accepted error
-  ///
-  /// In fr, this message translates to:
-  /// **'Veuillez accepter les conditions pour continuer.'**
-  String get authPhoneTermsError;
-
-  /// Invalid phone number error
-  ///
-  /// In fr, this message translates to:
-  /// **'Numéro invalide. Vérifiez et réessayez.'**
-  String get authPhoneInvalid;
-
-  /// OTP screen title
-  ///
-  /// In fr, this message translates to:
-  /// **'Entrez le code'**
-  String get authOtpTitle;
-
-  /// OTP sent to phone
-  ///
-  /// In fr, this message translates to:
-  /// **'Code envoyé au {phone}'**
-  String authOtpSubtitle(String phone);
-
-  /// Resend countdown
-  ///
-  /// In fr, this message translates to:
-  /// **'Renvoyer dans {seconds}s'**
-  String authOtpResendIn(int seconds);
-
-  /// Resend OTP button
-  ///
-  /// In fr, this message translates to:
-  /// **'Renvoyer le code'**
-  String get authOtpResend;
-
-  /// Change number link
-  ///
-  /// In fr, this message translates to:
-  /// **'Changer de numéro'**
-  String get authOtpChangeNumber;
-
   /// Profile setup title
   ///
   /// In fr, this message translates to:
@@ -535,18 +427,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'E-mail de réinitialisation envoyé.'**
   String get authEmailResetSent;
-
-  /// Switch to phone auth link
-  ///
-  /// In fr, this message translates to:
-  /// **'Se connecter par téléphone'**
-  String get authEmailUsePhone;
-
-  /// Switch to email auth link
-  ///
-  /// In fr, this message translates to:
-  /// **'Se connecter par e-mail'**
-  String get authPhoneUseEmail;
 
   /// Email already in use error
   ///
@@ -1352,10 +1232,28 @@ abstract class AppLocalizations {
   /// **'0'**
   String get listingFormAmountHint;
 
+  /// Main commune picker label
+  ///
+  /// In fr, this message translates to:
+  /// **'Commune principale'**
+  String get listingFormBaseCommuneLabel;
+
+  /// Main commune picker hint
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez votre commune principale'**
+  String get listingFormBaseCommuneHint;
+
+  /// Main commune validation error
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez votre commune principale'**
+  String get listingFormBaseCommuneError;
+
   /// Communes picker hint
   ///
   /// In fr, this message translates to:
-  /// **'Sélectionnez vos zones (max 10)'**
+  /// **'Sélectionnez des zones supplémentaires (max 10)'**
   String get listingFormCommuneHint;
 
   /// Title validation error
@@ -1387,6 +1285,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Brouillon enregistré'**
   String get listingFormDraftSaved;
+
+  /// Draft dialog title
+  ///
+  /// In fr, this message translates to:
+  /// **'Garder le brouillon ?'**
+  String get listingFormDraftDialogTitle;
+
+  /// Draft dialog body
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous avez un brouillon non enregistré. Voulez-vous le garder ou le supprimer ?'**
+  String get listingFormDraftDialogBody;
+
+  /// Keep draft button
+  ///
+  /// In fr, this message translates to:
+  /// **'Garder'**
+  String get listingFormDraftKeep;
+
+  /// Discard draft button
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get listingFormDraftDiscard;
+
+  /// Photo upload error
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'envoi de la photo a échoué. Appuyez sur Réessayer.'**
+  String get listingFormPhotoUploadError;
 
   /// Provider dashboard title
   ///

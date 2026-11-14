@@ -4,7 +4,7 @@
 |---|---|
 | **Version** | v1.0 |
 | **Status** | Draft for build |
-| **Last updated** | 2026-11-01 |
+| **Last updated** | 2026-11-14 |
 | **Related** | [PRD](01-PRD.md) · [ADD](02-ADD.md) · [UI/UX Spec](04-UI-UX-SPEC.md) · [Test plan](06-TEST-PLAN.md) · starter files in [`firebase/`](firebase/) |
 
 > **Source of truth:** if this document and the code disagree, fix one of them in the same PR. Field names, collection names, enum values and limits in this document are **contracts**. Agents must not invent new ones without updating this file.
@@ -40,7 +40,6 @@ Use the latest stable versions at creation time and pin them in `pubspec.lock`. 
 | Images | `cached_network_image`, `image_picker`, `flutter_image_compress` |
 | Contact / sharing | `url_launcher`, `share_plus` |
 | Phone numbers | `phone_numbers_parser` |
-| OTP input | `pinput` |
 | Icons | `lucide_icons_flutter` (Lucide, matches the Figma icons) |
 | Device / misc | `connectivity_plus`, `package_info_plus`, `shared_preferences`, `uuid`, `collection` |
 | Lints | `flutter_lints` + project rules in `analysis_options.yaml` |
@@ -50,7 +49,7 @@ Use the latest stable versions at creation time and pin them in `pubspec.lock`. 
 
 ### 1.3 Functions packages
 
-`firebase-functions`, `firebase-admin`, `zod` (input validation for callables). Dev: `typescript`, `eslint`, `@firebase/rules-unit-testing`, `vitest` (or `jest`), `firebase-functions-test`.
+`firebase-functions`, `firebase-admin`, `zod` (input validation for callables). Dev: `typescript`, `eslint`, `@firebase/rules-unit-testing`, `@firebase/firestore` (rules test client), `vitest` (or `jest`), `firebase-functions-test`.
 
 ## 2. Repository structure
 
@@ -93,7 +92,7 @@ kazi/
 │   │   ├── utils/                # phone.dart, text_normalize.dart, formatters.dart, debouncer.dart
 │   │   └── widgets/              # design-system widgets (see 04-UI-UX-SPEC.md §6)
 │   ├── features/
-│   │   ├── auth/                 # phone OTP sign-in, profile setup
+│   │   ├── auth/                 # email/password sign-in, profile setup
 │   │   ├── onboarding/           # language picker, intro slides
 │   │   ├── home/
 │   │   ├── catalog/              # categories, locations
@@ -207,7 +206,7 @@ Readable by the owner and moderators only.
 |---|---|---|---|
 | `displayName` | string 2–60 | client | |
 | `photoUrl` | string? | client | Storage download URL |
-| `phone` | string | client (create only) | Must equal `request.auth.token.phone_number` |
+| `phone` | string | client (create only) | Empty for email/password accounts in dev; if Auth has a phone number, must match it. **Dev exception only; revisit before production.** |
 | `locale` | `fr` \| `en` | client | |
 | `city` | string | client | City id, e.g. `kinshasa` |
 | `commune` | string? | client | Commune id, e.g. `gombe` |
@@ -312,8 +311,13 @@ Readable by anyone when `visible == true`; always by the owner and moderators.
 | `providerName`, `providerPhotoUrl` | string | client (snapshot for the "Messages" tab) |
 | `listingId` | string? | client |
 | `channel` | `whatsapp` \| `call` | client |
+| `providerVerified` | bool | client (provider verification snapshot at contact time) |
+| `whatsappNumber` | string (E.164) | client (provider contact snapshot) |
+| `callNumber` | string? (E.164) | client (provider contact snapshot) |
 | `firstAt` | timestamp | client (create) |
 | `lastAt` | timestamp | client |
+
+**Rules changes recorded for the current dev contract:** email/password accounts may create `users/{uid}` with `phone: ''` (dev only; revisit before production); contact documents include the `providerVerified`, `whatsappNumber`, and `callNumber` snapshot fields.
 
 ### 4.8 `reports/{reporterUid}_{targetType}_{targetKey}`
 
@@ -411,7 +415,7 @@ Starter files: [`firebase/firestore.rules`](firebase/firestore.rules) and [`fire
 
 | Path | Read | Create | Update | Delete |
 |---|---|---|---|---|
-| `users/{uid}` | owner, moderator | owner (whitelisted fields, phone = token phone, status `active`) | owner (whitelisted mutable fields) | ❌ (callable) |
+| `users/{uid}` | owner, moderator | owner (whitelisted fields, empty phone for email accounts, status `active`) | owner (whitelisted mutable fields) | ❌ (callable) |
 | `users/{uid}/favorites|blocks|devices` | owner | owner | owner | owner |
 | `providers/{uid}` | anyone if approved; owner; moderator | owner, status `pending`, server fields zeroed | owner, client fields only; `rejected → pending` resubmit | ❌ |
 | `providers/{pid}/reviews/{rid}` | anyone | rid = auth.uid ≠ pid, contact exists, valid | author (rating/text); provider (reply only) | author, moderator |
@@ -470,6 +474,7 @@ All functions use `region: config.REGION` and are 2nd gen. Callables use `enforc
 |---|---|---|
 | `cleanupVerificationFiles` | daily 02:00 Africa/Kinshasa | Delete `private/verification/**` files older than 30 days and mark stale pending requests `rejected` (reason `expired`) |
 | `cleanupDraftListings` | weekly | Delete `draft` listings not updated for 90 days (and their media) |
+| `cleanupOrphanMedia` | daily 03:00 Africa/Kinshasa | List files under `media/{uid}/listings/{listingId}/`. For each group: if the listing doc doesn't exist or doesn't reference the file in its `photos` array, and the file is older than 24 hours, delete it. Logs the count of deleted files. |
 
 ### 6.5 Account deletion (`deleteAccount`)
 
@@ -509,7 +514,8 @@ Language = `users/{uid}.locale`. Sent to all tokens in `devices`; tokens with `m
 - `imageId` = UUID v4.
 - **Resize Images extension** config: sizes `200x200,800x800`; output `webp`; resize path `/media`; thumbnails folder `thumbs`; keep originals.
 - Thumbnail path convention: `…/thumbs/{imageId}_200x200.webp` and `_800x800.webp`. `KaziNetworkImage` takes the original `path` plus a `ThumbSize` and builds the thumb URL with `FirebaseStorage.ref(path).getDownloadURL()`, cached in memory. It falls back to the original if the thumb doesn't exist yet.
-- Upload flow for a new listing: create the listing doc as `draft` (to get an id) → upload photos → update `photos` + `status`.
+- **Upload flow (upload-on-submit):** Picking a photo only compresses it and stores it locally (`XFile` in controller state). The UI previews from the local file. No Storage call on pick. On publish/save: (1) validate the form — if invalid, nothing is uploaded; (2) create the listing doc as `draft` if it doesn't exist (single in-flight Future, no duplicate drafts); (3) upload pending photos sequentially with per-photo progress; (4) update the doc with `photos` + `status` in one write. On failure: stay on form, keep local files, keep photos that did upload on the draft, retry uploads only the missing ones. Back/cancel: nothing to clean up; if a draft exists, prompt "Garder le brouillon?" — discard deletes doc + uploaded photos. Editing: existing photos stay as remote entries; removed remote photos deleted from Storage only after save succeeds. Provider onboarding avatar/cover: upload only after form validates, right before provider doc is written.
+- **Safety net:** `cleanupOrphanMedia` scheduled function (daily) deletes orphan files under `media/{uid}/listings/{listingId}/` whose listing doc no longer exists or doesn't reference them, older than 24 hours (see §6.4).
 
 ## 8. Search
 
@@ -629,8 +635,9 @@ Repositories map `DocumentSnapshot` → model by injecting the doc id (`{...doc.
 ```dart
 abstract interface class AuthRepository {
   Stream<AuthUser?> authStateChanges();
-  Future<PhoneVerification> sendOtp(String e164Phone, {int? resendToken});
-  Future<void> confirmOtp(PhoneVerification verification, String smsCode);
+  Future<bool> signInWithEmail(String email, String password);
+  Future<bool> registerWithEmail(String email, String password);
+  Future<void> sendPasswordResetEmail(String email);
   Future<void> signOut();
 }
 
@@ -712,7 +719,8 @@ The admin panel has its own `AdminRepository` (queues + callables) in `features/
 
 | Controller | Scope | Responsibilities |
 |---|---|---|
-| `AuthController` | global | Auth stream, OTP flow state (`idle → codeSent → verifying → signedIn`), resend timer (60 s), errors |
+| `AuthController` | global | Email/password sign-in, registration, password reset, and auth errors |
+| `OnboardingController` | global | Persists completion of the first-launch intro |
 | `SessionController` | global (proxy on `AuthController`) | Current `AppUser` + `ProviderProfile?` streams; `needsProfileSetup`, `isProvider`, `providerStatus`; registers FCM token |
 | `LocaleController` | global | Locale from `shared_preferences` → user doc |
 | `CatalogController` | global | Categories + locations cached; lookups by id |
@@ -811,7 +819,7 @@ In widgets, use `context.select` for fine-grained rebuilds, e.g. `context.select
 | `/publish` | Publier hub (tab 3): routes to sign-in / onboarding / status / new listing | signed in |
 | `/messages` | Recent contacts + "chat coming soon" (tab 4) | signed in |
 | `/me` | Profil (tab 5): account, favourites, provider space, settings | guest sees sign-in CTA |
-| `/auth/phone` → `/auth/otp` → `/auth/profile` | Sign-in flow (`?from=` return path) | — |
+| `/auth/email` → `/auth/profile` | Email/password sign-in and registration (`?from=` return path) | — |
 | `/search?q=&cat=&commune=&verified=&sort=` | Results | guest OK |
 | `/category/:categoryId` | Results pre-filtered by category | guest OK |
 | `/p/:providerId` | Provider profile | guest OK |
@@ -822,7 +830,8 @@ In widgets, use `context.select` for fine-grained rebuilds, e.g. `context.select
 | `/provider/dashboard` | Provider space | provider |
 | `/provider/listings/new`, `/provider/listings/:id/edit` | Listing form | approved provider (new) / owner (edit) |
 | `/provider/verification` | ID verification | provider |
-| `/me/favorites`, `/me/settings`, `/me/language`, `/me/delete` | Account | signed in |
+| `/me/language` | Language selector | — |
+| `/me/favorites`, `/me/settings`, `/me/delete` | Account | signed in |
 | `/legal/terms`, `/legal/privacy`, `/help` | Static pages (bundled Markdown) | — |
 | `/update-required`, `/maintenance` | Remote Config gates | — |
 
@@ -834,7 +843,7 @@ Guards (in `guards.dart`): `requireSignedIn`, `requireProfile`, `requireProvider
 
 ```
 onTapContact(channel):
-  if guest → push /auth/phone?from=current, then resume
+  if guest → push /auth/email?from=current, then resume
   if provider is self → disabled
   record contact (fire-and-forget, offline-queued)
   analytics.log('contact_tap', {channel, provider_id, listing_id, category_id})
@@ -847,7 +856,7 @@ Pre-filled message (FR): `Bonjour {providerName}, je vous ai trouvé sur Kazi po
 
 ### 9.8 Phone numbers
 
-- Input with a country picker defaulting to **CD (+243)**, using `phone_numbers_parser`. Accept national formats (`0812345678`, `812345678`) and normalise to E.164.
+- Phone numbers are provider contact details, not an authentication method. Input with a country picker defaulting to **CD (+243)**, using `phone_numbers_parser`. Accept national formats (`0812345678`, `812345678`) and normalise to E.164.
 - Validate as a **mobile** number for the selected country.
 - Display format: `+243 81 234 5678`.
 
@@ -861,7 +870,7 @@ Pre-filled message (FR): `Bonjour {providerName}, je vous ai trouvé sur Kazi po
 
 ### 9.10 Error handling
 
-`AppException` (sealed) with codes: `network`, `permissionDenied`, `notFound`, `invalidInput`, `rateLimited`, `otpInvalid`, `otpExpired`, `tooManyRequests`, `quotaExceeded`, `unauthenticated`, `unknown`. `error_mapper.dart` maps `FirebaseException` / `FirebaseAuthException` / `FirebaseFunctionsException` codes to these. Each code has a localised message key `error_{code}`. Unknown errors are reported to Crashlytics with the original exception.
+`AppException` (sealed) with codes: `network`, `permissionDenied`, `notFound`, `invalidInput`, `rateLimited`, `tooManyRequests`, `quotaExceeded`, `unauthenticated`, `unknown`. `error_mapper.dart` maps `FirebaseException` / `FirebaseAuthException` / `FirebaseFunctionsException` codes to these. Each code has a localised message key `error_{code}`. Unknown errors are reported to Crashlytics with the original exception.
 
 ### 9.11 Analytics
 
@@ -901,7 +910,7 @@ Implement events from PRD §9 in `AnalyticsService`. Event names are lower_snake
 | Review text | 500 chars |
 | Report details | 500 chars |
 | Upload size (media / private) | 2 MB / 5 MB after compression |
-| OTP resend cooldown | 60 s |
+| Minimum password length | 6 characters |
 | Auto-hide threshold | 3 open reports |
 | Contact counting cooldown | 10 min per client–provider pair |
 | Page size | 20 |

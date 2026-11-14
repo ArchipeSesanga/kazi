@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../../../app/router/routes.dart';
+import '../../../core/errors/app_exception.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
@@ -90,16 +93,27 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
           if (ctrl.isDone) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!ctx.mounted) return;
-              final uid = ctx.read<SessionController>().uid;
-              if (uid != null) ctx.go(Routes.providerProfile(uid));
+              ctx.go(Routes.providerDashboard);
             });
           }
-          if (ctrl.hasError) {
+          if (ctrl.error != null) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!ctx.mounted) return;
-              ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-                content: Text(AppLocalizations.of(ctx).errorUnknown),
-              ));
+              final message = switch (ctrl.error) {
+                PermissionDeniedException() => AppLocalizations.of(
+                  ctx,
+                ).errorPermissionDenied,
+                InvalidInputException() => AppLocalizations.of(
+                  ctx,
+                ).errorInvalidInput,
+                _ => AppLocalizations.of(ctx).errorUnknown,
+              };
+              ScaffoldMessenger.of(ctx).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  duration: const Duration(seconds: 6),
+                ),
+              );
               ctrl.clearError();
             });
           }
@@ -439,9 +453,9 @@ class _Step2 extends StatelessWidget {
     final allCommunes = catalog.cities.expand((c) => c.communes).toList();
     final baseCommuneName = ctrl.baseCommune != null
         ? allCommunes
-            .where((c) => c.id == ctrl.baseCommune)
-            .map((c) => c.name)
-            .firstOrNull
+              .where((c) => c.id == ctrl.baseCommune)
+              .map((c) => c.name)
+              .firstOrNull
         : null;
 
     return ListView(
@@ -649,8 +663,7 @@ class _Step2 extends StatelessWidget {
                       commune.name,
                       style: TextStyle(
                         fontFamily: 'Montserrat',
-                        fontWeight:
-                            isBase ? FontWeight.w600 : FontWeight.w400,
+                        fontWeight: isBase ? FontWeight.w600 : FontWeight.w400,
                         color: isBase ? KaziColors.primary : KaziColors.ink,
                       ),
                     ),
@@ -697,14 +710,18 @@ class _Step3 extends StatelessWidget {
 
     final baseCommuneName = ctrl.baseCommune != null
         ? allCommunes
-            .where((c) => c.id == ctrl.baseCommune)
-            .map((c) => c.name)
-            .firstOrNull
+              .where((c) => c.id == ctrl.baseCommune)
+              .map((c) => c.name)
+              .firstOrNull
         : null;
 
     final communeNames = ctrl.communes
-        .map((id) =>
-            allCommunes.where((c) => c.id == id).map((c) => c.name).firstOrNull)
+        .map(
+          (id) => allCommunes
+              .where((c) => c.id == id)
+              .map((c) => c.name)
+              .firstOrNull,
+        )
         .whereType<String>()
         .join(', ');
 
@@ -726,7 +743,10 @@ class _Step3 extends StatelessWidget {
           ),
         ),
         const SizedBox(height: KaziSpacing.xl),
-        _ReviewRow(label: l.onboardingNameLabel, value: ctrl.displayName.trim()),
+        _ReviewRow(
+          label: l.onboardingNameLabel,
+          value: ctrl.displayName.trim(),
+        ),
         if (ctrl.bio.trim().isNotEmpty) ...[
           const SizedBox(height: KaziSpacing.md),
           _ReviewRow(label: l.onboardingBioLabel, value: ctrl.bio.trim()),
@@ -810,53 +830,37 @@ class _PhotoPickers extends StatelessWidget {
   Future<void> _pickAvatar(BuildContext context) async {
     final file = await _picker.pickImage(source: ImageSource.gallery);
     if (file == null || !context.mounted) return;
-    await ctrl.uploadAvatar(file);
+    ctrl.pickAvatar(file);
   }
 
   Future<void> _pickCover(BuildContext context) async {
     final file = await _picker.pickImage(source: ImageSource.gallery);
     if (file == null || !context.mounted) return;
-    await ctrl.uploadCover(file);
+    ctrl.pickCover(file);
   }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        Row(
-          children: [
-            _AvatarPicker(
-              label: l.onboardingAvatarLabel,
-              photoUrl: ctrl.photoUrl,
-              progress: ctrl.avatarUploadProgress,
-              hasError: ctrl.avatarUploadError,
-              onTap: () => _pickAvatar(context),
-            ),
-            const SizedBox(width: KaziSpacing.lg),
-            Expanded(
-              child: _CoverPicker(
-                label: l.onboardingCoverLabel,
-                coverUrl: ctrl.coverUrl,
-                progress: ctrl.coverUploadProgress,
-                hasError: ctrl.coverUploadError,
-                onTap: () => _pickCover(context),
-              ),
-            ),
-          ],
+        _AvatarPicker(
+          label: l.onboardingAvatarLabel,
+          photoUrl: ctrl.photoUrl,
+          localFile: ctrl.avatarFile,
+          progress: ctrl.avatarUploadProgress,
+          onTap: () => _pickAvatar(context),
         ),
-        if (ctrl.avatarUploadError || ctrl.coverUploadError) ...[
-          const SizedBox(height: KaziSpacing.xs),
-          Text(
-            l.onboardingUploadError,
-            style: const TextStyle(
-              fontFamily: 'Montserrat',
-              fontSize: 12,
-              color: KaziColors.error,
-            ),
+        const SizedBox(width: KaziSpacing.lg),
+        Expanded(
+          child: _CoverPicker(
+            label: l.onboardingCoverLabel,
+            coverUrl: ctrl.coverUrl,
+            localFile: ctrl.coverFile,
+            progress: ctrl.coverUploadProgress,
+            onTap: () => _pickCover(context),
           ),
-        ],
+        ),
       ],
     );
   }
@@ -867,18 +871,25 @@ class _AvatarPicker extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.photoUrl,
+    this.localFile,
     this.progress,
-    this.hasError = false,
   });
 
   final String label;
   final String? photoUrl;
+  final XFile? localFile;
   final double? progress;
-  final bool hasError;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    Widget? imageChild;
+    if (localFile != null) {
+      imageChild = Image.file(File(localFile!.path), fit: BoxFit.cover);
+    } else if (photoUrl != null) {
+      imageChild = CachedNetworkImage(imageUrl: photoUrl!, fit: BoxFit.cover);
+    }
+
     return Column(
       children: [
         GestureDetector(
@@ -892,21 +903,16 @@ class _AvatarPicker extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: KaziColors.surfaceAlt,
-                  border: Border.all(
-                    color: hasError ? KaziColors.error : KaziColors.border,
-                  ),
+                  border: Border.all(color: KaziColors.border),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: photoUrl != null
-                    ? CachedNetworkImage(
-                        imageUrl: photoUrl!,
-                        fit: BoxFit.cover,
-                      )
-                    : const Icon(
-                        LucideIcons.camera,
-                        color: KaziColors.muted,
-                        size: 24,
-                      ),
+                child:
+                    imageChild ??
+                    const Icon(
+                      LucideIcons.camera,
+                      color: KaziColors.muted,
+                      size: 24,
+                    ),
               ),
               if (progress != null)
                 SizedBox(
@@ -940,18 +946,33 @@ class _CoverPicker extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.coverUrl,
+    this.localFile,
     this.progress,
-    this.hasError = false,
   });
 
   final String label;
   final String? coverUrl;
+  final XFile? localFile;
   final double? progress;
-  final bool hasError;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    Widget? imageChild;
+    if (localFile != null) {
+      imageChild = Image.file(
+        File(localFile!.path),
+        fit: BoxFit.cover,
+        width: double.infinity,
+      );
+    } else if (coverUrl != null) {
+      imageChild = CachedNetworkImage(
+        imageUrl: coverUrl!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -965,24 +986,18 @@ class _CoverPicker extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: KaziColors.surfaceAlt,
                   borderRadius: BorderRadius.circular(KaziRadius.card),
-                  border: Border.all(
-                    color: hasError ? KaziColors.error : KaziColors.border,
-                  ),
+                  border: Border.all(color: KaziColors.border),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: coverUrl != null
-                    ? CachedNetworkImage(
-                        imageUrl: coverUrl!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      )
-                    : const Center(
-                        child: Icon(
-                          LucideIcons.image,
-                          color: KaziColors.muted,
-                          size: 24,
-                        ),
+                child:
+                    imageChild ??
+                    const Center(
+                      child: Icon(
+                        LucideIcons.image,
+                        color: KaziColors.muted,
+                        size: 24,
                       ),
+                    ),
               ),
               if (progress != null)
                 LinearProgressIndicator(
