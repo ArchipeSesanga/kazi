@@ -545,6 +545,24 @@ class AppLocalizationsFr extends AppLocalizations {
       'J\'accepte que ces numéros soient visibles par les clients.';
 
   @override
+  String get onboardingYearsLabel => 'Années d\'expérience';
+
+  @override
+  String get onboardingBaseCommuneLabel => 'Commune principale';
+
+  @override
+  String get onboardingBaseCommuneHint => 'Choisissez votre commune principale';
+
+  @override
+  String get onboardingCategoryError => 'Sélectionnez au moins une catégorie';
+
+  @override
+  String get onboardingCommuneError => 'Choisissez votre commune principale';
+
+  @override
+  String get onboardingReviewTitle => 'Vérifiez votre candidature';
+
+  @override
   String get listingFormTitle => 'Publier un service';
 
   @override

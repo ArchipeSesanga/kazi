@@ -1034,6 +1034,42 @@ abstract class AppLocalizations {
   /// **'J\'accepte que ces numéros soient visibles par les clients.'**
   String get onboardingPublicConsent;
 
+  /// Years of experience stepper label in onboarding step 1
+  ///
+  /// In fr, this message translates to:
+  /// **'Années d\'expérience'**
+  String get onboardingYearsLabel;
+
+  /// Main commune picker label in onboarding step 2
+  ///
+  /// In fr, this message translates to:
+  /// **'Commune principale'**
+  String get onboardingBaseCommuneLabel;
+
+  /// Placeholder for main commune picker when empty
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez votre commune principale'**
+  String get onboardingBaseCommuneHint;
+
+  /// Error shown when no category selected in step 2
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionnez au moins une catégorie'**
+  String get onboardingCategoryError;
+
+  /// Error shown when no base commune selected in step 2
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez votre commune principale'**
+  String get onboardingCommuneError;
+
+  /// Title shown at top of review step in onboarding
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifiez votre candidature'**
+  String get onboardingReviewTitle;
+
   /// Listing form title
   ///
   /// In fr, this message translates to:

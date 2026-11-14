@@ -538,6 +538,24 @@ class AppLocalizationsEn extends AppLocalizations {
       'I agree that these numbers will be visible to clients.';
 
   @override
+  String get onboardingYearsLabel => 'Years of experience';
+
+  @override
+  String get onboardingBaseCommuneLabel => 'Main commune';
+
+  @override
+  String get onboardingBaseCommuneHint => 'Choose your main commune';
+
+  @override
+  String get onboardingCategoryError => 'Select at least one category';
+
+  @override
+  String get onboardingCommuneError => 'Choose your main commune';
+
+  @override
+  String get onboardingReviewTitle => 'Review your application';
+
+  @override
   String get listingFormTitle => 'Post a service';
 
   @override

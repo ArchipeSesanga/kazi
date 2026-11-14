@@ -175,6 +175,12 @@
   "onboardingWhatsAppLabel": "WhatsApp number",
   "onboardingPhoneLabel": "Call number (optional)",
   "onboardingPublicConsent": "I agree that these numbers will be visible to clients.",
+  "onboardingYearsLabel": "Years of experience",
+  "onboardingBaseCommuneLabel": "Main commune",
+  "onboardingBaseCommuneHint": "Choose your main commune",
+  "onboardingCategoryError": "Select at least one category",
+  "onboardingCommuneError": "Choose your main commune",
+  "onboardingReviewTitle": "Review your application",
 
   "listingFormTitle": "Post a service",
   "listingFormEditTitle": "Edit listing",
