@@ -623,6 +623,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingFormSaveDraft => 'Save draft';
 
   @override
+  String get listingFormPhotoPickGallery => 'Gallery';
+
+  @override
+  String get listingFormPhotoPickCamera => 'Camera';
+
+  @override
+  String get listingFormCategoryHint => 'Choose a category';
+
+  @override
+  String get listingFormDescriptionHint =>
+      'Describe your service, strengths and pricing…';
+
+  @override
+  String get listingFormPriceTypeFixed => 'Fixed';
+
+  @override
+  String get listingFormPriceTypeFrom => 'From';
+
+  @override
+  String get listingFormAmountHint => '0';
+
+  @override
+  String get listingFormCommuneHint => 'Select service zones (max 10)';
+
+  @override
+  String get listingFormTitleError => '4–80 characters required';
+
+  @override
+  String get listingFormCategoryError => 'Choose a category';
+
+  @override
+  String get listingFormCommuneError => 'Choose at least one zone';
+
+  @override
+  String get listingFormPublished => 'Listing published!';
+
+  @override
+  String get listingFormDraftSaved => 'Draft saved';
+
+  @override
   String get dashboardTitle => 'My space';
 
   @override

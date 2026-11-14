@@ -1196,6 +1196,84 @@ abstract class AppLocalizations {
   /// **'Enregistrer le brouillon'**
   String get listingFormSaveDraft;
 
+  /// Pick photo from gallery
+  ///
+  /// In fr, this message translates to:
+  /// **'Galerie'**
+  String get listingFormPhotoPickGallery;
+
+  /// Take photo with camera
+  ///
+  /// In fr, this message translates to:
+  /// **'Appareil photo'**
+  String get listingFormPhotoPickCamera;
+
+  /// Category picker hint
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez une catégorie'**
+  String get listingFormCategoryHint;
+
+  /// Description field hint
+  ///
+  /// In fr, this message translates to:
+  /// **'Décrivez votre service, vos atouts, vos tarifs…'**
+  String get listingFormDescriptionHint;
+
+  /// Fixed price type chip
+  ///
+  /// In fr, this message translates to:
+  /// **'Fixe'**
+  String get listingFormPriceTypeFixed;
+
+  /// From price type chip
+  ///
+  /// In fr, this message translates to:
+  /// **'À partir de'**
+  String get listingFormPriceTypeFrom;
+
+  /// Price amount field hint
+  ///
+  /// In fr, this message translates to:
+  /// **'0'**
+  String get listingFormAmountHint;
+
+  /// Communes picker hint
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionnez vos zones (max 10)'**
+  String get listingFormCommuneHint;
+
+  /// Title validation error
+  ///
+  /// In fr, this message translates to:
+  /// **'4 à 80 caractères requis'**
+  String get listingFormTitleError;
+
+  /// Category validation error
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez une catégorie'**
+  String get listingFormCategoryError;
+
+  /// Commune validation error
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez au moins une zone'**
+  String get listingFormCommuneError;
+
+  /// Listing published snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce publiée !'**
+  String get listingFormPublished;
+
+  /// Draft saved snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'Brouillon enregistré'**
+  String get listingFormDraftSaved;
+
   /// Provider dashboard title
   ///
   /// In fr, this message translates to:

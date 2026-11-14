@@ -630,6 +630,46 @@ class AppLocalizationsFr extends AppLocalizations {
   String get listingFormSaveDraft => 'Enregistrer le brouillon';
 
   @override
+  String get listingFormPhotoPickGallery => 'Galerie';
+
+  @override
+  String get listingFormPhotoPickCamera => 'Appareil photo';
+
+  @override
+  String get listingFormCategoryHint => 'Choisissez une catégorie';
+
+  @override
+  String get listingFormDescriptionHint =>
+      'Décrivez votre service, vos atouts, vos tarifs…';
+
+  @override
+  String get listingFormPriceTypeFixed => 'Fixe';
+
+  @override
+  String get listingFormPriceTypeFrom => 'À partir de';
+
+  @override
+  String get listingFormAmountHint => '0';
+
+  @override
+  String get listingFormCommuneHint => 'Sélectionnez vos zones (max 10)';
+
+  @override
+  String get listingFormTitleError => '4 à 80 caractères requis';
+
+  @override
+  String get listingFormCategoryError => 'Choisissez une catégorie';
+
+  @override
+  String get listingFormCommuneError => 'Choisissez au moins une zone';
+
+  @override
+  String get listingFormPublished => 'Annonce publiée !';
+
+  @override
+  String get listingFormDraftSaved => 'Brouillon enregistré';
+
+  @override
   String get dashboardTitle => 'Mon espace';
 
   @override

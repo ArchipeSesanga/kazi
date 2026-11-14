@@ -300,5 +300,19 @@
   "providerBlockBody": "They will disappear from your search results and home screen.",
   "providerBlockConfirm": "Block",
   "providerBlockedSnackbar": "Blocked",
-  "providerUnblockedSnackbar": "Unblocked"
+  "providerUnblockedSnackbar": "Unblocked",
+
+  "listingFormPhotoPickGallery": "Gallery",
+  "listingFormPhotoPickCamera": "Camera",
+  "listingFormCategoryHint": "Choose a category",
+  "listingFormDescriptionHint": "Describe your service, strengths and pricing…",
+  "listingFormPriceTypeFixed": "Fixed",
+  "listingFormPriceTypeFrom": "From",
+  "listingFormAmountHint": "0",
+  "listingFormCommuneHint": "Select service zones (max 10)",
+  "listingFormTitleError": "4–80 characters required",
+  "listingFormCategoryError": "Choose a category",
+  "listingFormCommuneError": "Choose at least one zone",
+  "listingFormPublished": "Listing published!",
+  "listingFormDraftSaved": "Draft saved"
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../features/auth/application/session_controller.dart';
 import '../../features/auth/presentation/otp_screen.dart';
@@ -15,6 +16,7 @@ import '../../features/gate/presentation/update_required_screen.dart';
 import '../../features/help/presentation/help_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/legal/presentation/legal_screen.dart';
+import '../../features/listings/application/listing_form_controller.dart';
 import '../../features/listings/presentation/listing_detail_screen.dart';
 import '../../features/listings/presentation/listing_form_screen.dart';
 import '../../features/messages/presentation/messages_screen.dart';
@@ -229,12 +231,25 @@ GoRouter createAppRouter(SessionController session, GateController gate) =>
     ),
     GoRoute(
       path: Routes.providerNewListing,
-      builder: (context, state) => const ListingFormScreen(),
+      builder: (context, state) => ChangeNotifierProvider(
+        create: (c) => ListingFormController(
+          c.read(),
+          c.read(),
+          c.read(),
+        )..init(),
+        child: const ListingFormScreen(),
+      ),
     ),
     GoRoute(
       path: '/provider/listings/:listingId/edit',
-      builder: (context, state) => ListingFormScreen(
-        listingId: state.pathParameters['listingId'],
+      builder: (context, state) => ChangeNotifierProvider(
+        create: (c) => ListingFormController(
+          c.read(),
+          c.read(),
+          c.read(),
+          listingId: state.pathParameters['listingId'],
+        )..init(),
+        child: const ListingFormScreen(),
       ),
     ),
     GoRoute(
