@@ -159,6 +159,11 @@
   "publishHubPending": "Your application is under review.",
   "publishHubRejected": "Your application was rejected.",
   "publishHubNewListing": "New listing",
+  "publishHubApproved": "Your profile is approved. Start publishing your services.",
+  "publishHubGoToDashboard": "My provider space",
+  "publishHubResubmit": "Edit and resubmit",
+  "publishHubSuspended": "Your account has been suspended. Contact our support team for more information.",
+  "publishHubSupportCta": "Contact support",
 
   "onboardingTitle": "Become a provider",
   "onboardingStep1": "Identity",

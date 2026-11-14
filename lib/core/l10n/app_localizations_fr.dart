@@ -498,6 +498,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String get publishHubNewListing => 'Nouvelle annonce';
 
   @override
+  String get publishHubApproved =>
+      'Votre profil est approuvé. Commencez à publier vos services.';
+
+  @override
+  String get publishHubGoToDashboard => 'Mon espace prestataire';
+
+  @override
+  String get publishHubResubmit => 'Modifier et resoumettre';
+
+  @override
+  String get publishHubSuspended =>
+      'Votre compte a été suspendu. Contactez notre équipe d\'assistance pour plus d\'informations.';
+
+  @override
+  String get publishHubSupportCta => 'Contacter le support';
+
+  @override
   String get onboardingTitle => 'Devenir prestataire';
 
   @override

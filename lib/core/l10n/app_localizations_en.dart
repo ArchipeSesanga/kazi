@@ -492,6 +492,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publishHubNewListing => 'New listing';
 
   @override
+  String get publishHubApproved =>
+      'Your profile is approved. Start publishing your services.';
+
+  @override
+  String get publishHubGoToDashboard => 'My provider space';
+
+  @override
+  String get publishHubResubmit => 'Edit and resubmit';
+
+  @override
+  String get publishHubSuspended =>
+      'Your account has been suspended. Contact our support team for more information.';
+
+  @override
+  String get publishHubSupportCta => 'Contact support';
+
+  @override
   String get onboardingTitle => 'Become a provider';
 
   @override

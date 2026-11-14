@@ -944,6 +944,36 @@ abstract class AppLocalizations {
   /// **'Nouvelle annonce'**
   String get publishHubNewListing;
 
+  /// Approved status description on publish hub
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre profil est approuvé. Commencez à publier vos services.'**
+  String get publishHubApproved;
+
+  /// Go to provider dashboard button on publish hub
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon espace prestataire'**
+  String get publishHubGoToDashboard;
+
+  /// Edit and resubmit button shown on rejected state
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier et resoumettre'**
+  String get publishHubResubmit;
+
+  /// Suspended account message on publish hub
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre compte a été suspendu. Contactez notre équipe d\'assistance pour plus d\'informations.'**
+  String get publishHubSuspended;
+
+  /// Contact support button shown on suspended state
+  ///
+  /// In fr, this message translates to:
+  /// **'Contacter le support'**
+  String get publishHubSupportCta;
+
   /// Provider onboarding title
   ///
   /// In fr, this message translates to:
