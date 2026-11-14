@@ -539,5 +539,14 @@
   "profileSaveButton": "Enregistrer",
   "profileSignOutConfirmBody": "Voulez-vous vraiment vous déconnecter ?",
   "errorSaveFailed": "Échec de l'enregistrement. Veuillez réessayer.",
-  "errorDeleteFailed": "Échec de la suppression du compte. Veuillez réessayer."
+  "@errorSaveFailed": { "description": "Save failed error" },
+  "errorDeleteFailed": "Échec de la suppression du compte. Veuillez réessayer.",
+  "@errorDeleteFailed": { "description": "Delete account failed error" },
+
+  "contactWhatsAppNotInstalled": "WhatsApp n'est pas installé",
+  "@contactWhatsAppNotInstalled": { "description": "WhatsApp not installed snackbar" },
+  "contactCopyNumber": "Copier le numéro",
+  "@contactCopyNumber": { "description": "Copy number snackbar action" },
+  "contactNumberCopied": "Numéro copié",
+  "@contactNumberCopied": { "description": "Number copied confirmation snackbar" }
 }

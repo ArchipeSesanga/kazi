@@ -1532,17 +1532,35 @@ abstract class AppLocalizations {
   /// **'Voulez-vous vraiment vous déconnecter ?'**
   String get profileSignOutConfirmBody;
 
-  /// No description provided for @errorSaveFailed.
+  /// Save failed error
   ///
   /// In fr, this message translates to:
   /// **'Échec de l\'enregistrement. Veuillez réessayer.'**
   String get errorSaveFailed;
 
-  /// No description provided for @errorDeleteFailed.
+  /// Delete account failed error
   ///
   /// In fr, this message translates to:
   /// **'Échec de la suppression du compte. Veuillez réessayer.'**
   String get errorDeleteFailed;
+
+  /// WhatsApp not installed snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'WhatsApp n\'est pas installé'**
+  String get contactWhatsAppNotInstalled;
+
+  /// Copy number snackbar action
+  ///
+  /// In fr, this message translates to:
+  /// **'Copier le numéro'**
+  String get contactCopyNumber;
+
+  /// Number copied confirmation snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro copié'**
+  String get contactNumberCopied;
 }
 
 class _AppLocalizationsDelegate

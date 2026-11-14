@@ -272,5 +272,9 @@
   "profileSaveButton": "Save",
   "profileSignOutConfirmBody": "Are you sure you want to sign out?",
   "errorSaveFailed": "Failed to save. Please try again.",
-  "errorDeleteFailed": "Failed to delete account. Please try again."
+  "errorDeleteFailed": "Failed to delete account. Please try again.",
+
+  "contactWhatsAppNotInstalled": "WhatsApp is not installed",
+  "contactCopyNumber": "Copy number",
+  "contactNumberCopied": "Number copied"
 }

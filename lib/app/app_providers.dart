@@ -24,6 +24,8 @@ import '../features/auth/domain/user_repository.dart';
 import '../features/catalog/application/catalog_controller.dart';
 import '../features/catalog/data/firestore_catalog_repository.dart';
 import '../features/catalog/domain/catalog_repository.dart';
+import '../features/contact/application/contact_controller.dart';
+import '../features/contact/data/firestore_contact_repository.dart';
 import '../features/explore/application/explore_controller.dart';
 import '../features/gate/application/gate_controller.dart';
 import '../features/gate/data/remote_config_gate_service.dart';
@@ -87,6 +89,9 @@ class AppProviders extends StatelessWidget {
         ProxyProvider<FirebaseFirestore, SearchRepository>(
           update: (_, db, __) => FirestoreSearchRepository(db),
         ),
+        ProxyProvider<FirebaseFirestore, ContactRepository>(
+          update: (_, db, __) => FirestoreContactRepository(db),
+        ),
 
         // Global controllers.
         ChangeNotifierProvider(create: (_) => ConnectivityController()),
@@ -114,6 +119,16 @@ class AppProviders extends StatelessWidget {
           ),
           update: (_, authRepo, userRepo, prev) =>
               prev ?? SessionController(authRepo, userRepo),
+        ),
+        ChangeNotifierProxyProvider4<LauncherService, AnalyticsService, ContactRepository, SessionController, ContactController>(
+          create: (ctx) => ContactController(
+            ctx.read<LauncherService>(),
+            ctx.read<AnalyticsService>(),
+            ctx.read<ContactRepository>(),
+            ctx.read<SessionController>(),
+          ),
+          update: (_, launcher, analytics, repo, session, prev) =>
+              prev ?? ContactController(launcher, analytics, repo, session),
         ),
         ChangeNotifierProxyProvider<GateService, GateController>(
           create: (ctx) => GateController(ctx.read<GateService>()),

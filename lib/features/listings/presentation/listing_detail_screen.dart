@@ -18,6 +18,8 @@ import '../../../core/widgets/rating_stars.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../catalog/application/catalog_controller.dart';
+import '../../contact/application/contact_controller.dart';
+import '../../provider_profile/domain/provider_repository.dart';
 import '../application/listing_detail_controller.dart';
 import '../domain/listing_repository.dart';
 
@@ -116,6 +118,20 @@ class _LoadedScreen extends StatefulWidget {
 
 class _LoadedScreenState extends State<_LoadedScreen> {
   int _photoIndex = 0;
+  ProviderProfile? _provider;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProvider();
+  }
+
+  Future<void> _loadProvider() async {
+    final profile = await context
+        .read<ProviderRepository>()
+        .getProvider(widget.listing.providerId);
+    if (mounted) setState(() => _provider = profile);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -322,8 +338,31 @@ class _LoadedScreenState extends State<_LoadedScreen> {
 
           // Sticky contact bar
           ContactBar(
-            onWhatsApp: () {},
-            onCall: () {},
+            onWhatsApp: () {
+              final p = _provider;
+              if (p == null) return;
+              context.read<ContactController>().contactWhatsApp(
+                context: context,
+                providerId: p.uid,
+                providerName: p.displayName,
+                providerPhotoUrl: p.photoUrl,
+                whatsappNumber: p.whatsappNumber,
+                listingId: listing.id,
+                listingTitle: listing.title,
+              );
+            },
+            onCall: () {
+              final phone = _provider?.callNumber;
+              if (phone == null) return;
+              context.read<ContactController>().contactCall(
+                context: context,
+                providerId: _provider!.uid,
+                providerName: _provider!.displayName,
+                providerPhotoUrl: _provider!.photoUrl,
+                phoneNumber: phone,
+                listingId: listing.id,
+              );
+            },
             whatsAppLabel: l.providerWhatsAppButton,
             callLabel: l.providerCallButton,
           ),

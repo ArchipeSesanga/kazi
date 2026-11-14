@@ -21,6 +21,7 @@ import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../catalog/application/catalog_controller.dart';
+import '../../contact/application/contact_controller.dart';
 import '../../listings/domain/listing_repository.dart';
 import '../application/provider_profile_controller.dart';
 import '../domain/provider_repository.dart';
@@ -431,8 +432,24 @@ class _LoadedScreen extends StatelessWidget {
 
           // Sticky contact bar
           ContactBar(
-            onWhatsApp: () {},
-            onCall: () {},
+            onWhatsApp: () => context.read<ContactController>().contactWhatsApp(
+              context: context,
+              providerId: profile.uid,
+              providerName: profile.displayName,
+              providerPhotoUrl: profile.photoUrl,
+              whatsappNumber: profile.whatsappNumber,
+            ),
+            onCall: () {
+              final phone = profile.callNumber;
+              if (phone == null) return;
+              context.read<ContactController>().contactCall(
+                context: context,
+                providerId: profile.uid,
+                providerName: profile.displayName,
+                providerPhotoUrl: profile.photoUrl,
+                phoneNumber: phone,
+              );
+            },
             whatsAppLabel: l.providerWhatsAppButton,
             callLabel: l.providerCallButton,
           ),

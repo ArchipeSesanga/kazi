@@ -798,4 +798,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorDeleteFailed => 'Failed to delete account. Please try again.';
+
+  @override
+  String get contactWhatsAppNotInstalled => 'WhatsApp is not installed';
+
+  @override
+  String get contactCopyNumber => 'Copy number';
+
+  @override
+  String get contactNumberCopied => 'Number copied';
 }

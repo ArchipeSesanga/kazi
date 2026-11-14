@@ -808,4 +808,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get errorDeleteFailed =>
       'Échec de la suppression du compte. Veuillez réessayer.';
+
+  @override
+  String get contactWhatsAppNotInstalled => 'WhatsApp n\'est pas installé';
+
+  @override
+  String get contactCopyNumber => 'Copier le numéro';
+
+  @override
+  String get contactNumberCopied => 'Numéro copié';
 }
