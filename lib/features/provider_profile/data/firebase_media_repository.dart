@@ -78,12 +78,12 @@ class FirebaseMediaRepository implements MediaRepository {
     final uid = _uid;
     if (uid == null) throw const PermissionDeniedException();
     return switch (kind) {
-      MediaKind.avatar => 'providers/$uid/avatar.jpg',
-      MediaKind.cover => 'providers/$uid/cover.jpg',
+      MediaKind.avatar => 'media/$uid/avatar/avatar.jpg',
+      MediaKind.cover => 'media/$uid/cover/cover.jpg',
       MediaKind.portfolio =>
-        'providers/$uid/portfolio/${DateTime.now().millisecondsSinceEpoch}.jpg',
+        'media/$uid/portfolio/${DateTime.now().millisecondsSinceEpoch}.jpg',
       MediaKind.listingPhoto =>
-        'providers/$uid/listings/${listingId ?? 'unknown'}/${DateTime.now().millisecondsSinceEpoch}.jpg',
+        'media/$uid/listings/${listingId ?? 'unknown'}/${DateTime.now().millisecondsSinceEpoch}.jpg',
     };
   }
 
