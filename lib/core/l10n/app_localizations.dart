@@ -1472,6 +1472,60 @@ abstract class AppLocalizations {
   /// **'Publication en cours…'**
   String get dashboardListingPublishing;
 
+  /// Dashboard suspended status
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte suspendu'**
+  String get dashboardStatusSuspended;
+
+  /// Draft listing status chip
+  ///
+  /// In fr, this message translates to:
+  /// **'Brouillon'**
+  String get dashboardListingStatusDraft;
+
+  /// Active listing status chip
+  ///
+  /// In fr, this message translates to:
+  /// **'Actif'**
+  String get dashboardListingStatusActive;
+
+  /// Paused listing status chip
+  ///
+  /// In fr, this message translates to:
+  /// **'En pause'**
+  String get dashboardListingStatusPaused;
+
+  /// Empty listings message
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune annonce pour l\'instant.'**
+  String get dashboardListingsEmpty;
+
+  /// Contacts this month stat label
+  ///
+  /// In fr, this message translates to:
+  /// **'contacts ce mois'**
+  String get dashboardStatContactsMonth;
+
+  /// Total contacts stat label
+  ///
+  /// In fr, this message translates to:
+  /// **'contacts au total'**
+  String get dashboardStatContactsTotal;
+
+  /// Average rating stat label
+  ///
+  /// In fr, this message translates to:
+  /// **'note moyenne'**
+  String get dashboardStatRating;
+
+  /// Listing count stat label
+  ///
+  /// In fr, this message translates to:
+  /// **'annonces'**
+  String get dashboardStatListings;
+
   /// Verification screen title
   ///
   /// In fr, this message translates to:

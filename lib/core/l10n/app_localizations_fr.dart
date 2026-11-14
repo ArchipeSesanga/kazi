@@ -769,6 +769,33 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dashboardListingPublishing => 'Publication en cours…';
 
   @override
+  String get dashboardStatusSuspended => 'Compte suspendu';
+
+  @override
+  String get dashboardListingStatusDraft => 'Brouillon';
+
+  @override
+  String get dashboardListingStatusActive => 'Actif';
+
+  @override
+  String get dashboardListingStatusPaused => 'En pause';
+
+  @override
+  String get dashboardListingsEmpty => 'Aucune annonce pour l\'instant.';
+
+  @override
+  String get dashboardStatContactsMonth => 'contacts ce mois';
+
+  @override
+  String get dashboardStatContactsTotal => 'contacts au total';
+
+  @override
+  String get dashboardStatRating => 'note moyenne';
+
+  @override
+  String get dashboardStatListings => 'annonces';
+
+  @override
   String get verificationTitle => 'Vérification d\'identité';
 
   @override
