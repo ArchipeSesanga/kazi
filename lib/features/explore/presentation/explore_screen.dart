@@ -10,8 +10,10 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/models/localized_text.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
+import '../../../core/utils/category_icon.dart';
 import '../../../core/widgets/category_circle.dart';
 import '../../../core/widgets/kazi_search_bar.dart';
+import '../../../core/widgets/offline_banner.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../catalog/application/catalog_controller.dart';
 import '../application/explore_controller.dart';
@@ -49,11 +51,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   void _tapRecentSearch(String keyword) {
     context.read<ExploreController>().addSearch(keyword);
-    context.push('${Routes.search}?q=${Uri.encodeComponent(keyword)}');
+    unawaited(context.push('${Routes.search}?q=${Uri.encodeComponent(keyword)}'));
   }
 
-  void _tapCategory(Category cat) {
-    context.push(Routes.category(cat.id));
+  void _tapCategory(String id) {
+    unawaited(context.push(Routes.category(id)));
   }
 
   @override
@@ -64,123 +66,108 @@ class _ExploreScreenState extends State<ExploreScreen> {
     return Scaffold(
       backgroundColor: KaziColors.surfaceAlt,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header + search bar
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  KaziSpacing.screenPadding,
-                  KaziSpacing.xl,
-                  KaziSpacing.screenPadding,
-                  KaziSpacing.lg,
-                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const OfflineBanner(),
+            Expanded(
+              child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      l.exploreTitle,
-                      style: const TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: KaziColors.ink,
+                    // Header + search bar
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        KaziSpacing.screenPadding,
+                        KaziSpacing.xl,
+                        KaziSpacing.screenPadding,
+                        KaziSpacing.lg,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l.exploreTitle,
+                            style: const TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              color: KaziColors.ink,
+                            ),
+                          ),
+                          const SizedBox(height: KaziSpacing.lg),
+                          KaziSearchBar(
+                            hint: l.exploreSearchHint,
+                            controller: _textCtrl,
+                            showFilterButton: false,
+                            onSubmitted: _submitSearch,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: KaziSpacing.lg),
-                    KaziSearchBar(
-                      hint: l.exploreSearchHint,
-                      controller: _textCtrl,
-                      showFilterButton: false,
-                      onSubmitted: _submitSearch,
-                    ),
-                  ],
-                ),
-              ),
 
-              // Recent searches
-              Consumer<ExploreController>(
-                builder: (_, ctrl, __) {
-                  if (ctrl.searches.isEmpty) return const SizedBox.shrink();
-                  return _RecentSearches(
-                    searches: ctrl.searches,
-                    onTap: _tapRecentSearch,
-                    onRemove: ctrl.removeSearch,
-                    onClear: ctrl.clearAll,
-                  );
-                },
-              ),
-
-              // Categories
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: KaziSpacing.screenPadding),
-                child: SectionHeader(title: l.exploreCategories),
-              ),
-              const SizedBox(height: KaziSpacing.md),
-
-              Consumer<CatalogController>(
-                builder: (_, catalog, __) {
-                  if (catalog.categories.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: KaziSpacing.screenPadding),
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 4,
-                        childAspectRatio: 0.8,
-                        mainAxisSpacing: KaziSpacing.md,
-                        crossAxisSpacing: KaziSpacing.sm,
-                      ),
-                      itemCount: catalog.categories.length,
-                      itemBuilder: (_, i) {
-                        final cat = catalog.categories[i];
-                        return CategoryCircle(
-                          label: cat.name.resolve(locale),
-                          icon: _iconForName(cat.icon),
-                          onTap: () => _tapCategory(cat),
+                    // Recent searches
+                    Consumer<ExploreController>(
+                      builder: (_, ctrl, __) {
+                        if (ctrl.searches.isEmpty) return const SizedBox.shrink();
+                        return _RecentSearches(
+                          searches: ctrl.searches,
+                          onTap: _tapRecentSearch,
+                          onRemove: ctrl.removeSearch,
+                          onClear: ctrl.clearAll,
                         );
                       },
                     ),
-                  );
-                },
+
+                    // Categories
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: KaziSpacing.screenPadding),
+                      child: SectionHeader(title: l.exploreCategories),
+                    ),
+                    const SizedBox(height: KaziSpacing.md),
+
+                    Consumer<CatalogController>(
+                      builder: (_, catalog, __) {
+                        if (catalog.categories.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: KaziSpacing.screenPadding),
+                          child: GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4,
+                              childAspectRatio: 0.8,
+                              mainAxisSpacing: KaziSpacing.md,
+                              crossAxisSpacing: KaziSpacing.sm,
+                            ),
+                            itemCount: catalog.categories.length,
+                            itemBuilder: (_, i) {
+                              final cat = catalog.categories[i];
+                              return CategoryCircle(
+                                label: cat.name.resolve(locale),
+                                icon: categoryIconForName(cat.icon),
+                                onTap: () => _tapCategory(cat.id),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: KaziSpacing.xxxl),
+                  ],
+                ),
               ),
-              const SizedBox(height: KaziSpacing.xxxl),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
-
-  static IconData _iconForName(String name) => switch (name) {
-        'wrench' => LucideIcons.wrench,
-        'zap' => LucideIcons.zap,
-        'scissors' => LucideIcons.scissors,
-        'shirt' => LucideIcons.shirt,
-        'hammer' => LucideIcons.hammer,
-        'brick-wall' => LucideIcons.brickWall,
-        'paint-roller' => LucideIcons.paintRoller,
-        'car' => LucideIcons.car,
-        'smartphone' => LucideIcons.smartphone,
-        'laptop' => LucideIcons.laptop,
-        'graduation-cap' => LucideIcons.graduationCap,
-        'sparkles' => LucideIcons.sparkles,
-        'chef-hat' => LucideIcons.chefHat,
-        'truck' => LucideIcons.truck,
-        'party-popper' => LucideIcons.partyPopper,
-        'snowflake' => LucideIcons.snowflake,
-        'flame' => LucideIcons.flame,
-        'sprout' => LucideIcons.sprout,
-        'baby' => LucideIcons.baby,
-        _ => LucideIcons.moreHorizontal,
-      };
 }
 
 // ── Recent searches ───────────────────────────────────────────────────────────
@@ -248,12 +235,11 @@ class _RecentSearches extends StatelessWidget {
               onTap: () => onTap(keyword),
               behavior: HitTestBehavior.opaque,
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: KaziSpacing.sm),
+                padding: const EdgeInsets.symmetric(vertical: KaziSpacing.sm),
                 child: Row(
                   children: [
-                    const Icon(LucideIcons.clock, size: 16,
-                        color: KaziColors.muted),
+                    const Icon(LucideIcons.clock,
+                        size: 16, color: KaziColors.muted),
                     const SizedBox(width: KaziSpacing.md),
                     Expanded(
                       child: Text(
@@ -267,8 +253,8 @@ class _RecentSearches extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: () => onRemove(keyword),
-                      child: const Icon(LucideIcons.x, size: 16,
-                          color: KaziColors.muted),
+                      child: const Icon(LucideIcons.x,
+                          size: 16, color: KaziColors.muted),
                     ),
                   ],
                 ),

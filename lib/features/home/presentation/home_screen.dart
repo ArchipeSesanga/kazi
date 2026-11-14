@@ -7,6 +7,7 @@ import '../../../app/router/routes.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
+import '../../../core/utils/category_icon.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/category_circle.dart';
 import '../../../core/widgets/empty_state.dart';
@@ -452,7 +453,7 @@ class _CategoryRow extends StatelessWidget {
             padding: const EdgeInsets.only(right: KaziSpacing.md),
             child: CategoryCircle(
               label: label,
-              icon: _iconForName(cat.icon),
+              icon: categoryIconForName(cat.icon),
               onTap: () => context.push(Routes.category(cat.id)),
             ),
           );
@@ -461,28 +462,6 @@ class _CategoryRow extends StatelessWidget {
     );
   }
 
-  static IconData _iconForName(String name) => switch (name) {
-        'wrench'         => LucideIcons.wrench,
-        'zap'            => LucideIcons.zap,
-        'scissors'       => LucideIcons.scissors,
-        'shirt'          => LucideIcons.shirt,
-        'hammer'         => LucideIcons.hammer,
-        'brick-wall'     => LucideIcons.brickWall,
-        'paint-roller'   => LucideIcons.paintRoller,
-        'car'            => LucideIcons.car,
-        'smartphone'     => LucideIcons.smartphone,
-        'laptop'         => LucideIcons.laptop,
-        'graduation-cap' => LucideIcons.graduationCap,
-        'sparkles'       => LucideIcons.sparkles,
-        'chef-hat'       => LucideIcons.chefHat,
-        'truck'          => LucideIcons.truck,
-        'party-popper'   => LucideIcons.partyPopper,
-        'snowflake'       => LucideIcons.snowflake,
-        'flame'          => LucideIcons.flame,
-        'sprout'         => LucideIcons.sprout,
-        'baby'           => LucideIcons.baby,
-        _                => LucideIcons.moreHorizontal,
-      };
 }
 
 // ── Provider card adapter ─────────────────────────────────────────────────────
