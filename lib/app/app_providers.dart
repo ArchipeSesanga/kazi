@@ -91,10 +91,6 @@ class AppProviders extends StatelessWidget {
         ProxyProvider<FirebaseFirestore, ProviderRepository>(
           update: (_, db, __) => FirestoreProviderRepository(db),
         ),
-        ProxyProvider2<FirebaseStorage, SessionController, MediaRepository>(
-          update: (_, storage, session, __) =>
-              FirebaseMediaRepository(storage, session.uid),
-        ),
         ProxyProvider<FirebaseFirestore, ListingRepository>(
           update: (_, db, __) => FirestoreListingRepository(db),
         ),
@@ -131,6 +127,11 @@ class AppProviders extends StatelessWidget {
           ),
           update: (_, authRepo, userRepo, prev) =>
               prev ?? SessionController(authRepo, userRepo),
+        ),
+        // MediaRepository depends on SessionController.uid — must come after it.
+        ProxyProvider2<FirebaseStorage, SessionController, MediaRepository>(
+          update: (_, storage, session, __) =>
+              FirebaseMediaRepository(storage, session.uid),
         ),
         ChangeNotifierProxyProvider2<BlockRepository, SessionController, BlockController>(
           create: (ctx) => BlockController(ctx.read<BlockRepository>())

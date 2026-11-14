@@ -45,7 +45,10 @@ class PromoBanner extends StatelessWidget {
                 ),
               ),
             Padding(
-              padding: const EdgeInsets.all(KaziSpacing.xl),
+              padding: const EdgeInsets.symmetric(
+                horizontal: KaziSpacing.xl,
+                vertical: KaziSpacing.lg,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
