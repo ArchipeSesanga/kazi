@@ -17,6 +17,7 @@ import '../../../core/widgets/promo_banner.dart';
 import '../../../core/widgets/provider_card.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/skeleton_box.dart';
+import '../../block/application/block_controller.dart';
 import '../../catalog/application/catalog_controller.dart';
 import '../application/home_controller.dart';
 
@@ -55,6 +56,7 @@ class _HomeBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final catalog = context.watch<CatalogController>();
+    final blocked = context.watch<BlockController>();
     final locale = Localizations.localeOf(context).toLanguageTag();
 
     return CustomScrollView(
@@ -125,7 +127,7 @@ class _HomeBody extends StatelessWidget {
         ),
 
         // Provider grid (skeleton → grid → empty)
-        ..._buildProviderSliver(context, home, catalog, locale, l),
+        ..._buildProviderSliver(context, home, catalog, blocked, locale, l),
 
         // Recently added header
         SliverPadding(
@@ -164,6 +166,7 @@ class _HomeBody extends StatelessWidget {
     BuildContext context,
     HomeController home,
     CatalogController catalog,
+    BlockController blocked,
     String locale,
     AppLocalizations l,
   ) {
@@ -190,7 +193,11 @@ class _HomeBody extends StatelessWidget {
       ];
     }
 
-    if (home.providers.isEmpty) {
+    final providers = home.providers
+        .where((p) => !blocked.isBlocked(p.uid))
+        .toList();
+
+    if (providers.isEmpty) {
       return [
         SliverToBoxAdapter(
           child: Padding(
@@ -211,7 +218,7 @@ class _HomeBody extends StatelessWidget {
           gridDelegate: gridDelegate,
           delegate: SliverChildBuilderDelegate(
             (ctx, i) {
-              final p = home.providers[i];
+              final p = providers[i];
               return _ProviderCardAdapter(
                 provider: p,
                 catalog: catalog,
@@ -219,7 +226,7 @@ class _HomeBody extends StatelessWidget {
                 onTap: () => ctx.push(Routes.providerProfile(p.uid)),
               );
             },
-            childCount: home.providers.length,
+            childCount: providers.length,
           ),
         ),
       ),

@@ -815,4 +815,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contactNumberCopied => 'Number copied';
+
+  @override
+  String get providerBlock => 'Block';
+
+  @override
+  String get providerUnblock => 'Unblock';
+
+  @override
+  String providerBlockTitle(String name) {
+    return 'Block $name?';
+  }
+
+  @override
+  String get providerBlockBody =>
+      'They will disappear from your search results and home screen.';
+
+  @override
+  String get providerBlockConfirm => 'Block';
+
+  @override
+  String get providerBlockedSnackbar => 'Blocked';
+
+  @override
+  String get providerUnblockedSnackbar => 'Unblocked';
 }

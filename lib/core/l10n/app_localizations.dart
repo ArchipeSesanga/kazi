@@ -1573,6 +1573,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Numéro copié'**
   String get contactNumberCopied;
+
+  /// Block provider action
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloquer'**
+  String get providerBlock;
+
+  /// Unblock provider action
+  ///
+  /// In fr, this message translates to:
+  /// **'Débloquer'**
+  String get providerUnblock;
+
+  /// Block confirm dialog title
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloquer {name} ?'**
+  String providerBlockTitle(String name);
+
+  /// Block confirm dialog body
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce prestataire disparaîtra de vos résultats de recherche et de votre écran d\'accueil.'**
+  String get providerBlockBody;
+
+  /// Block confirm button
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloquer'**
+  String get providerBlockConfirm;
+
+  /// Provider blocked confirmation snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloqué(e)'**
+  String get providerBlockedSnackbar;
+
+  /// Provider unblocked confirmation snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'Débloqué(e)'**
+  String get providerUnblockedSnackbar;
 }
 
 class _AppLocalizationsDelegate

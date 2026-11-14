@@ -826,4 +826,28 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get contactNumberCopied => 'Numéro copié';
+
+  @override
+  String get providerBlock => 'Bloquer';
+
+  @override
+  String get providerUnblock => 'Débloquer';
+
+  @override
+  String providerBlockTitle(String name) {
+    return 'Bloquer $name ?';
+  }
+
+  @override
+  String get providerBlockBody =>
+      'Ce prestataire disparaîtra de vos résultats de recherche et de votre écran d\'accueil.';
+
+  @override
+  String get providerBlockConfirm => 'Bloquer';
+
+  @override
+  String get providerBlockedSnackbar => 'Bloqué(e)';
+
+  @override
+  String get providerUnblockedSnackbar => 'Débloqué(e)';
 }

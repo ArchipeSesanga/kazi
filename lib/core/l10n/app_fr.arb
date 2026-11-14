@@ -555,5 +555,23 @@
   "contactCopyNumber": "Copier le numéro",
   "@contactCopyNumber": { "description": "Copy number snackbar action" },
   "contactNumberCopied": "Numéro copié",
-  "@contactNumberCopied": { "description": "Number copied confirmation snackbar" }
+  "@contactNumberCopied": { "description": "Number copied confirmation snackbar" },
+
+  "providerBlock": "Bloquer",
+  "@providerBlock": { "description": "Block provider action" },
+  "providerUnblock": "Débloquer",
+  "@providerUnblock": { "description": "Unblock provider action" },
+  "providerBlockTitle": "Bloquer {name} ?",
+  "@providerBlockTitle": {
+    "description": "Block confirm dialog title",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "providerBlockBody": "Ce prestataire disparaîtra de vos résultats de recherche et de votre écran d'accueil.",
+  "@providerBlockBody": { "description": "Block confirm dialog body" },
+  "providerBlockConfirm": "Bloquer",
+  "@providerBlockConfirm": { "description": "Block confirm button" },
+  "providerBlockedSnackbar": "Bloqué(e)",
+  "@providerBlockedSnackbar": { "description": "Provider blocked confirmation snackbar" },
+  "providerUnblockedSnackbar": "Débloqué(e)",
+  "@providerUnblockedSnackbar": { "description": "Provider unblocked confirmation snackbar" }
 }

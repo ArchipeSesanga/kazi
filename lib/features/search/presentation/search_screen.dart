@@ -16,6 +16,7 @@ import '../../../core/widgets/kazi_search_bar.dart';
 import '../../../core/widgets/offline_banner.dart';
 import '../../../core/widgets/provider_list_item.dart';
 import '../../../core/widgets/skeleton_box.dart';
+import '../../block/application/block_controller.dart';
 import '../../catalog/application/catalog_controller.dart';
 import '../../search/domain/search_repository.dart';
 import '../application/search_results_controller.dart';
@@ -144,18 +145,22 @@ class _SearchScreenState extends State<SearchScreen> {
 
               // Result count
               Consumer<SearchResultsController>(
-                builder: (_, ctrl, __) {
+                builder: (ctx, ctrl, __) {
                   final state = ctrl.state;
                   if (state.isLoadingFirst || state.error != null) {
                     return const SizedBox.shrink();
                   }
+                  final blocked = ctx.watch<BlockController>();
+                  final count = state.items
+                      .where((item) => !blocked.isBlocked(item.providerId))
+                      .length;
                   return Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: KaziSpacing.screenPadding,
                       vertical: KaziSpacing.sm,
                     ),
                     child: Text(
-                      l.searchResultCount(state.items.length),
+                      l.searchResultCount(count),
                       style: const TextStyle(
                         fontFamily: 'Montserrat',
                         fontSize: 12,
@@ -169,13 +174,17 @@ class _SearchScreenState extends State<SearchScreen> {
               // Main content
               Expanded(
                 child: Consumer<SearchResultsController>(
-                  builder: (_, ctrl, __) {
+                  builder: (ctx, ctrl, __) {
                     final state = ctrl.state;
                     if (state.isLoadingFirst) return const _Skeleton();
-                    if (state.error != null && state.items.isEmpty) {
+                    final blocked = ctx.watch<BlockController>();
+                    final visibleItems = state.items
+                        .where((item) => !blocked.isBlocked(item.providerId))
+                        .toList();
+                    if (state.error != null && visibleItems.isEmpty) {
                       return _buildError(state.error!, ctrl.refresh, l);
                     }
-                    if (state.items.isEmpty) {
+                    if (visibleItems.isEmpty) {
                       return EmptyState(
                         icon: LucideIcons.searchX,
                         message: l.searchEmpty,
@@ -183,7 +192,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         onAction: _clearCommune,
                       );
                     }
-                    return _buildList(state, ctrl, l);
+                    return _buildList(visibleItems, state, ctrl, l);
                   },
                 ),
               ),
@@ -201,6 +210,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildList(
+    List<Listing> items,
     PagedState<Listing> state,
     SearchResultsController ctrl,
     AppLocalizations l,
@@ -216,10 +226,10 @@ class _SearchScreenState extends State<SearchScreen> {
           horizontal: KaziSpacing.screenPadding,
           vertical: KaziSpacing.lg,
         ),
-        itemCount: state.items.length + (state.hasMore ? 1 : 0),
+        itemCount: items.length + (state.hasMore ? 1 : 0),
         separatorBuilder: (_, __) => const SizedBox(height: KaziSpacing.md),
         itemBuilder: (ctx, i) {
-          if (i == state.items.length) {
+          if (i == items.length) {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: KaziSpacing.xl),
               child: state.isLoadingMore
@@ -227,7 +237,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   : const SizedBox.shrink(),
             );
           }
-          final listing = state.items[i];
+          final listing = items[i];
           return ProviderListItem(
             name: listing.providerName ?? listing.title,
             serviceLabel: listing.title,

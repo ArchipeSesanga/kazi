@@ -278,5 +278,13 @@
 
   "contactWhatsAppNotInstalled": "WhatsApp is not installed",
   "contactCopyNumber": "Copy number",
-  "contactNumberCopied": "Number copied"
+  "contactNumberCopied": "Number copied",
+
+  "providerBlock": "Block",
+  "providerUnblock": "Unblock",
+  "providerBlockTitle": "Block {name}?",
+  "providerBlockBody": "They will disappear from your search results and home screen.",
+  "providerBlockConfirm": "Block",
+  "providerBlockedSnackbar": "Blocked",
+  "providerUnblockedSnackbar": "Unblocked"
 }

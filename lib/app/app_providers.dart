@@ -21,6 +21,9 @@ import '../features/auth/data/firebase_auth_repository.dart';
 import '../features/auth/data/firebase_user_repository.dart';
 import '../features/auth/domain/auth_repository.dart';
 import '../features/auth/domain/user_repository.dart';
+import '../features/block/application/block_controller.dart';
+import '../features/block/data/firestore_block_repository.dart';
+import '../features/block/domain/block_repository.dart';
 import '../features/catalog/application/catalog_controller.dart';
 import '../features/catalog/data/firestore_catalog_repository.dart';
 import '../features/catalog/domain/catalog_repository.dart';
@@ -74,6 +77,9 @@ class AppProviders extends StatelessWidget {
         ProxyProvider2<FirebaseFirestore, FirebaseAuth, UserRepository>(
           update: (_, db, auth, __) => FirebaseUserRepository(db, auth),
         ),
+        ProxyProvider<FirebaseFirestore, BlockRepository>(
+          update: (_, db, __) => FirestoreBlockRepository(db),
+        ),
         ProxyProvider<FirebaseRemoteConfig, GateService>(
           update: (_, rc, __) => RemoteConfigGateService(rc),
         ),
@@ -119,6 +125,12 @@ class AppProviders extends StatelessWidget {
           ),
           update: (_, authRepo, userRepo, prev) =>
               prev ?? SessionController(authRepo, userRepo),
+        ),
+        ChangeNotifierProxyProvider2<BlockRepository, SessionController, BlockController>(
+          create: (ctx) => BlockController(ctx.read<BlockRepository>())
+              ..init(ctx.read<SessionController>().uid),
+          update: (_, repo, session, prev) =>
+              (prev ?? BlockController(repo))..init(session.uid),
         ),
         ChangeNotifierProxyProvider4<LauncherService, AnalyticsService, ContactRepository, SessionController, ContactController>(
           create: (ctx) => ContactController(

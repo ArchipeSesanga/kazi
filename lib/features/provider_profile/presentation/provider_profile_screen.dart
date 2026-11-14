@@ -21,6 +21,7 @@ import '../../../core/widgets/rating_stars.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../../core/widgets/verified_badge.dart';
+import '../../block/application/block_controller.dart';
 import '../../catalog/application/catalog_controller.dart';
 import '../../contact/application/contact_controller.dart';
 import '../../listings/domain/listing_repository.dart';
@@ -176,11 +177,15 @@ class _LoadedScreen extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(right: 6),
+                      padding: const EdgeInsets.all(6),
                       child: _CircleIconButton(
                         icon: LucideIcons.flag,
                         onTap: () {},
                       ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: _BlockMenu(profile: profile, l: l),
                     ),
                   ],
                   flexibleSpace: FlexibleSpaceBar(
@@ -775,5 +780,109 @@ class _CircleIconButton extends StatelessWidget {
         child: Icon(icon, size: 18, color: KaziColors.ink),
       ),
     );
+  }
+}
+
+// ── Block overflow menu ───────────────────────────────────────────────────────
+
+enum _ProfileMenuAction { block, unblock }
+
+class _BlockMenu extends StatelessWidget {
+  const _BlockMenu({required this.profile, required this.l});
+  final ProviderProfile profile;
+  final AppLocalizations l;
+
+  @override
+  Widget build(BuildContext context) {
+    final blocked = context.watch<BlockController>();
+    final isBlocked = blocked.isBlocked(profile.uid);
+
+    return PopupMenuButton<_ProfileMenuAction>(
+      padding: EdgeInsets.zero,
+      offset: const Offset(0, 44),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(KaziRadius.card),
+      ),
+      onSelected: (action) => _onSelected(context, action, blocked),
+      itemBuilder: (_) => [
+        PopupMenuItem<_ProfileMenuAction>(
+          value: isBlocked
+              ? _ProfileMenuAction.unblock
+              : _ProfileMenuAction.block,
+          child: Row(
+            children: [
+              Icon(
+                isBlocked ? LucideIcons.shieldCheck : LucideIcons.ban,
+                size: 16,
+                color: isBlocked ? KaziColors.primary : KaziColors.error,
+              ),
+              const SizedBox(width: KaziSpacing.sm),
+              Text(
+                isBlocked ? l.providerUnblock : l.providerBlock,
+                style: TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontSize: 14,
+                  color: isBlocked ? KaziColors.ink : KaziColors.error,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.9),
+          shape: BoxShape.circle,
+        ),
+        child: const Center(
+          child: Icon(LucideIcons.moreVertical, size: 18, color: KaziColors.ink),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onSelected(
+    BuildContext context,
+    _ProfileMenuAction action,
+    BlockController blocked,
+  ) async {
+    if (action == _ProfileMenuAction.unblock) {
+      await blocked.unblock(profile.uid);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l.providerUnblockedSnackbar)),
+      );
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(AppLocalizations.of(ctx).providerBlockTitle(profile.displayName)),
+        content: Text(AppLocalizations.of(ctx).providerBlockBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(AppLocalizations.of(ctx).buttonCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              AppLocalizations.of(ctx).providerBlockConfirm,
+              style: const TextStyle(color: KaziColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    await blocked.block(profile.uid);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context).providerBlockedSnackbar)),
+    );
+    Navigator.of(context).maybePop();
   }
 }
