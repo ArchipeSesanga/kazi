@@ -1256,6 +1256,12 @@ abstract class AppLocalizations {
   /// **'Dernier contact {date}'**
   String messagesLastContact(String date);
 
+  /// Sign in CTA on messages guest view
+  ///
+  /// In fr, this message translates to:
+  /// **'Connectez-vous pour voir votre historique de contacts'**
+  String get messagesSignInCta;
+
   /// Profile screen title
   ///
   /// In fr, this message translates to:

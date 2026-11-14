@@ -32,6 +32,8 @@ class ContactController extends ChangeNotifier {
     required String providerName,
     String? providerPhotoUrl,
     required String whatsappNumber,
+    String? callNumber,
+    bool providerVerified = false,
     String? listingId,
     String? listingTitle,
   }) async {
@@ -50,6 +52,9 @@ class ContactController extends ChangeNotifier {
       providerPhotoUrl: providerPhotoUrl,
       listingId: listingId,
       channel: 'whatsapp',
+      providerVerified: providerVerified,
+      whatsappNumber: whatsappNumber,
+      callNumber: callNumber,
     )));
 
     unawaited(_analytics.logContactProvider(
@@ -92,6 +97,9 @@ class ContactController extends ChangeNotifier {
     required String providerName,
     String? providerPhotoUrl,
     required String phoneNumber,
+    required String whatsappNumber,
+    String? callNumber,
+    bool providerVerified = false,
     String? listingId,
   }) async {
     if (!_session.isAuthenticated) {
@@ -108,6 +116,9 @@ class ContactController extends ChangeNotifier {
       providerPhotoUrl: providerPhotoUrl,
       listingId: listingId,
       channel: 'call',
+      providerVerified: providerVerified,
+      whatsappNumber: whatsappNumber,
+      callNumber: callNumber,
     )));
 
     unawaited(_analytics.logContactProvider(

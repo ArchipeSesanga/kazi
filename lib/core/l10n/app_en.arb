@@ -216,6 +216,7 @@
   "messagesEmpty": "No contacts yet.",
   "messagesChatSoon": "Integrated messaging coming soon",
   "messagesLastContact": "Last contact {date}",
+  "messagesSignInCta": "Sign in to see your contact history",
 
   "profileTitle": "My profile",
   "profileProviderSpace": "Provider space",

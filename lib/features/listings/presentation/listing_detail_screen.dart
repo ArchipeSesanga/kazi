@@ -347,6 +347,8 @@ class _LoadedScreenState extends State<_LoadedScreen> {
                 providerName: p.displayName,
                 providerPhotoUrl: p.photoUrl,
                 whatsappNumber: p.whatsappNumber,
+                callNumber: p.callNumber,
+                providerVerified: p.verified,
                 listingId: listing.id,
                 listingTitle: listing.title,
               );
@@ -360,6 +362,9 @@ class _LoadedScreenState extends State<_LoadedScreen> {
                 providerName: _provider!.displayName,
                 providerPhotoUrl: _provider!.photoUrl,
                 phoneNumber: phone,
+                whatsappNumber: _provider!.whatsappNumber,
+                callNumber: phone,
+                providerVerified: _provider!.verified,
                 listingId: listing.id,
               );
             },

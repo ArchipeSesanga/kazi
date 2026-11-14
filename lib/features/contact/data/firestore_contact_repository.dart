@@ -22,6 +22,9 @@ class FirestoreContactRepository implements ContactRepository {
           if (draft.providerPhotoUrl != null) 'providerPhotoUrl': draft.providerPhotoUrl,
           if (draft.listingId != null) 'listingId': draft.listingId,
           'channel': draft.channel,
+          'providerVerified': draft.providerVerified,
+          'whatsappNumber': draft.whatsappNumber,
+          if (draft.callNumber != null) 'callNumber': draft.callNumber,
           'lastAt': FieldValue.serverTimestamp(),
           if (!snap.exists) 'firstAt': FieldValue.serverTimestamp(),
         };
@@ -30,5 +33,34 @@ class FirestoreContactRepository implements ContactRepository {
     } catch (e, s) {
       throw mapException(e, s);
     }
+  }
+
+  @override
+  Stream<List<ContactRecord>> watchContacts(String clientUid) {
+    return _db
+        .collection('contacts')
+        .where('clientUid', isEqualTo: clientUid)
+        .orderBy('lastAt', descending: true)
+        .snapshots()
+        .map((snap) => snap.docs.map(_recordFromSnap).toList())
+        .handleError((Object e, StackTrace s) => throw mapException(e, s));
+  }
+
+  ContactRecord _recordFromSnap(
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final d = doc.data();
+    return ContactRecord(
+      clientUid: d['clientUid'] as String,
+      providerId: d['providerId'] as String,
+      providerName: d['providerName'] as String,
+      providerPhotoUrl: d['providerPhotoUrl'] as String?,
+      listingId: d['listingId'] as String?,
+      channel: d['channel'] as String,
+      providerVerified: (d['providerVerified'] as bool?) ?? false,
+      whatsappNumber: (d['whatsappNumber'] as String?) ?? '',
+      callNumber: d['callNumber'] as String?,
+      lastAt: (d['lastAt'] as Timestamp).toDate(),
+    );
   }
 }

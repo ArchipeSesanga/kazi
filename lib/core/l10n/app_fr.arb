@@ -446,6 +446,8 @@
     "description": "Last contact date",
     "placeholders": { "date": { "type": "String" } }
   },
+  "messagesSignInCta": "Connectez-vous pour voir votre historique de contacts",
+  "@messagesSignInCta": { "description": "Sign in CTA on messages guest view" },
 
   "profileTitle": "Mon profil",
   "@profileTitle": { "description": "Profile screen title" },

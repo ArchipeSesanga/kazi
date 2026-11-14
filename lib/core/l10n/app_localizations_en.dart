@@ -652,6 +652,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get messagesSignInCta => 'Sign in to see your contact history';
+
+  @override
   String get profileTitle => 'My profile';
 
   @override

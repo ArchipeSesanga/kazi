@@ -438,6 +438,8 @@ class _LoadedScreen extends StatelessWidget {
               providerName: profile.displayName,
               providerPhotoUrl: profile.photoUrl,
               whatsappNumber: profile.whatsappNumber,
+              callNumber: profile.callNumber,
+              providerVerified: profile.verified,
             ),
             onCall: () {
               final phone = profile.callNumber;
@@ -448,6 +450,9 @@ class _LoadedScreen extends StatelessWidget {
                 providerName: profile.displayName,
                 providerPhotoUrl: profile.photoUrl,
                 phoneNumber: phone,
+                whatsappNumber: profile.whatsappNumber,
+                callNumber: phone,
+                providerVerified: profile.verified,
               );
             },
             whatsAppLabel: l.providerWhatsAppButton,
