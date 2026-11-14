@@ -30,6 +30,8 @@ import '../features/gate/domain/gate_service.dart';
 import '../features/home/application/home_controller.dart';
 import '../features/provider_profile/data/stub_provider_repository.dart';
 import '../features/provider_profile/domain/provider_repository.dart';
+import '../features/search/data/firestore_search_repository.dart';
+import '../features/search/domain/search_repository.dart';
 import 'router/app_router.dart';
 
 class AppProviders extends StatelessWidget {
@@ -75,6 +77,9 @@ class AppProviders extends StatelessWidget {
         ),
         Provider<ProviderRepository>(
           create: (_) => const StubProviderRepository(),
+        ),
+        ProxyProvider<FirebaseFirestore, SearchRepository>(
+          update: (_, db, __) => FirestoreSearchRepository(db),
         ),
 
         // Global controllers.
