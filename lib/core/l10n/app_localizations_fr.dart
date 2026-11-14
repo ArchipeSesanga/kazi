@@ -311,10 +311,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get filterCommune => 'Commune';
 
   @override
+  String get filterCommuneAll => 'Toutes les communes';
+
+  @override
   String get filterVerified => 'Prestataires vérifiés uniquement';
 
   @override
   String get filterMinRating => 'Note minimale';
+
+  @override
+  String get filterMinRatingAny => 'Toutes';
 
   @override
   String get filterPriceType => 'Type de prix';

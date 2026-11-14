@@ -104,8 +104,10 @@
 
   "filterTitle": "Filters",
   "filterCommune": "Commune",
+  "filterCommuneAll": "All communes",
   "filterVerified": "Verified providers only",
   "filterMinRating": "Minimum rating",
+  "filterMinRatingAny": "Any",
   "filterPriceType": "Price type",
   "filterApply": "Apply",
   "filterReset": "Reset",

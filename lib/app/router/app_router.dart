@@ -25,6 +25,7 @@ import '../../features/provider_profile/presentation/provider_profile_screen.dar
 import '../../features/publish/presentation/publish_screen.dart';
 import '../../features/reviews/presentation/provider_reviews_screen.dart';
 import '../../features/reviews/presentation/write_review_screen.dart';
+import '../../features/search/domain/search_repository.dart';
 import '../../features/search/presentation/search_screen.dart';
 import '../../features/settings/presentation/delete_account_screen.dart';
 import '../../features/settings/presentation/language_screen.dart';
@@ -177,7 +178,8 @@ GoRouter createAppRouter(SessionController session, GateController gate) =>
     // ── Search & discovery ───────────────────────────────────────────────────
     GoRoute(
       path: Routes.search,
-      builder: (context, state) => const SearchScreen(),
+      builder: (context, state) =>
+          SearchScreen(initialQuery: SearchQuery.fromUri(state.uri)),
     ),
     GoRoute(
       path: '/category/:categoryId',

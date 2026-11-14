@@ -644,6 +644,12 @@ abstract class AppLocalizations {
   /// **'Commune'**
   String get filterCommune;
 
+  /// All communes option in filter sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les communes'**
+  String get filterCommuneAll;
+
   /// Verified toggle label
   ///
   /// In fr, this message translates to:
@@ -655,6 +661,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Note minimale'**
   String get filterMinRating;
+
+  /// No minimum rating filter option
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes'**
+  String get filterMinRatingAny;
 
   /// Price type label
   ///

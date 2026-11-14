@@ -306,10 +306,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filterCommune => 'Commune';
 
   @override
+  String get filterCommuneAll => 'All communes';
+
+  @override
   String get filterVerified => 'Verified providers only';
 
   @override
   String get filterMinRating => 'Minimum rating';
+
+  @override
+  String get filterMinRatingAny => 'Any';
 
   @override
   String get filterPriceType => 'Price type';
