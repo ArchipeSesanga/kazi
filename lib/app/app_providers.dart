@@ -24,6 +24,7 @@ import '../features/auth/domain/user_repository.dart';
 import '../features/catalog/application/catalog_controller.dart';
 import '../features/catalog/data/firestore_catalog_repository.dart';
 import '../features/catalog/domain/catalog_repository.dart';
+import '../features/explore/application/explore_controller.dart';
 import '../features/gate/application/gate_controller.dart';
 import '../features/gate/data/remote_config_gate_service.dart';
 import '../features/gate/domain/gate_service.dart';
@@ -92,6 +93,10 @@ class AppProviders extends StatelessWidget {
         ChangeNotifierProxyProvider<ProviderRepository, HomeController>(
           create: (ctx) => HomeController(ctx.read<ProviderRepository>())..load(),
           update: (_, repo, prev) => prev ?? (HomeController(repo)..load()),
+        ),
+        ChangeNotifierProxyProvider<SharedPreferences, ExploreController>(
+          create: (ctx) => ExploreController(ctx.read<SharedPreferences>()),
+          update: (_, prefs, prev) => prev ?? ExploreController(prefs),
         ),
         ChangeNotifierProxyProvider<AuthRepository, AuthController>(
           create: (ctx) => AuthController(ctx.read<AuthRepository>()),
