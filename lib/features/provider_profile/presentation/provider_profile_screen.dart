@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../core/errors/app_exception.dart';
@@ -167,7 +168,11 @@ class _LoadedScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(6),
                       child: _CircleIconButton(
                         icon: LucideIcons.share2,
-                        onTap: () {},
+                        onTap: () {
+                          final url = 'https://kazi.app/p/${profile.uid}';
+                          final message = l.providerShareMessage(profile.displayName);
+                          Share.share('$message\n$url');
+                        },
                       ),
                     ),
                     Padding(

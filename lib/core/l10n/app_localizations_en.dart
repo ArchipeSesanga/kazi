@@ -394,6 +394,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get providerShare => 'Share profile';
 
   @override
+  String providerShareMessage(String name) {
+    return 'Check out $name on Kazi';
+  }
+
+  @override
   String providerWhatsAppMessage(String name, String listing) {
     return 'Hello $name, I found you on Kazi for \"$listing\". Are you available?';
   }

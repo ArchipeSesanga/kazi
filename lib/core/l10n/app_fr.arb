@@ -260,6 +260,11 @@
   "@providerReport": { "description": "Report provider action" },
   "providerShare": "Partager le profil",
   "@providerShare": { "description": "Share profile action" },
+  "providerShareMessage": "Découvrez {name} sur Kazi",
+  "@providerShareMessage": {
+    "description": "Pre-filled share message for provider profile",
+    "placeholders": { "name": { "type": "String" } }
+  },
   "providerWhatsAppMessage": "Bonjour {name}, je vous ai trouvé sur Kazi pour « {listing} ». Êtes-vous disponible ?",
   "@providerWhatsAppMessage": {
     "description": "Pre-filled WhatsApp message",

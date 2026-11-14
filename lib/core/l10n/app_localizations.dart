@@ -788,6 +788,12 @@ abstract class AppLocalizations {
   /// **'Partager le profil'**
   String get providerShare;
 
+  /// Pre-filled share message for provider profile
+  ///
+  /// In fr, this message translates to:
+  /// **'Découvrez {name} sur Kazi'**
+  String providerShareMessage(String name);
+
   /// Pre-filled WhatsApp message
   ///
   /// In fr, this message translates to:

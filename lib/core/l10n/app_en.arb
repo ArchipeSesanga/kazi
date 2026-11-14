@@ -129,6 +129,7 @@
   "providerFavoriteRemove": "Remove from favourites",
   "providerReport": "Report",
   "providerShare": "Share profile",
+  "providerShareMessage": "Check out {name} on Kazi",
   "providerWhatsAppMessage": "Hello {name}, I found you on Kazi for \"{listing}\". Are you available?",
 
   "listingPriceFrom": "from {price}",
