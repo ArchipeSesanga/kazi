@@ -201,6 +201,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authProfileSave => 'Save my profile';
 
   @override
+  String get authEmailTitle => 'Sign in with email';
+
+  @override
+  String get authEmailSubtitle => 'Enter your email and password.';
+
+  @override
+  String get authEmailLabel => 'Email address';
+
+  @override
+  String get authEmailHint => 'example@email.com';
+
+  @override
+  String get authPasswordLabel => 'Password';
+
+  @override
+  String get authPasswordHint => 'At least 6 characters';
+
+  @override
+  String get authEmailSignIn => 'Sign in';
+
+  @override
+  String get authEmailRegister => 'Create account';
+
+  @override
+  String get authEmailCreateAccountPrompt => 'No account yet?';
+
+  @override
+  String get authEmailHasAccountPrompt => 'Already have an account?';
+
+  @override
+  String get authEmailForgotPassword => 'Forgot password?';
+
+  @override
+  String get authEmailResetSent => 'Password reset email sent.';
+
+  @override
+  String get authEmailUsePhone => 'Sign in with phone';
+
+  @override
+  String get authPhoneUseEmail => 'Sign in with email';
+
+  @override
+  String get authEmailInUse => 'This email is already in use.';
+
+  @override
+  String get authWeakPassword => 'Password too short (6+ characters).';
+
+  @override
+  String get authUserNotFound => 'No account found for this email.';
+
+  @override
+  String get authWrongPassword => 'Incorrect email or password.';
+
+  @override
+  String get authEmailInvalid => 'Invalid email address.';
+
+  @override
   String get homeSearchHint => 'Search for a service…';
 
   @override

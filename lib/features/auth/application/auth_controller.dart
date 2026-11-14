@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../domain/auth_repository.dart';
 
-enum AuthStep { idle, sendingOtp, otpSent, confirmingOtp, done, error }
+enum AuthStep { idle, sendingOtp, otpSent, confirmingOtp, signingIn, done, error }
 
 class AuthController extends ChangeNotifier {
   AuthController(this._repo);
@@ -53,6 +53,49 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> signInWithEmail(String email, String password) async {
+    _step = AuthStep.signingIn;
+    _errorKey = null;
+    notifyListeners();
+    try {
+      _isNewUser = await _repo.signInWithEmail(email, password);
+      _step = AuthStep.done;
+    } catch (e) {
+      _step = AuthStep.error;
+      _errorKey = _mapEmailError(e);
+    }
+    notifyListeners();
+  }
+
+  Future<void> registerWithEmail(String email, String password) async {
+    _step = AuthStep.signingIn;
+    _errorKey = null;
+    notifyListeners();
+    try {
+      _isNewUser = await _repo.registerWithEmail(email, password);
+      _step = AuthStep.done;
+    } catch (e) {
+      _step = AuthStep.error;
+      _errorKey = _mapEmailError(e);
+    }
+    notifyListeners();
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    _step = AuthStep.signingIn;
+    _errorKey = null;
+    notifyListeners();
+    try {
+      await _repo.sendPasswordResetEmail(email);
+      _step = AuthStep.idle;
+      _errorKey = 'authEmailResetSent';
+    } catch (e) {
+      _step = AuthStep.error;
+      _errorKey = _mapEmailError(e);
+    }
+    notifyListeners();
+  }
+
   void resetError() {
     if (_step == AuthStep.error) {
       _step = _verification != null ? AuthStep.otpSent : AuthStep.idle;
@@ -68,6 +111,19 @@ class AuthController extends ChangeNotifier {
     if (code.contains('session-expired')) return 'errorOtpExpired';
     if (code.contains('too-many-requests')) return 'errorTooManyRequests';
     if (code.contains('quota-exceeded')) return 'errorQuotaExceeded';
+    return 'errorUnknown';
+  }
+
+  static String _mapEmailError(Object e) {
+    final code = e is Exception ? e.toString() : '';
+    if (code.contains('email-already-in-use')) return 'authEmailInUse';
+    if (code.contains('weak-password')) return 'authWeakPassword';
+    if (code.contains('user-not-found')) return 'authUserNotFound';
+    if (code.contains('wrong-password') || code.contains('invalid-credential')) {
+      return 'authWrongPassword';
+    }
+    if (code.contains('invalid-email')) return 'authEmailInvalid';
+    if (code.contains('too-many-requests')) return 'errorTooManyRequests';
     return 'errorUnknown';
   }
 }

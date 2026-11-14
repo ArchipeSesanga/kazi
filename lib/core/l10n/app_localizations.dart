@@ -464,6 +464,120 @@ abstract class AppLocalizations {
   /// **'Enregistrer mon profil'**
   String get authProfileSave;
 
+  /// Email auth screen title
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion par e-mail'**
+  String get authEmailTitle;
+
+  /// Email auth screen subtitle
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrez votre e-mail et mot de passe.'**
+  String get authEmailSubtitle;
+
+  /// Email field label
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse e-mail'**
+  String get authEmailLabel;
+
+  /// Email field hint
+  ///
+  /// In fr, this message translates to:
+  /// **'exemple@email.com'**
+  String get authEmailHint;
+
+  /// Password field label
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get authPasswordLabel;
+
+  /// Password field hint
+  ///
+  /// In fr, this message translates to:
+  /// **'Au moins 6 caractères'**
+  String get authPasswordHint;
+
+  /// Email sign-in button
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter'**
+  String get authEmailSignIn;
+
+  /// Email register button
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer un compte'**
+  String get authEmailRegister;
+
+  /// Prompt to switch to register mode
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore de compte ?'**
+  String get authEmailCreateAccountPrompt;
+
+  /// Prompt to switch to sign-in mode
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà un compte ?'**
+  String get authEmailHasAccountPrompt;
+
+  /// Forgot password link
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe oublié ?'**
+  String get authEmailForgotPassword;
+
+  /// Password reset confirmation
+  ///
+  /// In fr, this message translates to:
+  /// **'E-mail de réinitialisation envoyé.'**
+  String get authEmailResetSent;
+
+  /// Switch to phone auth link
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter par téléphone'**
+  String get authEmailUsePhone;
+
+  /// Switch to email auth link
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter par e-mail'**
+  String get authPhoneUseEmail;
+
+  /// Email already in use error
+  ///
+  /// In fr, this message translates to:
+  /// **'Cet e-mail est déjà utilisé.'**
+  String get authEmailInUse;
+
+  /// Weak password error
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe trop court (6 caractères min).'**
+  String get authWeakPassword;
+
+  /// User not found error
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun compte trouvé pour cet e-mail.'**
+  String get authUserNotFound;
+
+  /// Wrong password error
+  ///
+  /// In fr, this message translates to:
+  /// **'E-mail ou mot de passe incorrect.'**
+  String get authWrongPassword;
+
+  /// Invalid email error
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse e-mail invalide.'**
+  String get authEmailInvalid;
+
   /// Home search bar hint
   ///
   /// In fr, this message translates to:

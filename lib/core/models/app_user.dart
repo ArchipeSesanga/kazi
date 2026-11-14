@@ -14,7 +14,7 @@ abstract class AppUser with _$AppUser {
     required String uid,
     required String displayName,
     String? photoUrl,
-    required String phone,
+    @Default('') String phone,
     @Default('fr') String locale,
     @Default('kinshasa') String city,
     String? commune,

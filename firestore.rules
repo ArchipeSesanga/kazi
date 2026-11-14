@@ -49,7 +49,9 @@ service cloud.firestore {
       allow create: if isOwner()
         && onlyKeys(userClientKeys())
         && hasKeys(['displayName', 'phone', 'locale', 'city', 'termsVersion', 'termsAcceptedAt', 'status', 'createdAt', 'updatedAt'])
-        && data().phone == request.auth.token.phone_number
+        && ('phone_number' in request.auth.token
+            ? data().phone == request.auth.token.phone_number
+            : data().phone == '')
         && data().status == 'active'
         && isNow('createdAt') && isNow('updatedAt') && isNow('termsAcceptedAt')
         && validUser();

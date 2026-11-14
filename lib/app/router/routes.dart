@@ -9,6 +9,7 @@ abstract final class Routes {
 
   static const authPhone = '/auth/phone';
   static const authOtp = '/auth/otp';
+  static const authEmail = '/auth/email';
   static const authSetupProfile = '/auth/profile';
 
   static const search = '/search';

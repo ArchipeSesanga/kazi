@@ -227,13 +227,13 @@ return $default(_that.uid,_that.displayName,_that.photoUrl,_that.phone,_that.loc
 @JsonSerializable()
 
 class _AppUser implements AppUser {
-  const _AppUser({required this.uid, required this.displayName, this.photoUrl, required this.phone, this.locale = 'fr', this.city = 'kinshasa', this.commune, this.termsVersion, @TimestampConverter() this.termsAcceptedAt, this.isProvider = false, this.status = UserStatus.active, @TimestampConverter() this.createdAt, @TimestampConverter() this.updatedAt});
+  const _AppUser({required this.uid, required this.displayName, this.photoUrl, this.phone = '', this.locale = 'fr', this.city = 'kinshasa', this.commune, this.termsVersion, @TimestampConverter() this.termsAcceptedAt, this.isProvider = false, this.status = UserStatus.active, @TimestampConverter() this.createdAt, @TimestampConverter() this.updatedAt});
   factory _AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
 
 @override final  String uid;
 @override final  String displayName;
 @override final  String? photoUrl;
-@override final  String phone;
+@override@JsonKey() final  String phone;
 @override@JsonKey() final  String locale;
 @override@JsonKey() final  String city;
 @override final  String? commune;

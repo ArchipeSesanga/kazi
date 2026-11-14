@@ -175,6 +175,20 @@ class _PhoneScreenState extends State<PhoneScreen> {
                   onPressed: isLoading ? null : _submit,
                   isLoading: isLoading,
                 ),
+                const SizedBox(height: KaziSpacing.lg),
+                Center(
+                  child: TextButton(
+                    onPressed: () => context.push(Routes.authEmail),
+                    child: Text(
+                      l.authPhoneUseEmail,
+                      style: const TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 13,
+                        color: KaziColors.muted,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

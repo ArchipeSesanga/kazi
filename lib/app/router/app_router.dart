@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../features/auth/application/session_controller.dart';
+import '../../features/auth/presentation/email_screen.dart';
 import '../../features/auth/presentation/otp_screen.dart';
 import '../../features/auth/presentation/phone_screen.dart';
 import '../../features/auth/presentation/setup_profile_screen.dart';
@@ -44,6 +45,7 @@ const _publicRoutes = {
   Routes.welcome,
   Routes.authPhone,
   Routes.authOtp,
+  Routes.authEmail,
   Routes.authSetupProfile,
   Routes.legalTerms,
   Routes.legalPrivacy,
@@ -92,7 +94,8 @@ GoRouter createAppRouter(SessionController session, GateController gate) =>
     }
     if (authed && (location == Routes.welcome ||
         location.startsWith('/auth/phone') ||
-        location.startsWith('/auth/otp'))) {
+        location.startsWith('/auth/otp') ||
+        location.startsWith('/auth/email'))) {
       return Routes.home;
     }
     return null;
@@ -116,6 +119,10 @@ GoRouter createAppRouter(SessionController session, GateController gate) =>
     GoRoute(
       path: Routes.authOtp,
       builder: (context, state) => const OtpScreen(),
+    ),
+    GoRoute(
+      path: Routes.authEmail,
+      builder: (context, state) => const EmailScreen(),
     ),
     GoRoute(
       path: Routes.authSetupProfile,

@@ -10,7 +10,7 @@ _AppUser _$AppUserFromJson(Map<String, dynamic> json) => _AppUser(
   uid: json['uid'] as String,
   displayName: json['displayName'] as String,
   photoUrl: json['photoUrl'] as String?,
-  phone: json['phone'] as String,
+  phone: json['phone'] as String? ?? '',
   locale: json['locale'] as String? ?? 'fr',
   city: json['city'] as String? ?? 'kinshasa',
   commune: json['commune'] as String?,
