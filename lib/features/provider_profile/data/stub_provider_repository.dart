@@ -14,6 +14,7 @@ class StubProviderRepository implements ProviderRepository {
   @override
   Future<PageResult<ProviderProfile>> fetchPopular({
     required String city,
+    String? commune,
     Object? cursor,
   }) async =>
       const PageResult(items: [], hasMore: false);

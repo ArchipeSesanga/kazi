@@ -25,7 +25,10 @@ class HomeController extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      final result = await _providerRepo.fetchPopular(city: 'kinshasa');
+      final result = await _providerRepo.fetchPopular(
+        city: 'kinshasa',
+        commune: _selectedCommuneId,
+      );
       _providers = result.items;
     } catch (e) {
       _error = e;

@@ -8,6 +8,7 @@ abstract interface class ProviderRepository {
   Stream<ProviderProfile?> watchProvider(String id);
   Future<PageResult<ProviderProfile>> fetchPopular({
     required String city,
+    String? commune,
     Object? cursor,
   });
   Future<void> createProvider(ProviderProfile profile);

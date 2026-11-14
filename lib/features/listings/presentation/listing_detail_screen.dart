@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../../app/router/routes.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/kazi_colors.dart';
@@ -16,6 +17,7 @@ import '../../../core/widgets/offline_banner.dart';
 import '../../../core/widgets/rating_stars.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../../core/widgets/verified_badge.dart';
+import '../../catalog/application/catalog_controller.dart';
 import '../application/listing_detail_controller.dart';
 import '../domain/listing_repository.dart';
 
@@ -269,30 +271,37 @@ class _LoadedScreenState extends State<_LoadedScreen> {
                                 ),
                               ),
                               const SizedBox(height: KaziSpacing.md),
-                              Wrap(
-                                spacing: KaziSpacing.sm,
-                                runSpacing: KaziSpacing.sm,
-                                children: listing.communes.map((c) {
-                                  return Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: KaziSpacing.md,
-                                      vertical: KaziSpacing.xs,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: KaziColors.primarySurface,
-                                      borderRadius:
-                                          BorderRadius.circular(KaziRadius.pill),
-                                    ),
-                                    child: Text(
-                                      c,
-                                      style: const TextStyle(
-                                        fontFamily: 'Montserrat',
-                                        fontSize: 13,
-                                        color: KaziColors.primary,
-                                      ),
-                                    ),
+                              Builder(
+                                builder: (ctx) {
+                                  final catalog = ctx.read<CatalogController>();
+                                  return Wrap(
+                                    spacing: KaziSpacing.sm,
+                                    runSpacing: KaziSpacing.sm,
+                                    children: listing.communes.map((c) {
+                                      final label =
+                                          catalog.communeById(c)?.name ?? c;
+                                      return Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: KaziSpacing.md,
+                                          vertical: KaziSpacing.xs,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: KaziColors.primarySurface,
+                                          borderRadius: BorderRadius.circular(
+                                              KaziRadius.pill),
+                                        ),
+                                        child: Text(
+                                          label,
+                                          style: const TextStyle(
+                                            fontFamily: 'Montserrat',
+                                            fontSize: 13,
+                                            color: KaziColors.primary,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
                                   );
-                                }).toList(),
+                                },
                               ),
                             ],
                           ),
@@ -407,7 +416,7 @@ class _ProviderMiniCard extends StatelessWidget {
           ),
           const SizedBox(height: KaziSpacing.md),
           GestureDetector(
-            onTap: () => context.push('/p/${listing.providerId}'),
+            onTap: () => context.push(Routes.providerProfile(listing.providerId)),
             child: Container(
               padding: const EdgeInsets.all(KaziSpacing.md),
               decoration: BoxDecoration(

@@ -31,7 +31,7 @@ import '../features/gate/domain/gate_service.dart';
 import '../features/home/application/home_controller.dart';
 import '../features/listings/data/stub_listing_repository.dart';
 import '../features/listings/domain/listing_repository.dart';
-import '../features/provider_profile/data/stub_provider_repository.dart';
+import '../features/provider_profile/data/firestore_provider_repository.dart';
 import '../features/provider_profile/domain/provider_repository.dart';
 import '../features/search/data/firestore_search_repository.dart';
 import '../features/search/domain/search_repository.dart';
@@ -78,8 +78,8 @@ class AppProviders extends StatelessWidget {
         ProxyProvider2<FirebaseFirestore, SharedPreferences, CatalogRepository>(
           update: (_, db, sp, __) => FirestoreCatalogRepository(db, sp),
         ),
-        Provider<ProviderRepository>(
-          create: (_) => const StubProviderRepository(),
+        ProxyProvider<FirebaseFirestore, ProviderRepository>(
+          update: (_, db, __) => FirestoreProviderRepository(db),
         ),
         Provider<ListingRepository>(
           create: (_) => const StubListingRepository(),
