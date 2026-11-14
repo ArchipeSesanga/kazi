@@ -551,6 +551,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingPhoneLabel => 'Call number (optional)';
 
   @override
+  String get onboardingAvatarLabel => 'Profile photo';
+
+  @override
+  String get onboardingCoverLabel => 'Cover photo (optional)';
+
+  @override
+  String get onboardingUploadError => 'Upload failed. Try again.';
+
+  @override
   String get onboardingPublicConsent =>
       'I agree that these numbers will be visible to clients.';
 

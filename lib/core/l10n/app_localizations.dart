@@ -1058,6 +1058,24 @@ abstract class AppLocalizations {
   /// **'Numéro d\'appel (optionnel)'**
   String get onboardingPhoneLabel;
 
+  /// Profile photo picker label in onboarding step 1
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo de profil'**
+  String get onboardingAvatarLabel;
+
+  /// Cover photo picker label in onboarding step 1
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo de couverture (optionnelle)'**
+  String get onboardingCoverLabel;
+
+  /// Error shown when image upload fails in onboarding
+  ///
+  /// In fr, this message translates to:
+  /// **'Échec du téléchargement. Réessayez.'**
+  String get onboardingUploadError;
+
   /// Public number consent checkbox
   ///
   /// In fr, this message translates to:

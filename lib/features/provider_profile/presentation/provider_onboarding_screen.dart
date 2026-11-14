@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -14,6 +16,7 @@ import '../../../core/widgets/stepper_bar.dart';
 import '../../auth/application/session_controller.dart';
 import '../../catalog/application/catalog_controller.dart';
 import '../application/provider_onboarding_controller.dart';
+import '../domain/media_repository.dart';
 import '../domain/provider_repository.dart';
 
 class ProviderOnboardingScreen extends StatefulWidget {
@@ -40,6 +43,7 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
     _ctrl = OnboardingController(
       context.read<ProviderRepository>(),
       context.read<SessionController>(),
+      context.read<MediaRepository>(),
     );
     _nameCtrl = TextEditingController();
     _bioCtrl = TextEditingController();
@@ -219,6 +223,8 @@ class _Step1 extends StatelessWidget {
               color: KaziColors.ink,
             ),
           ),
+          const SizedBox(height: KaziSpacing.xl),
+          _PhotoPickers(ctrl: ctrl),
           const SizedBox(height: KaziSpacing.xl),
           KaziTextField(
             label: l.onboardingNameLabel,
@@ -788,6 +794,213 @@ class _ReviewRow extends StatelessWidget {
         ),
         const SizedBox(height: KaziSpacing.sm),
         const Divider(height: 1, color: KaziColors.border),
+      ],
+    );
+  }
+}
+
+// ── Photo pickers ─────────────────────────────────────────────────────────────
+
+class _PhotoPickers extends StatelessWidget {
+  const _PhotoPickers({required this.ctrl});
+  final OnboardingController ctrl;
+
+  static final _picker = ImagePicker();
+
+  Future<void> _pickAvatar(BuildContext context) async {
+    final file = await _picker.pickImage(source: ImageSource.gallery);
+    if (file == null || !context.mounted) return;
+    await ctrl.uploadAvatar(file);
+  }
+
+  Future<void> _pickCover(BuildContext context) async {
+    final file = await _picker.pickImage(source: ImageSource.gallery);
+    if (file == null || !context.mounted) return;
+    await ctrl.uploadCover(file);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            _AvatarPicker(
+              label: l.onboardingAvatarLabel,
+              photoUrl: ctrl.photoUrl,
+              progress: ctrl.avatarUploadProgress,
+              hasError: ctrl.avatarUploadError,
+              onTap: () => _pickAvatar(context),
+            ),
+            const SizedBox(width: KaziSpacing.lg),
+            Expanded(
+              child: _CoverPicker(
+                label: l.onboardingCoverLabel,
+                coverUrl: ctrl.coverUrl,
+                progress: ctrl.coverUploadProgress,
+                hasError: ctrl.coverUploadError,
+                onTap: () => _pickCover(context),
+              ),
+            ),
+          ],
+        ),
+        if (ctrl.avatarUploadError || ctrl.coverUploadError) ...[
+          const SizedBox(height: KaziSpacing.xs),
+          Text(
+            l.onboardingUploadError,
+            style: const TextStyle(
+              fontFamily: 'Montserrat',
+              fontSize: 12,
+              color: KaziColors.error,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _AvatarPicker extends StatelessWidget {
+  const _AvatarPicker({
+    required this.label,
+    required this.onTap,
+    this.photoUrl,
+    this.progress,
+    this.hasError = false,
+  });
+
+  final String label;
+  final String? photoUrl;
+  final double? progress;
+  final bool hasError;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: progress == null ? onTap : null,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: KaziColors.surfaceAlt,
+                  border: Border.all(
+                    color: hasError ? KaziColors.error : KaziColors.border,
+                  ),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: photoUrl != null
+                    ? CachedNetworkImage(
+                        imageUrl: photoUrl!,
+                        fit: BoxFit.cover,
+                      )
+                    : const Icon(
+                        LucideIcons.camera,
+                        color: KaziColors.muted,
+                        size: 24,
+                      ),
+              ),
+              if (progress != null)
+                SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: CircularProgressIndicator(
+                    value: progress,
+                    strokeWidth: 3,
+                    color: KaziColors.primary,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: KaziSpacing.xs),
+        Text(
+          label,
+          style: const TextStyle(
+            fontFamily: 'Montserrat',
+            fontSize: 11,
+            color: KaziColors.muted,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CoverPicker extends StatelessWidget {
+  const _CoverPicker({
+    required this.label,
+    required this.onTap,
+    this.coverUrl,
+    this.progress,
+    this.hasError = false,
+  });
+
+  final String label;
+  final String? coverUrl;
+  final double? progress;
+  final bool hasError;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: progress == null ? onTap : null,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                height: 80,
+                decoration: BoxDecoration(
+                  color: KaziColors.surfaceAlt,
+                  borderRadius: BorderRadius.circular(KaziRadius.card),
+                  border: Border.all(
+                    color: hasError ? KaziColors.error : KaziColors.border,
+                  ),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: coverUrl != null
+                    ? CachedNetworkImage(
+                        imageUrl: coverUrl!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      )
+                    : const Center(
+                        child: Icon(
+                          LucideIcons.image,
+                          color: KaziColors.muted,
+                          size: 24,
+                        ),
+                      ),
+              ),
+              if (progress != null)
+                LinearProgressIndicator(
+                  value: progress,
+                  color: KaziColors.primary,
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: KaziSpacing.xs),
+        Text(
+          label,
+          style: const TextStyle(
+            fontFamily: 'Montserrat',
+            fontSize: 11,
+            color: KaziColors.muted,
+          ),
+        ),
       ],
     );
   }

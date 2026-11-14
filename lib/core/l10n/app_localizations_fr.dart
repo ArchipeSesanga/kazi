@@ -558,6 +558,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onboardingPhoneLabel => 'Numéro d\'appel (optionnel)';
 
   @override
+  String get onboardingAvatarLabel => 'Photo de profil';
+
+  @override
+  String get onboardingCoverLabel => 'Photo de couverture (optionnelle)';
+
+  @override
+  String get onboardingUploadError => 'Échec du téléchargement. Réessayez.';
+
+  @override
   String get onboardingPublicConsent =>
       'J\'accepte que ces numéros soient visibles par les clients.';
 

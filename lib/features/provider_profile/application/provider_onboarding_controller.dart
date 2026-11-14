@@ -1,13 +1,16 @@
 import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../auth/application/session_controller.dart';
+import '../domain/media_repository.dart';
 import '../domain/provider_repository.dart';
 
 class OnboardingController extends ChangeNotifier {
-  OnboardingController(this._repo, this._session);
+  OnboardingController(this._repo, this._session, this._mediaRepo);
 
   final ProviderRepository _repo;
   final SessionController _session;
+  final MediaRepository _mediaRepo;
 
   int step = 1;
   static const totalSteps = 3;
@@ -19,6 +22,14 @@ class OnboardingController extends ChangeNotifier {
   String callNumber = '';
   int yearsExperience = 0;
   bool hasConsent = false;
+
+  // Photos
+  String? photoUrl;
+  String? coverUrl;
+  double? avatarUploadProgress;
+  double? coverUploadProgress;
+  bool avatarUploadError = false;
+  bool coverUploadError = false;
 
   // Step 2
   List<String> categoryIds = [];
@@ -81,6 +92,50 @@ class OnboardingController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> uploadAvatar(XFile file) async {
+    avatarUploadProgress = 0;
+    avatarUploadError = false;
+    notifyListeners();
+    try {
+      final result = await _mediaRepo.upload(
+        file,
+        MediaKind.avatar,
+        onProgress: (p) {
+          avatarUploadProgress = p;
+          notifyListeners();
+        },
+      );
+      photoUrl = result.url;
+    } catch (_) {
+      avatarUploadError = true;
+    } finally {
+      avatarUploadProgress = null;
+      notifyListeners();
+    }
+  }
+
+  Future<void> uploadCover(XFile file) async {
+    coverUploadProgress = 0;
+    coverUploadError = false;
+    notifyListeners();
+    try {
+      final result = await _mediaRepo.upload(
+        file,
+        MediaKind.cover,
+        onProgress: (p) {
+          coverUploadProgress = p;
+          notifyListeners();
+        },
+      );
+      coverUrl = result.url;
+    } catch (_) {
+      coverUploadError = true;
+    } finally {
+      coverUploadProgress = null;
+      notifyListeners();
+    }
+  }
+
   void clearError() {
     hasError = false;
     notifyListeners();
@@ -98,6 +153,8 @@ class OnboardingController extends ChangeNotifier {
         uid: uid,
         displayName: displayName.trim(),
         bio: bio.trim(),
+        photoUrl: photoUrl,
+        coverUrl: coverUrl,
         whatsappNumber: whatsappNumber.trim(),
         callNumber: callNumber.trim().isEmpty ? null : callNumber.trim(),
         yearsExperience: yearsExperience,
