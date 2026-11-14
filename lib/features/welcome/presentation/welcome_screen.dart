@@ -117,6 +117,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   ),
                   const SizedBox(height: KaziSpacing.sm),
                   KaziButton(
+                    label: l.profileSignInButton,
+                    onPressed: _skip,
+                    variant: KaziButtonVariant.outline,
+                  ),
+                  const SizedBox(height: KaziSpacing.sm),
+                  KaziButton(
                     label: l.welcomeLanguageTitle,
                     onPressed: () => context.push(Routes.myLanguage),
                     variant: KaziButtonVariant.text,
