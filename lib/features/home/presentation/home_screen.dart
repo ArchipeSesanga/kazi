@@ -18,11 +18,11 @@ import '../../../core/widgets/kazi_search_bar.dart';
 import '../../../core/widgets/offline_banner.dart';
 import '../../../core/widgets/promo_banner.dart';
 import '../../../core/widgets/provider_card.dart';
-import '../../../core/widgets/provider_list_item.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../block/application/block_controller.dart';
 import '../../catalog/application/catalog_controller.dart';
+import '../../listings/presentation/listing_result_tile.dart';
 import '../application/home_controller.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -220,18 +220,9 @@ class _HomeBody extends StatelessWidget {
           separatorBuilder: (_, __) => const SizedBox(height: KaziSpacing.md),
           itemBuilder: (ctx, i) {
             final listing = listings[i];
-            return ProviderListItem(
-              name: listing.providerName ?? listing.title,
-              serviceLabel: listing.title,
-              price: KaziFormatters.price(
-                listing.priceAmount,
-                listing.currency.name.toUpperCase(),
-                listing.priceType.name,
-                locale: locale,
-              ),
-              rating: listing.ratingAvg,
-              reviewCount: listing.ratingCount,
-              isVerified: listing.providerVerified,
+            return ListingResultTile(
+              listing: listing,
+              locale: locale,
               onTap: () => ctx.push(Routes.listingDetail(listing.id)),
             );
           },

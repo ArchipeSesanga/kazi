@@ -10,16 +10,15 @@ import '../../../core/models/listing.dart';
 import '../../../core/state/paged_state.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
-import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/kazi_chip.dart';
 import '../../../core/widgets/kazi_search_bar.dart';
 import '../../../core/widgets/offline_banner.dart';
-import '../../../core/widgets/provider_list_item.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../block/application/block_controller.dart';
 import '../../catalog/application/catalog_controller.dart';
+import '../../listings/presentation/listing_result_tile.dart';
 import '../../search/domain/search_repository.dart';
 import '../application/search_results_controller.dart';
 import 'filters_sheet.dart';
@@ -240,18 +239,9 @@ class _SearchScreenState extends State<SearchScreen> {
             );
           }
           final listing = items[i];
-          return ProviderListItem(
-            name: listing.providerName ?? listing.title,
-            serviceLabel: listing.title,
-            price: KaziFormatters.price(
-              listing.priceAmount,
-              listing.currency.name.toUpperCase(),
-              listing.priceType.name,
-              locale: locale,
-            ),
-            rating: listing.ratingAvg,
-            reviewCount: listing.ratingCount,
-            isVerified: listing.providerVerified,
+          return ListingResultTile(
+            listing: listing,
+            locale: locale,
             onTap: () => context.push(Routes.listingDetail(listing.id)),
           );
         },
