@@ -1951,6 +1951,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Voir mon profil public'**
   String get dashboardViewPublicProfile;
+
+  /// Edit profile: add photo
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une photo'**
+  String get profilePhotoAdd;
+
+  /// Edit profile: change photo
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer la photo'**
+  String get profilePhotoChange;
+
+  /// Edit profile: remove photo
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer la photo'**
+  String get profilePhotoRemove;
 }
 
 class _AppLocalizationsDelegate

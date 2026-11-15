@@ -1014,4 +1014,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboardViewPublicProfile => 'View my public profile';
+
+  @override
+  String get profilePhotoAdd => 'Add a photo';
+
+  @override
+  String get profilePhotoChange => 'Change photo';
+
+  @override
+  String get profilePhotoRemove => 'Remove photo';
 }

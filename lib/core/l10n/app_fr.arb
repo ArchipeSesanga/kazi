@@ -678,5 +678,11 @@
   "listingOverLimitNote": "Cette annonce est masquée : vous avez atteint la limite d'annonces actives ou en pause. Supprimez une annonce, puis enregistrez celle-ci pour la republier.",
   "@listingOverLimitNote": {"description": "Explanation for an over-limit listing"},
   "dashboardViewPublicProfile": "Voir mon profil public",
-  "@dashboardViewPublicProfile": {"description": "Dashboard app bar: open own public profile"}
+  "@dashboardViewPublicProfile": {"description": "Dashboard app bar: open own public profile"},
+  "profilePhotoAdd": "Ajouter une photo",
+  "@profilePhotoAdd": {"description": "Edit profile: add photo"},
+  "profilePhotoChange": "Changer la photo",
+  "@profilePhotoChange": {"description": "Edit profile: change photo"},
+  "profilePhotoRemove": "Supprimer la photo",
+  "@profilePhotoRemove": {"description": "Edit profile: remove photo"}
 }

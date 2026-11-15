@@ -19,5 +19,9 @@ abstract interface class MediaRepository {
     void Function(double)? onProgress,
   });
   Future<void> delete(String path);
+
+  /// Deletes a previously uploaded file from its download URL. Only files in
+  /// the signed-in user's own `avatar` folder are ever deleted.
+  Future<void> deleteAvatarByUrl(String url);
   Future<String> thumbUrl(String path, ThumbSize size);
 }

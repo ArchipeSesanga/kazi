@@ -85,6 +85,19 @@ class FirebaseMediaRepository implements MediaRepository {
   }
 
   @override
+  Future<void> deleteAvatarByUrl(String url) async {
+    final uid = _uid;
+    if (uid == null) throw const PermissionDeniedException();
+    try {
+      final ref = _storage.refFromURL(url);
+      if (!ref.fullPath.startsWith('media/$uid/avatar/')) return;
+      await ref.delete();
+    } catch (e, s) {
+      throw mapException(e, s);
+    }
+  }
+
+  @override
   Future<String> thumbUrl(String path, ThumbSize size) async {
     final segments = path.split('/');
     final filename = segments.last;
@@ -102,7 +115,10 @@ class FirebaseMediaRepository implements MediaRepository {
     final uid = _uid;
     if (uid == null) throw const PermissionDeniedException();
     return switch (kind) {
-      MediaKind.avatar => 'media/$uid/avatar/avatar.jpg',
+      // Unique name: an overwritten file keeps its download URL and the
+      // image cache would keep showing the old picture.
+      MediaKind.avatar =>
+        'media/$uid/avatar/avatar_${DateTime.now().millisecondsSinceEpoch}.jpg',
       MediaKind.cover => 'media/$uid/cover/cover.jpg',
       MediaKind.portfolio =>
         'media/$uid/portfolio/${DateTime.now().millisecondsSinceEpoch}.jpg',
