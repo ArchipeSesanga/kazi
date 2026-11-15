@@ -1011,4 +1011,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get listingOverLimitNote =>
       'This listing is hidden: you have reached the limit of active or paused listings. Delete a listing, then save this one to republish it.';
+
+  @override
+  String get dashboardViewPublicProfile => 'View my public profile';
 }

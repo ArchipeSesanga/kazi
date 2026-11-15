@@ -41,7 +41,15 @@ class _PublishScreenState extends State<PublishScreen> {
     if (_lastStatus == ProviderStatus.pending &&
         status == ProviderStatus.approved) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.go(Routes.providerDashboard);
+        // Only when this hub is the visible screen: if onboarding just
+        // finished it already opened the dashboard on top of us.
+        if (!mounted) return;
+        final location = GoRouter.of(context)
+            .routerDelegate
+            .currentConfiguration
+            .uri
+            .path;
+        if (location == Routes.publish) context.push(Routes.providerDashboard);
       });
     }
     _lastStatus = status;

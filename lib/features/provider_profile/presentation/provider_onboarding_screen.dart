@@ -93,7 +93,7 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
           // dashboard.
           setState(() => _redirecting = true);
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) context.go(Routes.providerDashboard);
+            if (mounted) context.pushReplacement(Routes.providerDashboard);
           });
       }
     } catch (_) {
@@ -147,7 +147,7 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
           if (ctrl.isDone) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!ctx.mounted) return;
-              ctx.go(Routes.providerDashboard);
+              ctx.pushReplacement(Routes.providerDashboard);
             });
           }
           if (ctrl.error != null) {

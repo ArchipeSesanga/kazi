@@ -676,5 +676,7 @@
   "dashboardListingOverLimit": "Limite atteinte",
   "@dashboardListingOverLimit": {"description": "Chip: listing hidden because the limit was reached"},
   "listingOverLimitNote": "Cette annonce est masquée : vous avez atteint la limite d'annonces actives ou en pause. Supprimez une annonce, puis enregistrez celle-ci pour la republier.",
-  "@listingOverLimitNote": {"description": "Explanation for an over-limit listing"}
+  "@listingOverLimitNote": {"description": "Explanation for an over-limit listing"},
+  "dashboardViewPublicProfile": "Voir mon profil public",
+  "@dashboardViewPublicProfile": {"description": "Dashboard app bar: open own public profile"}
 }

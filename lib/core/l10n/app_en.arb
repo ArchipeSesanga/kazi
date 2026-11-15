@@ -341,5 +341,6 @@
   "listingsLoadFailed": "Couldn't load listings.",
   "dashboardListingHidden": "Hidden",
   "dashboardListingOverLimit": "Limit reached",
-  "listingOverLimitNote": "This listing is hidden: you have reached the limit of active or paused listings. Delete a listing, then save this one to republish it."
+  "listingOverLimitNote": "This listing is hidden: you have reached the limit of active or paused listings. Delete a listing, then save this one to republish it.",
+  "dashboardViewPublicProfile": "View my public profile"
 }

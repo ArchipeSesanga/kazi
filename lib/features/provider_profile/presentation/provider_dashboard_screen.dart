@@ -55,23 +55,31 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
 
-    return Scaffold(
-      backgroundColor: KaziColors.surfaceAlt,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            const OfflineBanner(),
-            _AppBar(l: l),
-            Expanded(
-              child: ChangeNotifierProvider.value(
-                value: _ctrl,
-                child: Consumer<DashboardController>(
-                  builder: (_, ctrl, __) => _Body(ctrl: ctrl, l: l),
+    // This screen is outside the tab shell and is sometimes entered with
+    // `go` (empty back stack): never strand the user, fall back to Home.
+    return PopScope(
+      canPop: context.canPop(),
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) context.go(Routes.home);
+      },
+      child: Scaffold(
+        backgroundColor: KaziColors.surfaceAlt,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              const OfflineBanner(),
+              _AppBar(l: l),
+              Expanded(
+                child: ChangeNotifierProvider.value(
+                  value: _ctrl,
+                  child: Consumer<DashboardController>(
+                    builder: (_, ctrl, __) => _Body(ctrl: ctrl, l: l),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -86,15 +94,23 @@ class _AppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final uid = context.read<SessionController>().uid;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        KaziSpacing.screenPadding,
+        KaziSpacing.sm,
         KaziSpacing.lg,
         KaziSpacing.sm,
         KaziSpacing.md,
       ),
       child: Row(
         children: [
+          IconButton(
+            icon: const Icon(LucideIcons.arrowLeft, size: 22),
+            color: KaziColors.ink,
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go(Routes.home),
+          ),
           Expanded(
             child: Text(
               l.dashboardTitle,
@@ -106,12 +122,13 @@ class _AppBar extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(
-            icon: const Icon(LucideIcons.settings, size: 20),
-            color: KaziColors.muted,
-            tooltip: l.publishHubGoToDashboard,
-            onPressed: () => context.push(Routes.providerOnboarding),
-          ),
+          if (uid != null)
+            IconButton(
+              icon: const Icon(LucideIcons.user, size: 20),
+              color: KaziColors.muted,
+              tooltip: l.dashboardViewPublicProfile,
+              onPressed: () => context.push(Routes.providerProfile(uid)),
+            ),
         ],
       ),
     );

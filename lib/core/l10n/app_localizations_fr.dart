@@ -1022,4 +1022,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get listingOverLimitNote =>
       'Cette annonce est masquée : vous avez atteint la limite d\'annonces actives ou en pause. Supprimez une annonce, puis enregistrez celle-ci pour la republier.';
+
+  @override
+  String get dashboardViewPublicProfile => 'Voir mon profil public';
 }

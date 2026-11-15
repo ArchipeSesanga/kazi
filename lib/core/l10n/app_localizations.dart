@@ -1945,6 +1945,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Cette annonce est masquée : vous avez atteint la limite d\'annonces actives ou en pause. Supprimez une annonce, puis enregistrez celle-ci pour la republier.'**
   String get listingOverLimitNote;
+
+  /// Dashboard app bar: open own public profile
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir mon profil public'**
+  String get dashboardViewPublicProfile;
 }
 
 class _AppLocalizationsDelegate
