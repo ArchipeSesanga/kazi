@@ -480,7 +480,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Publiez vos services gratuitement et touchez des milliers de clients.';
 
   @override
-  String get publishHubPending => 'Votre dossier est en cours d\'examen.';
+  String get publishHubPending => 'Activation de votre profil…';
 
   @override
   String get publishHubRejected => 'Votre dossier a été refusé.';

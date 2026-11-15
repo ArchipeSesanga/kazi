@@ -39,7 +39,7 @@
 |---|---|---|
 | users create | owner with matching phone or email account with empty phone | phone ≠ token phone; extra field `isProvider`; status `suspended` |
 | users update | name change | changing `phone`, `status`, `isProvider` |
-| providers create | pending with zeroed server fields | `verified: true`; `status: approved`; `ratingAvg: 5`; 4 categories |
+| providers create | exact `ProviderProfile.toCreateMap()` payload with pending status and zeroed server fields | extra keys; `verified: true`; `status: approved`; `ratingAvg: 5`; 4 categories |
 | providers update | bio change; rejected → pending | pending → approved; owner when suspended; set `verified` |
 | providers read | approved by guest; pending by owner | pending by another user |
 | listings create | approved provider, valid | `visible: true` included; 7 photos; `priceType: quote` with amount; provider with listingCount 10 (denied) vs 9 (allowed) against `config/limits`; limit raised/lowered via `config/limits`; missing `config/limits` falls back to 10; other user's providerId |

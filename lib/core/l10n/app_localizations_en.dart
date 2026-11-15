@@ -476,7 +476,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Post your services for free and reach thousands of clients.';
 
   @override
-  String get publishHubPending => 'Your application is under review.';
+  String get publishHubPending => 'Activating your profile…';
 
   @override
   String get publishHubRejected => 'Your application was rejected.';

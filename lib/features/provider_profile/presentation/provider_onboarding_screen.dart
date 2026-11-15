@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../../app/router/routes.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/models/enums.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
 import '../../../core/widgets/kazi_button.dart';
@@ -40,6 +41,11 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
   bool _consentError = false;
   String? _step2Error;
 
+  // Entry check: is there already a providers/{uid} doc, and if so what do
+  // we do about it (see the redirect/resubmit rules in _checkExisting).
+  bool _checkingEntry = true;
+  bool _redirecting = false;
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +58,49 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
     _bioCtrl = TextEditingController();
     _whatsappCtrl = TextEditingController();
     _callCtrl = TextEditingController();
+    _checkExisting();
+  }
+
+  Future<void> _checkExisting() async {
+    final uid = context.read<SessionController>().uid;
+    if (uid == null) {
+      if (mounted) setState(() => _checkingEntry = false);
+      return;
+    }
+    try {
+      final existing = await context.read<ProviderRepository>().getProvider(
+        uid,
+      );
+      if (!mounted) return;
+      if (existing == null) {
+        setState(() => _checkingEntry = false);
+        return;
+      }
+      switch (existing.status) {
+        case ProviderStatus.rejected:
+          _ctrl.prefillForResubmit(existing);
+          _nameCtrl.text = _ctrl.displayName;
+          _bioCtrl.text = _ctrl.bio;
+          _whatsappCtrl.text = _ctrl.whatsappNumber;
+          _callCtrl.text = _ctrl.callNumber;
+          setState(() => _checkingEntry = false);
+        case ProviderStatus.pending:
+        case ProviderStatus.approved:
+        case ProviderStatus.suspended:
+          // A doc already exists — re-submitting a create-style payload
+          // against it would be evaluated as an update and denied. Only a
+          // rejected profile may resubmit; everything else belongs on the
+          // dashboard.
+          setState(() => _redirecting = true);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) context.go(Routes.providerDashboard);
+          });
+      }
+    } catch (_) {
+      // Don't trap the user on a blank screen over a transient read error —
+      // fall back to the create form; the write path still verifies itself.
+      if (mounted) setState(() => _checkingEntry = false);
+    }
   }
 
   @override
@@ -86,6 +135,11 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_checkingEntry || _redirecting) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator.adaptive()),
+      );
+    }
     return ChangeNotifierProvider.value(
       value: _ctrl,
       child: Consumer<OnboardingController>(

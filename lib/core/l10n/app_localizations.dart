@@ -920,10 +920,10 @@ abstract class AppLocalizations {
   /// **'Publiez vos services gratuitement et touchez des milliers de clients.'**
   String get publishHubBecomeProviderSubtitle;
 
-  /// Pending status message
+  /// Pending status message (brief, auto-approve is instant in v1)
   ///
   /// In fr, this message translates to:
-  /// **'Votre dossier est en cours d\'examen.'**
+  /// **'Activation de votre profil…'**
   String get publishHubPending;
 
   /// Rejected status message

@@ -188,6 +188,19 @@ class FirestoreProviderRepository implements ProviderRepository {
         ...fields,
         'updatedAt': FieldValue.serverTimestamp(),
       });
+      // Firestore resolves update() optimistically from local cache.
+      // Wait for the server to confirm, then verify the write actually stuck
+      // (a rules-denied update can otherwise look like it succeeded locally).
+      await _db.waitForPendingWrites().timeout(const Duration(seconds: 10));
+      final doc = await _col
+          .doc(id)
+          .get(const GetOptions(source: Source.server));
+      final expectedStatus = fields['status'];
+      if (!doc.exists ||
+          (expectedStatus != null && doc.data()?['status'] != expectedStatus)) {
+        debugPrint('[ProviderRepo] updateProvider: server rejected write');
+        throw const PermissionDeniedException();
+      }
     } catch (e, s) {
       throw mapException(e, s);
     }

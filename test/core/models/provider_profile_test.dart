@@ -33,10 +33,16 @@ void main() {
       expect(payload['yearsExperience'], isA<int>());
       expect(payload['whatsappNumber'], '+243812345678');
       expect(payload['callNumber'], isNull);
+      expect(
+        payload['photoUrl'],
+        'https://firebasestorage.googleapis.com/v0/b/kazi-dev/o/avatar.jpg?alt=media&token=test',
+      );
+      expect(
+        payload['coverUrl'],
+        'https://firebasestorage.googleapis.com/v0/b/kazi-dev/o/cover.jpg?alt=media&token=test',
+      );
       expect(payload['baseCommune'], 'gombe');
       expect(payload['communes'], ['gombe', 'lingwala']);
-      expect(payload['photoUrl'], isNull);
-      expect(payload['coverUrl'], isNull);
       expect(payload['status'], 'pending');
       expect(payload['verified'], isFalse);
       expect(payload['ratingAvg'], 0);
@@ -53,13 +59,36 @@ void main() {
       expect(payload['yearsExperience'], 0);
       expect(payload['yearsExperience'], isA<int>());
     });
+
+    test('normalizes optional call number to E.164', () {
+      final payload = _profile()
+          .copyWith(callNumber: '0812345678')
+          .toCreateMap();
+
+      expect(payload['callNumber'], '+243812345678');
+    });
+
+    test('normalizes empty photo URLs to null without dropping their keys', () {
+      final payload = _profile(photoUrl: '', coverUrl: '   ').toCreateMap();
+
+      expect(payload.containsKey('photoUrl'), isTrue);
+      expect(payload['photoUrl'], isNull);
+      expect(payload.containsKey('coverUrl'), isTrue);
+      expect(payload['coverUrl'], isNull);
+    });
   });
 }
 
-ProviderProfile _profile({int yearsExperience = 8}) => ProviderProfile(
+ProviderProfile _profile({
+  int yearsExperience = 8,
+  String? photoUrl = 'https://firebasestorage.googleapis.com/v0/b/kazi-dev/o/avatar.jpg?alt=media&token=test',
+  String? coverUrl = 'https://firebasestorage.googleapis.com/v0/b/kazi-dev/o/cover.jpg?alt=media&token=test',
+}) => ProviderProfile(
   uid: 'provider-uid',
   displayName: 'Jean Mukendi',
   bio: 'Plombier depuis 8 ans',
+  photoUrl: photoUrl,
+  coverUrl: coverUrl,
   whatsappNumber: '0812345678',
   yearsExperience: yearsExperience,
   categoryIds: const ['plomberie'],

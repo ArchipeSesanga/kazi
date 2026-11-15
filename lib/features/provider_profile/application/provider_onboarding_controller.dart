@@ -37,10 +37,31 @@ class OnboardingController extends ChangeNotifier {
   String? baseCommune;
   List<String> communes = [];
 
+  // Resubmit (entry found an existing `rejected` doc)
+  bool isResubmitting = false;
+
   // Submit
   bool isSubmitting = false;
   bool isDone = false;
   AppException? error;
+
+  /// Prefills the form from a previously-rejected profile so the user can
+  /// edit and resubmit rather than create a duplicate doc.
+  void prefillForResubmit(ProviderProfile profile) {
+    isResubmitting = true;
+    displayName = profile.displayName;
+    bio = profile.bio;
+    photoUrl = profile.photoUrl;
+    coverUrl = profile.coverUrl;
+    whatsappNumber = profile.whatsappNumber;
+    callNumber = profile.callNumber ?? '';
+    yearsExperience = profile.yearsExperience;
+    categoryIds = List.of(profile.categoryIds);
+    baseCommune = profile.baseCommune;
+    communes = List.of(profile.communes);
+    hasConsent = true;
+    notifyListeners();
+  }
 
   void goToStep(int s) {
     step = s;
@@ -167,7 +188,16 @@ class OnboardingController extends ChangeNotifier {
         baseCommune: baseCommune!,
         communes: communes,
       );
-      await _repo.createProvider(profile);
+      if (isResubmitting) {
+        // rejected → pending is the only status transition the rules allow
+        // a client to make; everything else is a normal field update.
+        await _repo.updateProvider(uid, {
+          ...profile.toUpdateMap(),
+          'status': 'pending',
+        });
+      } else {
+        await _repo.createProvider(profile);
+      }
       isDone = true;
     } on AppException catch (e) {
       error = e;
