@@ -329,5 +329,17 @@
   "listingFormDraftDialogBody": "You have an unsaved draft. Do you want to keep it or discard it?",
   "listingFormDraftKeep": "Keep",
   "listingFormDraftDiscard": "Discard",
-  "listingFormPhotoUploadError": "Photo upload failed. Tap Retry to resume."
+  "listingFormPhotoUploadError": "Photo upload failed. Tap Retry to resume.",
+  "listingLimitUsage": "{used}/{max} listings",
+  "listingLimitReachedTitle": "Listing limit reached",
+  "listingLimitReachedBody": "You have reached the limit of {max} listings. Delete an existing listing to create a new one.",
+  "listingFormUpdated": "Listing updated.",
+  "listingActionPaused": "Listing paused.",
+  "listingActionResumed": "Listing resumed.",
+  "listingActionDeleted": "Listing deleted.",
+  "listingActionFailed": "The action failed. Please try again.",
+  "listingsLoadFailed": "Couldn't load listings.",
+  "dashboardListingHidden": "Hidden",
+  "dashboardListingOverLimit": "Limit reached",
+  "listingOverLimitNote": "This listing is hidden: you have reached the limit of active or paused listings. Delete a listing, then save this one to republish it."
 }

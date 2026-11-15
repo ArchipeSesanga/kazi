@@ -17,11 +17,13 @@ import '../../../core/widgets/offline_banner.dart';
 import '../../../core/widgets/rating_stars.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../../core/widgets/verified_badge.dart';
+import '../../auth/application/session_controller.dart';
 import '../../catalog/application/catalog_controller.dart';
 import '../../contact/application/contact_controller.dart';
 import '../../provider_profile/domain/provider_repository.dart';
 import '../application/listing_detail_controller.dart';
 import '../domain/listing_repository.dart';
+import 'listing_status_chip.dart';
 
 class ListingDetailScreen extends StatefulWidget {
   const ListingDetailScreen({required this.listingId, super.key});
@@ -209,6 +211,15 @@ class _LoadedScreenState extends State<_LoadedScreen> {
                                 color: KaziColors.ink,
                               ),
                             ),
+                            // The owner sees every status (draft / active /
+                            // paused / publishing); other users only ever
+                            // get visible listings from the repository.
+                            if (listing.providerId ==
+                                context.read<SessionController>().uid) ...[
+                              const SizedBox(height: KaziSpacing.sm),
+                              ListingStatusChip(listing: listing),
+                              ListingStatusNote(listing: listing),
+                            ],
                             const SizedBox(height: KaziSpacing.sm),
                             Text(
                               KaziFormatters.price(

@@ -1873,6 +1873,78 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Débloqué(e)'**
   String get providerUnblockedSnackbar;
+
+  /// Listing quota label
+  ///
+  /// In fr, this message translates to:
+  /// **'{used}/{max} annonces'**
+  String listingLimitUsage(int used, int max);
+
+  /// Listing limit dialog title
+  ///
+  /// In fr, this message translates to:
+  /// **'Limite d\'annonces atteinte'**
+  String get listingLimitReachedTitle;
+
+  /// Listing limit explanation
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous avez atteint la limite de {max} annonces. Supprimez une annonce existante pour en créer une nouvelle.'**
+  String listingLimitReachedBody(int max);
+
+  /// Listing edit saved snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce mise à jour.'**
+  String get listingFormUpdated;
+
+  /// Listing paused snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce mise en pause.'**
+  String get listingActionPaused;
+
+  /// Listing resumed snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce réactivée.'**
+  String get listingActionResumed;
+
+  /// Listing deleted snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce supprimée.'**
+  String get listingActionDeleted;
+
+  /// Listing action failed snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'action a échoué. Veuillez réessayer.'**
+  String get listingActionFailed;
+
+  /// Listings load error
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les annonces.'**
+  String get listingsLoadFailed;
+
+  /// Listing hidden by moderation
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquée'**
+  String get dashboardListingHidden;
+
+  /// Chip: listing hidden because the limit was reached
+  ///
+  /// In fr, this message translates to:
+  /// **'Limite atteinte'**
+  String get dashboardListingOverLimit;
+
+  /// Explanation for an over-limit listing
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette annonce est masquée : vous avez atteint la limite d\'annonces actives ou en pause. Supprimez une annonce, puis enregistrez celle-ci pour la republier.'**
+  String get listingOverLimitNote;
 }
 
 class _AppLocalizationsDelegate

@@ -60,6 +60,7 @@ class ListingFormController extends ChangeNotifier {
     String? listingId,
   }) {
     _listingId = listingId;
+    _startedAsNew = listingId == null;
   }
 
   final ListingRepository _listingRepo;
@@ -69,6 +70,27 @@ class ListingFormController extends ChangeNotifier {
   String? _listingId;
   String? get listingId => _listingId;
   bool get isEditing => _listingId != null;
+  late final bool _startedAsNew;
+
+  /// Status of the listing as loaded by [init] (edit mode only).
+  ListingStatus? _originalStatus;
+
+  /// Editing an active or paused listing: saving keeps its status (the form
+  /// shows a single Save button instead of Draft / Publish).
+  bool get preservesStatus =>
+      _originalStatus != null && _originalStatus != ListingStatus.draft;
+
+  /// Provider's listing count vs the configured limit; loaded for new
+  /// listings so the form can explain the limit instead of failing.
+  ListingQuota? quota;
+
+  /// True when saving an existing listing (not a draft) succeeded.
+  bool savedAsUpdate = false;
+
+  /// New listing, no draft created yet, and the provider is at the limit.
+  bool get limitReached =>
+      _startedAsNew && _listingId == null && quota?.reached == true;
+
 
   String title = '';
   String? categoryId;
@@ -92,14 +114,30 @@ class ListingFormController extends ChangeNotifier {
   Future<String>? _draftFuture;
 
   static const _maxPhotos = 6;
+  Future<void> _loadQuota() async {
+    final uid = _session.uid;
+    if (uid == null) return;
+    try {
+      quota = await _listingRepo.getQuota(uid);
+      notifyListeners();
+    } on AppException {
+      // Advisory only — the rules / onListingWritten still enforce the limit.
+    }
+  }
+
 
   Future<void> init() async {
-    if (_listingId == null) return;
+    if (_listingId == null) {
+      await _loadQuota();
+      return;
+    }
     isLoading = true;
     notifyListeners();
     try {
       final listing = await _listingRepo.getListing(_listingId!);
       if (listing != null) {
+        _originalStatus = listing.status;
+        if (listing.status == ListingStatus.draft) unawaited(_loadQuota());
         title = listing.title;
         categoryId = listing.categoryId;
         description = listing.description;
@@ -204,14 +242,26 @@ class ListingFormController extends ChangeNotifier {
 
   Future<void> publish() => _save(ListingStatus.active);
 
+  /// Saves an existing listing keeping its current status.
+  Future<void> save() => _save(_originalStatus ?? ListingStatus.draft);
+
   Future<void> _save(ListingStatus status) async {
     if (isSaving) return;
     if (!_validate()) return;
     final uid = _session.uid;
     if (uid == null) return;
+    // Publishing a draft takes a slot (only active + paused count). Without
+    // a free one, onListingWritten would hide it, so say so up front.
+    final takesSlot = status == ListingStatus.active && !preservesStatus;
+    if (limitReached || (takesSlot && quota?.reached == true)) {
+      error = const QuotaExceededException('listing_limit');
+      notifyListeners();
+      return;
+    }
     isSaving = true;
     error = null;
     savedStatus = null;
+    savedAsUpdate = false;
     notifyListeners();
     try {
       // 1. Ensure draft doc exists.
@@ -280,6 +330,7 @@ class ListingFormController extends ChangeNotifier {
         'status': status.name,
       });
       savedStatus = status;
+      savedAsUpdate = preservesStatus;
 
       // 4. Clean up removed remote photos (best-effort).
       for (final removed in _removedRemotePhotos) {
@@ -289,11 +340,31 @@ class ListingFormController extends ChangeNotifier {
       }
       _removedRemotePhotos.clear();
     } on AppException catch (e) {
-      error = e;
+      error = await _explainCreateDenied(e);
     } finally {
       isSaving = false;
       notifyListeners();
     }
+  }
+
+  /// A denied create is most often the listing limit (the counter is updated
+  /// server-side, so the form's quota can be stale): say so explicitly.
+  Future<AppException> _explainCreateDenied(AppException e) async {
+    if (e is! PermissionDeniedException ||
+        !_startedAsNew ||
+        _listingId != null) {
+      return e;
+    }
+    final uid = _session.uid;
+    if (uid == null) return e;
+    try {
+      final q = await _listingRepo.getQuota(uid);
+      quota = q;
+      if (q.reached) return const QuotaExceededException('listing_limit');
+    } on AppException {
+      // keep the original error
+    }
+    return e;
   }
 
   /// Creates the draft doc once. Concurrent calls share the same future.

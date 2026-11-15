@@ -970,4 +970,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get providerUnblockedSnackbar => 'Unblocked';
+
+  @override
+  String listingLimitUsage(int used, int max) {
+    return '$used/$max listings';
+  }
+
+  @override
+  String get listingLimitReachedTitle => 'Listing limit reached';
+
+  @override
+  String listingLimitReachedBody(int max) {
+    return 'You have reached the limit of $max listings. Delete an existing listing to create a new one.';
+  }
+
+  @override
+  String get listingFormUpdated => 'Listing updated.';
+
+  @override
+  String get listingActionPaused => 'Listing paused.';
+
+  @override
+  String get listingActionResumed => 'Listing resumed.';
+
+  @override
+  String get listingActionDeleted => 'Listing deleted.';
+
+  @override
+  String get listingActionFailed => 'The action failed. Please try again.';
+
+  @override
+  String get listingsLoadFailed => 'Couldn\'t load listings.';
+
+  @override
+  String get dashboardListingHidden => 'Hidden';
+
+  @override
+  String get dashboardListingOverLimit => 'Limit reached';
+
+  @override
+  String get listingOverLimitNote =>
+      'This listing is hidden: you have reached the limit of active or paused listings. Delete a listing, then save this one to republish it.';
 }

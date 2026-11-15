@@ -1,5 +1,7 @@
 // Single source of truth for all app limits — mirrors functions/src/config.ts.
 abstract final class Limits {
+  /// Fallback only: the live value is Firestore `config/limits`
+  /// (`maxListingsPerProvider`), read via `ListingRepository.fetchMaxListings`.
   static const int maxListingsPerProvider = 10;
   static const int maxPhotosPerListing = 6;
   static const int maxPortfolioPhotos = 12;

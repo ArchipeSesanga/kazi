@@ -301,53 +301,56 @@ class _LoadedScreen extends StatelessWidget {
 
                       // Categories
                       if (profile.categoryIds.isNotEmpty)
-                        Builder(builder: (ctx) {
-                          final catalog = ctx.read<CatalogController>();
-                          final cats = profile.categoryIds
-                              .map((id) => catalog.categoryById(id))
-                              .whereType<Category>()
-                              .toList();
-                          if (cats.isEmpty) return const SizedBox.shrink();
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  KaziSpacing.screenPadding,
-                                  KaziSpacing.lg,
-                                  KaziSpacing.screenPadding,
-                                  KaziSpacing.md,
-                                ),
-                                child: Wrap(
-                                  spacing: KaziSpacing.sm,
-                                  runSpacing: KaziSpacing.sm,
-                                  children: cats.map((c) {
-                                    return Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: KaziSpacing.md,
-                                        vertical: KaziSpacing.xs,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: KaziColors.primarySurface,
-                                        borderRadius: BorderRadius.circular(
-                                            KaziRadius.pill),
-                                      ),
-                                      child: Text(
-                                        c.name.resolve(locale),
-                                        style: const TextStyle(
-                                          fontFamily: 'Montserrat',
-                                          fontSize: 13,
-                                          color: KaziColors.primary,
+                        Builder(
+                          builder: (ctx) {
+                            final catalog = ctx.read<CatalogController>();
+                            final cats = profile.categoryIds
+                                .map((id) => catalog.categoryById(id))
+                                .whereType<Category>()
+                                .toList();
+                            if (cats.isEmpty) return const SizedBox.shrink();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    KaziSpacing.screenPadding,
+                                    KaziSpacing.lg,
+                                    KaziSpacing.screenPadding,
+                                    KaziSpacing.md,
+                                  ),
+                                  child: Wrap(
+                                    spacing: KaziSpacing.sm,
+                                    runSpacing: KaziSpacing.sm,
+                                    children: cats.map((c) {
+                                      return Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: KaziSpacing.md,
+                                          vertical: KaziSpacing.xs,
                                         ),
-                                      ),
-                                    );
-                                  }).toList(),
+                                        decoration: BoxDecoration(
+                                          color: KaziColors.primarySurface,
+                                          borderRadius: BorderRadius.circular(
+                                            KaziRadius.pill,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          c.name.resolve(locale),
+                                          style: const TextStyle(
+                                            fontFamily: 'Montserrat',
+                                            fontSize: 13,
+                                            color: KaziColors.primary,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
                                 ),
-                              ),
-                              const _Divider(),
-                            ],
-                          );
-                        }),
+                                const _Divider(),
+                              ],
+                            );
+                          },
+                        ),
 
                       // Services (listings)
                       Padding(
@@ -568,6 +571,7 @@ class _ListingsSection extends StatefulWidget {
 
 class _ListingsSectionState extends State<_ListingsSection> {
   List<Listing>? _listings;
+  bool _failed = false;
 
   @override
   void initState() {
@@ -576,17 +580,39 @@ class _ListingsSectionState extends State<_ListingsSection> {
   }
 
   Future<void> _load() async {
+    if (mounted) setState(() => _failed = false);
     try {
       final repo = context.read<ListingRepository>();
       final result = await repo.fetchByProvider(widget.providerId);
       if (mounted) setState(() => _listings = result.items);
-    } catch (_) {
-      if (mounted) setState(() => _listings = []);
+    } catch (e) {
+      // Surface the failure (e.g. a missing index) instead of showing an
+      // empty list that looks like "no listings".
+      debugPrint('[ProviderProfile] listings query failed: $e');
+      if (mounted) {
+        setState(() {
+          _failed = true;
+          _listings = null;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_failed) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: KaziSpacing.screenPadding,
+          vertical: KaziSpacing.sm,
+        ),
+        child: ErrorView(
+          message: widget.l.listingsLoadFailed,
+          onRetry: _load,
+          retryLabel: widget.l.buttonRetry,
+        ),
+      );
+    }
     final listings = _listings;
     if (listings == null) {
       return const Padding(
@@ -603,8 +629,9 @@ class _ListingsSectionState extends State<_ListingsSection> {
     if (listings.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(
-            horizontal: KaziSpacing.screenPadding,
-            vertical: KaziSpacing.sm),
+          horizontal: KaziSpacing.screenPadding,
+          vertical: KaziSpacing.sm,
+        ),
         child: Text(
           widget.l.homeEmptyRecent,
           style: const TextStyle(

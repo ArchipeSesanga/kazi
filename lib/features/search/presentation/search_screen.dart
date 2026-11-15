@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../../app/router/routes.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/models/listing.dart';
@@ -250,7 +252,7 @@ class _SearchScreenState extends State<SearchScreen> {
             rating: listing.ratingAvg,
             reviewCount: listing.ratingCount,
             isVerified: listing.providerVerified,
-            onTap: () {},
+            onTap: () => context.push(Routes.listingDetail(listing.id)),
           );
         },
       ),

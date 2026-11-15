@@ -981,4 +981,45 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get providerUnblockedSnackbar => 'Débloqué(e)';
+
+  @override
+  String listingLimitUsage(int used, int max) {
+    return '$used/$max annonces';
+  }
+
+  @override
+  String get listingLimitReachedTitle => 'Limite d\'annonces atteinte';
+
+  @override
+  String listingLimitReachedBody(int max) {
+    return 'Vous avez atteint la limite de $max annonces. Supprimez une annonce existante pour en créer une nouvelle.';
+  }
+
+  @override
+  String get listingFormUpdated => 'Annonce mise à jour.';
+
+  @override
+  String get listingActionPaused => 'Annonce mise en pause.';
+
+  @override
+  String get listingActionResumed => 'Annonce réactivée.';
+
+  @override
+  String get listingActionDeleted => 'Annonce supprimée.';
+
+  @override
+  String get listingActionFailed => 'L\'action a échoué. Veuillez réessayer.';
+
+  @override
+  String get listingsLoadFailed => 'Impossible de charger les annonces.';
+
+  @override
+  String get dashboardListingHidden => 'Masquée';
+
+  @override
+  String get dashboardListingOverLimit => 'Limite atteinte';
+
+  @override
+  String get listingOverLimitNote =>
+      'Cette annonce est masquée : vous avez atteint la limite d\'annonces actives ou en pause. Supprimez une annonce, puis enregistrez celle-ci pour la republier.';
 }

@@ -110,9 +110,17 @@ class AppProviders extends StatelessWidget {
           create: (ctx) => CatalogController(ctx.read<CatalogRepository>())..load(),
           update: (_, repo, prev) => prev ?? (CatalogController(repo)..load()),
         ),
-        ChangeNotifierProxyProvider<ProviderRepository, HomeController>(
-          create: (ctx) => HomeController(ctx.read<ProviderRepository>())..load(),
-          update: (_, repo, prev) => prev ?? (HomeController(repo)..load()),
+        ChangeNotifierProxyProvider2<
+          ProviderRepository,
+          SearchRepository,
+          HomeController
+        >(
+          create: (ctx) => HomeController(
+            ctx.read<ProviderRepository>(),
+            ctx.read<SearchRepository>(),
+          )..load(),
+          update: (_, providers, search, prev) =>
+              prev ?? (HomeController(providers, search)..load()),
         ),
         ChangeNotifierProxyProvider<SharedPreferences, ExploreController>(
           create: (ctx) => ExploreController(ctx.read<SharedPreferences>()),
