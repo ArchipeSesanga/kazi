@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../core/theme/kazi_colors.dart';
-import '../../../core/widgets/kazi_logo.dart';
 import '../../auth/application/session_controller.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -43,12 +42,19 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Mirrors the native launch screen (same background and image) so the
+    // hand-off from native splash to Flutter is seamless: one splash only.
     return const Scaffold(
       backgroundColor: KaziColors.ink,
       body: Center(
-        child: KaziLogo(
-          variant: KaziLogoVariant.horizontalReversed,
-          width: 220,
+        child: OverflowBox(
+          maxWidth: 432,
+          maxHeight: 432,
+          child: Image(
+            image: AssetImage('assets/images/splash_logo.png'),
+            width: 432,
+            height: 432,
+          ),
         ),
       ),
     );
