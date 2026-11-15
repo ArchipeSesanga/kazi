@@ -42,23 +42,29 @@ class KaziButton extends StatelessWidget {
               color: _foreground,
             ),
           )
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 18, color: _foreground),
-                const SizedBox(width: KaziSpacing.sm),
-              ],
-              Text(
-                label,
-                style: TextStyle(
-                  fontFamily: 'Montserrat',
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w700,
-                  color: _foreground,
+        // Last-resort guard: a long translation scales down instead of
+        // overflowing (no effect when it fits or when width is unbounded).
+        : FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 18, color: _foreground),
+                  const SizedBox(width: KaziSpacing.sm),
+                ],
+                Text(
+                  label,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w700,
+                    color: _foreground,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
 
     if (variant == KaziButtonVariant.text) {

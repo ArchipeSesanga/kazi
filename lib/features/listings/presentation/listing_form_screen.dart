@@ -209,7 +209,7 @@ class _ListingFormScreenState extends State<ListingFormScreen> {
             KaziSpacing.lg,
             KaziSpacing.lg,
             KaziSpacing.lg,
-            120,
+            176,
           ),
           children: [
             if (ctrl.limitReached) ...[
@@ -275,7 +275,7 @@ class _ListingFormScreenState extends State<ListingFormScreen> {
             ],
           ],
         ),
-        bottomNavigationBar: _BottomBar(
+        bottomNavigationBar: ListingFormBottomBar(
           isSaving: ctrl.isSaving,
           hasUploading: ctrl.photos.any((p) => p.isUploading),
           limitReached: ctrl.limitReached,
@@ -760,8 +760,10 @@ class _CommuneSection extends StatelessWidget {
 
 // ── Bottom bar ────────────────────────────────────────────────────────────────
 
-class _BottomBar extends StatelessWidget {
-  const _BottomBar({
+/// Bottom action bar of the listing form.
+class ListingFormBottomBar extends StatelessWidget {
+  const ListingFormBottomBar({
+    super.key,
     required this.isSaving,
     required this.hasUploading,
     required this.limitReached,
@@ -799,23 +801,22 @@ class _BottomBar extends StatelessWidget {
                 onPressed: disabled ? null : onSave,
                 isLoading: isSaving,
               )
-            : Row(
+            // Stacked, not side by side: "Enregistrer le brouillon" does not
+            // fit in half the screen width (and never at larger text sizes).
+            : Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: KaziButton(
-                      label: l.listingFormSaveDraft,
-                      onPressed: disabled ? null : onDraft,
-                      variant: KaziButtonVariant.outline,
-                      isLoading: isSaving,
-                    ),
+                  KaziButton(
+                    label: l.listingFormPublish,
+                    onPressed: disabled ? null : onPublish,
+                    isLoading: isSaving,
                   ),
-                  const SizedBox(width: KaziSpacing.sm),
-                  Expanded(
-                    child: KaziButton(
-                      label: l.listingFormPublish,
-                      onPressed: disabled ? null : onPublish,
-                      isLoading: isSaving,
-                    ),
+                  const SizedBox(height: KaziSpacing.sm),
+                  KaziButton(
+                    label: l.listingFormSaveDraft,
+                    onPressed: disabled ? null : onDraft,
+                    variant: KaziButtonVariant.outline,
+                    isLoading: isSaving,
                   ),
                 ],
               ),
