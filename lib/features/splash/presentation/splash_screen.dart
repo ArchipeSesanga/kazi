@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../core/theme/kazi_colors.dart';
+import '../../../core/widgets/kazi_logo.dart';
 import '../../auth/application/session_controller.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -43,16 +44,11 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: KaziColors.primary,
+      backgroundColor: KaziColors.ink,
       body: Center(
-        child: Text(
-          'Kazi',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 40,
-            fontWeight: FontWeight.w900,
-            fontFamily: 'Montserrat',
-          ),
+        child: KaziLogo(
+          variant: KaziLogoVariant.horizontalReversed,
+          width: 220,
         ),
       ),
     );

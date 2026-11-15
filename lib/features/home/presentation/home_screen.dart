@@ -11,6 +11,7 @@ import '../../../core/utils/category_icon.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/category_circle.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/kazi_logo.dart';
 import '../../../core/widgets/kazi_search_bar.dart';
 import '../../../core/widgets/offline_banner.dart';
 import '../../../core/widgets/promo_banner.dart';
@@ -259,15 +260,7 @@ class _AppBar extends StatelessWidget {
       titleSpacing: KaziSpacing.screenPadding,
       title: Row(
         children: [
-          const Text(
-            'Kazi',
-            style: TextStyle(
-              fontFamily: 'Montserrat',
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              color: KaziColors.primary,
-            ),
-          ),
+          const KaziLogo(height: 26),
           const SizedBox(width: KaziSpacing.sm),
           GestureDetector(
             onTap: () => _showCommunePicker(context),

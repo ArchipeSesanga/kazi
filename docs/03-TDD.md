@@ -41,6 +41,7 @@ Use the latest stable versions at creation time and pin them in `pubspec.lock`. 
 | Contact / sharing | `url_launcher`, `share_plus` |
 | Phone numbers | `phone_numbers_parser` |
 | Icons | `lucide_icons_flutter` (Lucide, matches the Figma icons) |
+| Brand logo | `flutter_svg` (renders the SVG logo kit in `assets/kazi-logo-kit/svg/` crisply at any size) |
 | Device / misc | `connectivity_plus`, `package_info_plus`, `shared_preferences`, `uuid`, `collection` |
 | Lints | `flutter_lints` + project rules in `analysis_options.yaml` |
 | Testing (dev) | `flutter_test`, `integration_test`, `mocktail`, `fake_cloud_firestore`, `firebase_auth_mocks` |
