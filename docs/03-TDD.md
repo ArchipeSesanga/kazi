@@ -196,6 +196,8 @@ reports/{reporterUid}_{targetType}_{targetKey}
 verificationRequests/{uid}
 categories/{categoryId}
 config/locations
+config/limits
+config/moderation
 adminLogs/{logId}
 ```
 
@@ -246,7 +248,7 @@ Readable by anyone when `status == 'approved'`; always by the owner and moderato
 | `ratingAvg` | number | server | 0 when no reviews; 1 decimal |
 | `ratingCount` | int | server | |
 | `ratingSum` | int | server | |
-| `listingCount` | int | server | Non-deleted listings |
+| `listingCount` | int | server | Listings that hold a limit slot: **`active` + `paused` only** (drafts and listings hidden for the limit do not count). Maintained by `onListingWritten`; compared with `config/limits.maxListingsPerProvider` by the create rule |
 | `headline` | `{ categoryId, fromAmount, fromCurrency, fromPriceType }` | server | For cards: "Plombier · dès 10 $" |
 | `stats` | `{ contactsTotal, contactsByMonth: { "2026-11": n } }` | server | |
 | `searchKeywords` | string[] | server | Provider name, categories, communes |
@@ -300,6 +302,8 @@ Readable by anyone when `visible == true`; always by the owner and moderators.
 | `searchKeywords` | string[] ≤ 200 | server | See §8 |
 | `contactCount` | int | server | |
 | `publishedAt` | timestamp? | server | First time `visible` became true |
+| `countsTowardLimit` | bool | server | The listing holds one of the provider's limit slots (`status` active/paused and a slot was free). Makes slot accounting idempotent |
+| `moderationReason = 'over_limit'` | — | server | The provider was at `config/limits.maxListingsPerProvider` when the listing became active/paused: `moderation = hidden`, **not deleted, photos kept**. The app shows "Limite atteinte" with an explanation. Any later write of the listing (edit/save, resume) retries; it is restored once a slot is free |
 
 > Because `visible` is computed by a function, a newly created active listing becomes public a few seconds after creation. The UI shows "Publication en cours…" until the owner's listener sees `visible == true`.
 
@@ -406,6 +410,26 @@ Seed ids: `plomberie, electricite, coiffure_beaute, couture, menuiserie, maconne
 
 Cached on device by `CatalogController` (Firestore cache + `shared_preferences` copy for first launch offline).
 
+### 4.11a `config/limits`
+
+```json
+{ "maxListingsPerProvider": 10 }
+```
+
+**Single source of truth** for the per-provider listing limit. Free v1 value: `10`, counted over `active` + `paused` listings (`providers.listingCount`; drafts are free). Future paid tiers change this value (or add per-tier fields) without a rules or app release.
+
+| Reader | Use |
+|---|---|
+| `firestore.rules` | `listings` create: `providers.listingCount < maxListingsPerProvider` |
+| App (`ListingRepository.fetchMaxListings` / `getQuota`) | "3/10 annonces" on the dashboard; the "Nouvelle annonce" button and the form explain the limit instead of failing |
+| Cloud Functions (`getMaxListingsPerProvider`) | `onListingWritten` is the enforcement point for activation: a listing that becomes active/paused with no free slot is hidden with `moderationReason = over_limit` (never deleted). The create rule only gates *creating* a listing while the provider is at the limit |
+
+Readable by all, written by seed/admin only (`config/{docId}` rule). Missing document → fallback `10` everywhere (`Limits.maxListingsPerProvider`, `DEFAULT_MAX_LISTINGS_PER_PROVIDER`, rules). Seed: `scripts/seed-rest.ts`.
+
+### 4.11b `config/moderation`
+
+`{ autoApproveProviders: bool }`. v1: `true` (no admin panel yet), so `onProviderWritten` approves a provider as soon as it is created `pending` (or resubmitted from `rejected`). Set to `false` once admin moderation is live.
+
 ### 4.12 `adminLogs/{logId}`
 
 `{ actorUid, action, targetType, targetId, before?: map, after?: map, note?, createdAt }`. Server only; admin read.
@@ -420,7 +444,7 @@ Starter files: [`firebase/firestore.rules`](firebase/firestore.rules) and [`fire
 | `users/{uid}/favorites|blocks|devices` | owner | owner | owner | owner |
 | `providers/{uid}` | anyone if approved; owner; moderator | owner, status `pending`, server fields zeroed | owner, client fields only; `rejected → pending` resubmit | ❌ |
 | `providers/{pid}/reviews/{rid}` | anyone | rid = auth.uid ≠ pid, contact exists, valid | author (rating/text); provider (reply only) | author, moderator |
-| `listings/{id}` | anyone if `visible`; owner; moderator | owner, client fields only, `listingCount < 10`, provider not suspended | owner, client fields only | owner |
+| `listings/{id}` | anyone if `visible`; owner; moderator | owner, client fields only, `providers.listingCount < config/limits.maxListingsPerProvider` (fallback 10 if the doc is missing; the count is active + paused only), provider not suspended | owner, client fields only | owner |
 | `contacts/{id}` | client or provider of the pair; moderator | client, id = `uid_providerId` | client (`listingId`, `channel`, `lastAt`, snapshots) | ❌ |
 | `reports/{id}` | moderator | reporter, deterministic id, status `open` | ❌ | ❌ |
 | `verificationRequests/{uid}` | owner, moderator | ❌ (callable) | ❌ | ❌ |
@@ -435,6 +459,8 @@ Starter files: [`firebase/firestore.rules`](firebase/firestore.rules) and [`fire
 | `media/{uid}/**/thumbs/*` | anyone | ❌ (extension writes with Admin SDK) |
 | `private/verification/{uid}/{file}` | ❌ (admin uses signed URLs) | owner; `image/*`; < 5 MB; create only |
 
+> **Listing limit.** The limit is read from `config/limits` (§4.11a), never hard-coded in the rules. Rules tests cover: allowed at 9 of 10, denied at 10 of 10, follows a raised/lowered value, fallback to 10 when the doc is missing, clients cannot write `config/limits`.
+
 **Rules testing is mandatory**: every rule branch has an allow and a deny test in `functions/test/rules/` (see [Test plan](06-TEST-PLAN.md)).
 
 ## 6. Cloud Functions
@@ -445,8 +471,8 @@ All functions use `region: config.REGION` and are 2nd gen. Callables use `enforc
 
 | Function | Trigger | Behaviour |
 |---|---|---|
-| `onProviderWritten` | `providers/{uid}` written | (1) Recompute `searchKeywords`. (2) If `displayName`, `photoUrl`, `verified`, `ratingAvg`, `ratingCount` or `status` changed → batch-update the provider's listings (denormalised fields + recompute `visible`). (3) On create: set `users/{uid}.isProvider = true`. (4) Guard against infinite loops: compare before/after, and only write when values differ |
-| `onListingWritten` | `listings/{id}` written | (1) On create/update: fill denormalised provider + category fields, compute `searchKeywords`, `visible`, set `publishedAt` the first time it becomes visible. (2) Validate content (no phone numbers in title; profanity list) → set `moderation = hidden`, `moderationReason = 'auto_content'` if it fails. (3) Maintain `providers.listingCount`, `providers.headline`, `categories.listingCount`. (4) On delete: delete Storage objects of removed photos (also on update when photos are removed) |
+| `onProviderWritten` | `providers/{uid}` written | (1) Recompute `searchKeywords`. (2) If `displayName`, `photoUrl`, `verified`, `ratingAvg`, `ratingCount` or `status` changed → batch-update the provider's listings (denormalised fields + recompute `visible`). (3) **v1 auto-approval:** if `status == pending` on create (or `rejected → pending`) and `config/moderation.autoApproveProviders == true`, set `status = approved`, `approvedAt`. (3b) On create: set `users/{uid}.isProvider = true` *(not yet implemented)*. (4) Guard against infinite loops: compare before/after, and only write when values differ |
+| `onListingWritten` | `listings/{id}` written | (1) On create/update: fill denormalised provider + category fields, compute `searchKeywords`, `visible`, set `publishedAt` the first time it becomes visible. (2) Validate content (no phone numbers in title; profanity list) → set `moderation = hidden`, `moderationReason = 'auto_content'` if it fails. (3) Maintain `providers.listingCount` through `countsTowardLimit` (state-based, idempotent: +1 when a listing becomes active/paused with a free slot, −1 when it goes to draft or is deleted); with no free slot the listing is hidden with `over_limit` instead of counted. `providers.headline` and `categories.listingCount` are **not yet implemented**. (4) On delete: delete the listing's Storage objects (also on update when photos are removed); only paths under `media/{providerId}/listings/` are ever deleted (the `photos` array is client-written). Server writes happen only when a computed value differs, so the invocation caused by the function's own write is a no-op (logged as `wrote: false`) |
 | `onReviewWritten` | `providers/{pid}/reviews/{rid}` written | In a transaction, apply the delta to `ratingSum` / `ratingCount`; set `ratingAvg = round(sum / count, 1)` |
 | `onContactWritten` | `contacts/{id}` written | Increment `providers.stats.contactsTotal`, `stats.contactsByMonth[YYYY-MM]` and `listings.contactCount`. **Ignore** updates where `lastAt - before.lastAt < 10 min` (anti-inflation) |
 | `onReportCreated` | `reports/{id}` created | Count open reports for the target (`where targetType, targetKey, status == open`). If ≥ `AUTO_HIDE_THRESHOLD` (3): hide the listing (`moderation = hidden`, reason `auto_reports`) or, for a provider, set every listing to `hidden` (the provider stays approved until an admin decides). Write `adminLogs` |
@@ -897,11 +923,11 @@ Implement events from PRD §9 in `AnalyticsService`. Event names are lower_snake
 | `not-found` | Target missing | `notFound` |
 | `internal` | Unexpected | `unknown` |
 
-## 12. Limits (single source: `lib/core/constants/limits.dart` and `functions/src/config.ts`)
+## 12. Limits (single source: `lib/core/constants/limits.dart` and `functions/src/config.ts`; the listing limit is the exception — it lives in Firestore `config/limits`)
 
 | Limit | Value |
 |---|---|
-| Listings per provider | 10 |
+| Listings per provider (active + paused) | 10 in v1 (free). **Live value: Firestore `config/limits.maxListingsPerProvider`** (§4.11a); `Limits.maxListingsPerProvider` and `DEFAULT_MAX_LISTINGS_PER_PROVIDER` are fallbacks only |
 | Photos per listing | 6 |
 | Portfolio photos | 12 |
 | Categories per provider | 3 |

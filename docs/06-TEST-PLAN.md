@@ -42,7 +42,7 @@
 | providers create | pending with zeroed server fields | `verified: true`; `status: approved`; `ratingAvg: 5`; 4 categories |
 | providers update | bio change; rejected → pending | pending → approved; owner when suspended; set `verified` |
 | providers read | approved by guest; pending by owner | pending by another user |
-| listings create | approved provider, valid | `visible: true` included; 7 photos; `priceType: quote` with amount; provider with listingCount 10; other user's providerId |
+| listings create | approved provider, valid | `visible: true` included; 7 photos; `priceType: quote` with amount; provider with listingCount 10 (denied) vs 9 (allowed) against `config/limits`; limit raised/lowered via `config/limits`; missing `config/limits` falls back to 10; other user's providerId |
 | listings read | visible by guest; draft by owner | draft by another user; query without `visible == true` by guest |
 | reviews create | after contact | without contact; self-review; rating 6; doc id ≠ uid |
 | contacts create | `uid_pid` id | wrong id format; self-contact |
@@ -53,7 +53,7 @@
 
 ### 2.4 Functions
 - `onReviewWritten`: create (avg updates), update rating (delta), delete (count decrements), last review deleted → avg 0.
-- `onListingWritten`: visibility matrix (status × providerStatus × moderation); keywords generated; phone number in title → hidden; photo removal deletes Storage objects; listingCount maintained.
+- `onListingWritten`: over-limit → hidden `over_limit`, doc and photos kept, restored when a slot frees; only active + paused count; no write loop (self-triggered run is a no-op); visibility matrix (status × providerStatus × moderation); keywords generated; phone number in title → hidden; photo removal deletes Storage objects; listingCount maintained.
 - `onProviderWritten`: name change propagates to all listings; suspension hides all listings; no write loop (function invocation count stable).
 - `onContactWritten`: cooldown respected.
 - `onReportCreated`: third distinct report hides target; duplicate reporter can't count twice (deterministic id).

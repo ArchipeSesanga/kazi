@@ -1,10 +1,8 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
-import { initializeApp } from "firebase-admin/app";
-import { REGION, ORPHAN_MEDIA_AGE_HOURS } from "../config.js";
-
-initializeApp();
+import "../lib/firebaseAdmin.js";
+import { SCHEDULER_REGION, ORPHAN_MEDIA_AGE_HOURS } from "../config.js";
 
 const db = getFirestore();
 const bucket = getStorage().bucket();
@@ -20,7 +18,7 @@ export const cleanupOrphanMedia = onSchedule(
   {
     schedule: "0 3 * * *",
     timeZone: "Africa/Kinshasa",
-    region: REGION,
+    region: SCHEDULER_REGION,
     retryCount: 1,
   },
   async () => {

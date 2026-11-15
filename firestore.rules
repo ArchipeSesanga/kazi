@@ -198,6 +198,13 @@ service cloud.firestore {
           && data().status in ['draft', 'active', 'paused'];
       }
       function ownerProvider() { return providerDoc(uid()).data; }
+      // Single source: config/limits.maxListingsPerProvider (TDD §12). The
+      // fallback only applies while the document does not exist yet.
+      function maxListings() {
+        return exists(/databases/$(database)/documents/config/limits)
+          ? get(/databases/$(database)/documents/config/limits).data.maxListingsPerProvider
+          : 10;
+      }
 
       allow read: if resource.data.visible == true
         || (signedIn() && resource.data.providerId == uid())
@@ -207,7 +214,7 @@ service cloud.firestore {
         && data().providerId == uid()
         && onlyKeys(listingClientKeys())
         && ownerProvider().status in ['pending', 'approved', 'rejected']
-        && ownerProvider().listingCount < 10
+        && ownerProvider().listingCount < maxListings()
         && isNow('createdAt') && isNow('updatedAt')
         && validListing();
 
