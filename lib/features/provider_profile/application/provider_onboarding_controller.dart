@@ -3,15 +3,32 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../../auth/application/session_controller.dart';
+import '../../auth/domain/user_repository.dart';
 import '../domain/media_repository.dart';
 import '../domain/provider_repository.dart';
 
 class OnboardingController extends ChangeNotifier {
-  OnboardingController(this._repo, this._session, this._mediaRepo);
+  OnboardingController(
+    this._repo,
+    this._session,
+    this._mediaRepo,
+    this._users,
+  ) {
+    // The account already has a profile picture: show it in the picker and
+    // use it for the provider profile, no new upload needed.
+    photoUrl = _accountPhotoUrl;
+  }
 
   final ProviderRepository _repo;
   final SessionController _session;
   final MediaRepository _mediaRepo;
+  final UserRepository _users;
+
+  /// The signed-in account's current picture (`users/{uid}.photoUrl`).
+  String? get _accountPhotoUrl {
+    final url = _session.appUser?.photoUrl;
+    return url == null || url.isEmpty ? null : url;
+  }
 
   int step = 1;
   static const totalSteps = 3;
@@ -51,7 +68,7 @@ class OnboardingController extends ChangeNotifier {
     isResubmitting = true;
     displayName = profile.displayName;
     bio = profile.bio;
-    photoUrl = profile.photoUrl;
+    photoUrl = profile.photoUrl ?? _accountPhotoUrl;
     coverUrl = profile.coverUrl;
     whatsappNumber = profile.whatsappNumber;
     callNumber = profile.callNumber ?? '';
@@ -131,6 +148,24 @@ class OnboardingController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// The provider's picture is also the account's: a picture picked here
+  /// becomes the profile picture when the account has none, and replaces it
+  /// when the user chose a different one. Unchanged → nothing to do.
+  /// Best-effort: the provider profile is already saved at this point.
+  Future<void> _syncAccountPhoto(String uid) async {
+    final url = photoUrl;
+    final old = _accountPhotoUrl;
+    if (url == null || url == old) return;
+    try {
+      await _users.updateUser(uid, {'photoUrl': url});
+      if (old != null) {
+        await _mediaRepo.deleteAvatarByUrl(old).catchError((_) {});
+      }
+    } catch (e) {
+      debugPrint('[Onboarding] account photo sync failed: $e');
+    }
+  }
+
   Future<void> submit() async {
     final uid = _session.uid;
     if (uid == null || isSubmitting) return;
@@ -198,6 +233,7 @@ class OnboardingController extends ChangeNotifier {
       } else {
         await _repo.createProvider(profile);
       }
+      await _syncAccountPhoto(uid);
       isDone = true;
     } on AppException catch (e) {
       error = e;

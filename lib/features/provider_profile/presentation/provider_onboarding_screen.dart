@@ -18,6 +18,7 @@ import '../../../core/widgets/kazi_chip.dart';
 import '../../../core/widgets/kazi_text_field.dart';
 import '../../../core/widgets/stepper_bar.dart';
 import '../../auth/application/session_controller.dart';
+import '../../auth/domain/user_repository.dart';
 import '../../catalog/application/catalog_controller.dart';
 import '../application/provider_onboarding_controller.dart';
 import '../domain/media_repository.dart';
@@ -53,6 +54,7 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
       context.read<ProviderRepository>(),
       context.read<SessionController>(),
       context.read<MediaRepository>(),
+      context.read<UserRepository>(),
     );
     _nameCtrl = TextEditingController();
     _bioCtrl = TextEditingController();
