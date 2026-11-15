@@ -7,10 +7,27 @@ import '../core/controllers/locale_controller.dart';
 import '../core/l10n/app_localizations.dart';
 import '../core/theme/kazi_theme.dart';
 
-class KaziApp extends StatelessWidget {
+/// Lets the router handle the system back button first, then swallows it so
+/// Android back never closes the app (internal navigation only).
+class _NoExitBackButtonDispatcher extends RootBackButtonDispatcher {
+  @override
+  Future<bool> didPopRoute() async {
+    await super.didPopRoute();
+    return true;
+  }
+}
+
+class KaziApp extends StatefulWidget {
   const KaziApp({super.key, this.admin = false});
 
   final bool admin;
+
+  @override
+  State<KaziApp> createState() => _KaziAppState();
+}
+
+class _KaziAppState extends State<KaziApp> {
+  final _backDispatcher = _NoExitBackButtonDispatcher();
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +45,10 @@ class KaziApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      routerConfig: router,
+      routerDelegate: router.routerDelegate,
+      routeInformationParser: router.routeInformationParser,
+      routeInformationProvider: router.routeInformationProvider,
+      backButtonDispatcher: _backDispatcher,
     );
   }
 }
