@@ -1,0 +1,171 @@
+name: Release
+
+# Tag vX.Y.Z -> verify -> signed prod App Bundle + (manually approved) prod
+# backend deploy -> Google Play INTERNAL track (as a draft).
+# Runbook: docs/11-PROD-RUNBOOK.md. Never run against kazi-dev.
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify (tests, tag, legal pages)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag matches pubspec version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pub="$(grep -E '^version:' pubspec.yaml | sed -E 's/version:[[:space:]]*([0-9.]+).*/\1/')"
+          echo "tag=$tag pubspec=$pub"
+          test "$tag" = "$pub"
+      - name: Legal pages have no placeholders
+        run: ./scripts/check-legal-placeholders.sh
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.9
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart run tool/check_arb_parity.dart
+      - run: flutter analyze
+      - run: flutter test
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+        working-directory: functions
+      - run: npm run lint
+        working-directory: functions
+      - run: npm run build
+        working-directory: functions
+      - run: npx --yes firebase-tools@14 emulators:exec --only firestore,storage --project demo-kazi "npm --prefix functions test"
+
+  build-android:
+    name: Build signed prod App Bundle
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.9
+          channel: stable
+          cache: true
+      - name: Decode the upload keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$ANDROID_KEYSTORE_BASE64" || { echo "ANDROID_KEYSTORE_BASE64 is not set"; exit 1; }
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+      - run: flutter pub get
+      - name: Build the prod App Bundle
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/upload.jks
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: >
+          flutter build appbundle --release --flavor prod -t lib/main.dart
+          --dart-define=FLAVOR=prod
+          --build-number=${{ github.run_number }}
+      - name: Refuse anything not signed with the upload key
+        env:
+          EXPECTED_SHA256: ${{ vars.UPLOAD_CERT_SHA256 }}
+        run: |
+          aab=build/app/outputs/bundle/prodRelease/app-prod-release.aab
+          out="$(keytool -printcert -jarfile "$aab")"
+          echo "$out" | grep -E "Owner|SHA256"
+          if echo "$out" | grep -qi "Android Debug"; then echo "Debug-signed bundle"; exit 1; fi
+          if [ -n "$EXPECTED_SHA256" ]; then
+            got="$(echo "$out" | grep -m1 'SHA256:' | sed 's/.*SHA256:[[:space:]]*//' | tr -d ':' | tr 'A-F' 'a-f')"
+            want="$(echo "$EXPECTED_SHA256" | tr -d ':' | tr 'A-F' 'a-f')"
+            test "$got" = "$want" || { echo "Upload certificate mismatch"; exit 1; }
+          else
+            echo "UPLOAD_CERT_SHA256 repository variable not set: skipping the fingerprint comparison"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kazi-prod-aab
+          path: build/app/outputs/bundle/prodRelease/app-prod-release.aab
+          if-no-files-found: error
+
+  # Waits for a manual approval (GitHub environment "production" with required
+  # reviewers). Order matters: indexes -> rules -> functions -> hosting.
+  deploy-backend:
+    name: Deploy backend to kazi-prod
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: production
+    env:
+      FIREBASE_PROJECT: kazi-prod-d9c00
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+      - run: npm ci
+        working-directory: functions
+      - name: Authenticate
+        env:
+          SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROD }}
+        run: |
+          test -n "$SA" || { echo "FIREBASE_SERVICE_ACCOUNT_PROD is not set"; exit 1; }
+          echo "$SA" > "$RUNNER_TEMP/sa.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/sa.json" >> "$GITHUB_ENV"
+      - name: Indexes
+        run: npx --yes firebase-tools@14 deploy --project "$FIREBASE_PROJECT" --only firestore:indexes --non-interactive
+      - name: Rules (Firestore + Storage)
+        run: npx --yes firebase-tools@14 deploy --project "$FIREBASE_PROJECT" --only firestore:rules,storage --non-interactive
+      - name: Functions, one at a time
+        run: |
+          for fn in $(node scripts/function-names.mjs); do
+            echo "::group::deploy $fn"
+            npx --yes firebase-tools@14 deploy --project "$FIREBASE_PROJECT" --only "functions:$fn" --non-interactive
+            echo "::endgroup::"
+          done
+      - name: Hosting (legal pages)
+        run: |
+          ./scripts/check-legal-placeholders.sh
+          npx --yes firebase-tools@14 deploy --project "$FIREBASE_PROJECT" --only hosting:web --non-interactive
+
+  publish-play:
+    name: Upload to Play (internal track, draft)
+    needs: [build-android, deploy-backend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: kazi-prod-aab
+      - uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.arkepios.kazi
+          releaseFiles: app-prod-release.aab
+          track: internal
+          # A draft the owner promotes by hand after the smoke test.
+          status: draft

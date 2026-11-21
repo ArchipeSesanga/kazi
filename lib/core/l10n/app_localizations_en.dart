@@ -1138,4 +1138,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportNotVerified => 'Sign in with your phone number to report.';
+
+  @override
+  String get legalOpenHint =>
+      'This document is published on our website. It opens in your browser.';
+
+  @override
+  String get legalOpenButton => 'Open the page';
 }

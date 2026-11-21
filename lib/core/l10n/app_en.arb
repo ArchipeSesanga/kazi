@@ -415,5 +415,9 @@
   "reportNotFound": "This content no longer exists.",
   "@reportNotFound": { "description": "Report sheet" },
   "reportNotVerified": "Sign in with your phone number to report.",
-  "@reportNotVerified": { "description": "Report sheet" }
+  "@reportNotVerified": { "description": "Report sheet" },
+  "legalOpenHint": "This document is published on our website. It opens in your browser.",
+  "@legalOpenHint": { "description": "Legal page" },
+  "legalOpenButton": "Open the page",
+  "@legalOpenButton": { "description": "Legal page" }
 }

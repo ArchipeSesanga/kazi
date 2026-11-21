@@ -1154,4 +1154,11 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get reportNotVerified =>
       'Connectez-vous avec votre numéro pour signaler.';
+
+  @override
+  String get legalOpenHint =>
+      'Ce document est publié sur notre site. Il s\'ouvre dans votre navigateur.';
+
+  @override
+  String get legalOpenButton => 'Ouvrir la page';
 }

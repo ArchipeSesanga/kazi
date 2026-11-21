@@ -2179,6 +2179,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Connectez-vous avec votre numéro pour signaler.'**
   String get reportNotVerified;
+
+  /// Legal page
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce document est publié sur notre site. Il s\'ouvre dans votre navigateur.'**
+  String get legalOpenHint;
+
+  /// Legal page
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir la page'**
+  String get legalOpenButton;
 }
 
 class _AppLocalizationsDelegate

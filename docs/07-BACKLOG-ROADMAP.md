@@ -100,13 +100,13 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-093 | Notification triggers | todo |  |
 | KZ-094 | Verified badge everywhere | todo |  |
 | KZ-100 | Analytics events | todo |  |
-| KZ-101 | Legal pages | todo |  |
+| KZ-101 | Legal pages | in progress | FR/EN Terms, Privacy and `/delete-account` built under `web/public` (Hosting `web` target) and opened from the app. Remaining: fill the `{{…}}` placeholders, lawyer review, deploy to prod |
 | KZ-102 | Share landing page `/p/:id` | todo |  |
 | KZ-103 | App icon, splash, store listing assets | todo |  |
 | KZ-104 | Performance pass | todo |  |
 | KZ-105 | Accessibility pass | todo |  |
 | KZ-106 | App Check enforcement | todo |  |
-| KZ-107 | Release pipeline | todo |  |
+| KZ-107 | Release pipeline | in progress | `release.yml` + Android release signing (tested locally with a throwaway key) + prod `google-services.json` + runbook (docs/11). Not yet run on GitHub: needs the secrets, the `production` environment and a Play app |
 | KZ-108 | Closed beta | todo |  |
 
 ---

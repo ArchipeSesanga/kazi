@@ -43,7 +43,7 @@ Android emulator → host emulators: use `10.0.2.2`; physical device: use your m
 |---|---|---|
 | `ci.yml` | PR, push to `main` | Flutter: pub get → format check → analyze → `flutter test --coverage` → ARB key parity check. Functions: `npm ci` → lint → build → `firebase emulators:exec "npm test"` (rules + functions tests) |
 | `deploy-dev.yml` | push to `main` | Deploy rules, indexes, functions and the admin (hosting) to `kazi-dev`; build dev APK and upload to Firebase App Distribution (testers group) |
-| `release.yml` | tag `v*.*.*` | Deploy rules/indexes/functions/hosting to `kazi-prod`; build prod **App Bundle** signed with the upload key (from GitHub secrets); upload to Google Play **internal** track via `r0adkll/upload-google-play` or Fastlane |
+| `release.yml` | tag `v*.*.*` | Verify (tag = pubspec version, legal placeholders, all tests) → build the prod **App Bundle** signed with the upload key and refuse any other certificate → **after a manual approval** (`production` environment) deploy indexes → rules → functions (one at a time) → hosting `web` to `kazi-prod` → upload to the Play **internal** track as a draft. Step by step: [11-PROD-RUNBOOK.md](11-PROD-RUNBOOK.md) |
 
 Secrets (GitHub): `FIREBASE_SERVICE_ACCOUNT_DEV`, `FIREBASE_SERVICE_ACCOUNT_PROD` (least-privilege deploy roles), `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `ANDROID_STORE_PASSWORD`, `PLAY_SERVICE_ACCOUNT_JSON`.
 

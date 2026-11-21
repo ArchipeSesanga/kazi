@@ -2,5 +2,21 @@
   "projects": {
     "dev": "kazi-dev-8099c",
     "prod": "kazi-prod-d9c00"
+  },
+  "targets": {
+    "kazi-dev-8099c": {
+      "hosting": {
+        "web": [
+          "kazi-dev-8099c"
+        ]
+      }
+    },
+    "kazi-prod-d9c00": {
+      "hosting": {
+        "web": [
+          "kazi-prod-d9c00"
+        ]
+      }
+    }
   }
 }
