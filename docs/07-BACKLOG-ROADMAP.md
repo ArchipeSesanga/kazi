@@ -50,7 +50,7 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-022 | Profile setup | done |  |
 | KZ-023 | Session controller & guards | done | Three access levels in `guards.dart` (no session / no profile / complete profile + provider doc + admin claim), tests per level. `?from=` return path is not implemented: guests go to phone sign-in and then home |
 | KZ-024 | Account screen (S20) & settings | done |  |
-| KZ-025 | Delete account (client) | in progress | Typed word + fresh OTP re-confirmation, retry-safe; tests. Code and tests done; remaining: deploy `deleteAccount` to `kazi-dev` and a device test, then mark done |
+| KZ-025 | Delete account (client) | done | Typed word + fresh OTP re-confirmation, retry-safe; tests; confirmed on a device against kazi-dev |
 | KZ-026 | Remote Config gates | done |  |
 | KZ-027 | Connectivity | done |  |
 | KZ-030 | Seed scripts | done |  |
@@ -83,7 +83,7 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-074 | `onContactWritten` | todo |  |
 | KZ-075 | `onReportCreated` | todo |  |
 | KZ-076 | Notifications lib | todo |  |
-| KZ-077 | `deleteAccount` callable | in progress | Fresh-login check, idempotent steps, review anonymisation, Storage and Auth removal; emulator tests. Not deployed yet; mark done after the dev deploy and device test |
+| KZ-077 | `deleteAccount` callable | done | Fresh-login check, idempotent steps, review anonymisation, Storage and Auth removal; emulator tests; deployed to kazi-dev and confirmed on a device |
 | KZ-078 | Scheduled cleanups | in progress | only cleanupOrphanMedia |
 | KZ-079 | Admin callables | todo |  |
 | KZ-080 | Admin shell & auth | todo |  |
