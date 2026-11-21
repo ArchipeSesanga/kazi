@@ -1023,4 +1023,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profilePhotoRemove => 'Remove photo';
+
+  @override
+  String get authPhoneTitle => 'Your phone number';
+
+  @override
+  String get authPhoneSubtitle => 'We\'ll text you a code to sign in.';
+
+  @override
+  String get authPhoneLabel => 'Phone number';
+
+  @override
+  String get authPhoneHint => '81 234 5678';
+
+  @override
+  String get authPhoneContinue => 'Send code';
+
+  @override
+  String get authPhoneInvalid => 'Invalid phone number.';
+
+  @override
+  String get authPhoneUseEmail => 'Email sign-in (test)';
+
+  @override
+  String get authOtpTitle => 'Enter the code';
+
+  @override
+  String get authOtpCodeLabel => '6-digit code';
+
+  @override
+  String get authOtpVerify => 'Verify';
+
+  @override
+  String get authOtpResend => 'Resend code';
+
+  @override
+  String get authOtpChangeNumber => 'Change number';
+
+  @override
+  String get authOtpWrong => 'Wrong code. Check it and try again.';
+
+  @override
+  String get authOtpExpired => 'This code has expired. Request a new one.';
+
+  @override
+  String get authOtpTooMany => 'Too many attempts. Try again in a few minutes.';
+
+  @override
+  String get authPhoneNetwork => 'No connection. Check your network.';
+
+  @override
+  String get authPhoneQuota =>
+      'SMS service temporarily unavailable. Try again later.';
+
+  @override
+  String authOtpResendIn(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
+  String authOtpSubtitle(String phone) {
+    return 'Enter the 6-digit code sent to $phone.';
+  }
 }

@@ -8,6 +8,7 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/models/app_user.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
+import '../../../core/utils/phone.dart';
 import '../../../core/widgets/kazi_button.dart';
 import '../../../core/widgets/kazi_text_field.dart';
 import '../application/session_controller.dart';
@@ -43,7 +44,8 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
 
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    final uid = context.read<SessionController>().uid;
+    final session = context.read<SessionController>();
+    final uid = session.uid;
     if (uid == null) return;
 
     setState(() {
@@ -56,6 +58,8 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
     final user = AppUser(
       uid: uid,
       displayName: displayName,
+      phone: session.authUser?.phone ?? '',
+      email: session.authUser?.email,
       termsVersion: AppDefaults.termsVersion,
     );
 
@@ -76,7 +80,10 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final email = context.watch<SessionController>().authUser?.email ?? '';
+    final authUser = context.watch<SessionController>().authUser;
+    final identity = (authUser?.phone?.isNotEmpty ?? false)
+        ? PhoneUtils.formatDisplay(authUser!.phone!)
+        : (authUser?.email ?? '');
 
     return Scaffold(
       backgroundColor: KaziColors.surface,
@@ -100,10 +107,10 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                     color: KaziColors.ink,
                   ),
                 ),
-                if (email.isNotEmpty) ...[
+                if (identity.isNotEmpty) ...[
                   const SizedBox(height: KaziSpacing.xs),
                   Text(
-                    email,
+                    identity,
                     style: const TextStyle(
                       fontFamily: 'Montserrat',
                       fontSize: 14,

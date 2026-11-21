@@ -38,7 +38,7 @@ class ContactController extends ChangeNotifier {
     String? listingTitle,
   }) async {
     if (!_session.isAuthenticated) {
-      unawaited(context.push(Routes.authEmail));
+      unawaited(context.push(Routes.authPhone));
       return;
     }
 
@@ -103,7 +103,7 @@ class ContactController extends ChangeNotifier {
     String? listingId,
   }) async {
     if (!_session.isAuthenticated) {
-      unawaited(context.push(Routes.authEmail));
+      unawaited(context.push(Routes.authPhone));
       return;
     }
 

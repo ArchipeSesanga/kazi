@@ -43,7 +43,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   Future<void> _completeOnboarding() async {
     await context.read<OnboardingController>().complete();
-    if (mounted) context.go(Routes.authEmail);
+    if (mounted) context.go(Routes.authPhone);
   }
 
   @override

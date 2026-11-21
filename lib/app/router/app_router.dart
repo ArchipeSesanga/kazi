@@ -2,8 +2,11 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/config/env.dart';
 import '../../features/auth/application/session_controller.dart';
 import '../../features/auth/presentation/email_screen.dart';
+import '../../features/auth/presentation/otp_screen.dart';
+import '../../features/auth/presentation/phone_screen.dart';
 import '../../features/auth/presentation/setup_profile_screen.dart';
 import '../../features/catalog/presentation/category_screen.dart';
 import '../../features/dev/presentation/dev_components_screen.dart';
@@ -42,6 +45,8 @@ import 'routes.dart';
 const _publicRoutes = {
   Routes.splash,
   Routes.welcome,
+  Routes.authPhone,
+  Routes.authOtp,
   Routes.authEmail,
   Routes.authSetupProfile,
   Routes.myLanguage,
@@ -54,13 +59,15 @@ const _publicRoutes = {
 GoRouter createAppRouter(
   SessionController session,
   GateController gate,
-  OnboardingController onboarding,
-) =>
+  OnboardingController onboarding, {
+  bool? emailAuthEnabled,
+}) =>
     GoRouter(
   initialLocation: Routes.splash,
   refreshListenable: Listenable.merge([session, gate, onboarding]),
   redirect: (context, state) {
     final location = state.matchedLocation;
+    final emailAllowed = emailAuthEnabled ?? Env.emailAuthEnabled;
 
     // Stay on splash until both session and gate checks resolve.
     if (session.isLoading || gate.isChecking) return Routes.splash;
@@ -75,8 +82,11 @@ GoRouter createAppRouter(
 
     // If sitting on a gate screen but gates are open, redirect away.
     if (location == Routes.maintenance || location == Routes.updateRequired) {
-      return onboarding.isComplete ? Routes.authEmail : Routes.welcome;
+      return onboarding.isComplete ? Routes.authPhone : Routes.welcome;
     }
+
+    // Email/password sign-in does not exist in prod consumer builds.
+    if (location == Routes.authEmail && !emailAllowed) return Routes.authPhone;
 
     final authed = session.isAuthenticated;
     final incomplete = session.isProfileIncomplete;
@@ -86,7 +96,7 @@ GoRouter createAppRouter(
     if (location == Routes.splash) {
       if (authed) return Routes.home;
       if (incomplete) return Routes.authSetupProfile;
-      return completedOnboarding ? Routes.authEmail : Routes.welcome;
+      return completedOnboarding ? Routes.authPhone : Routes.welcome;
     }
 
     final isPublic = _publicRoutes.any((r) => location.startsWith(r));
@@ -100,7 +110,7 @@ GoRouter createAppRouter(
     }
     if (!authed && !incomplete && completedOnboarding &&
         location == Routes.welcome) {
-      return Routes.authEmail;
+      return Routes.authPhone;
     }
 
     if (!authed && !incomplete && !isPublic) return Routes.welcome;
@@ -125,6 +135,16 @@ GoRouter createAppRouter(
     ),
 
     // ── Auth flow ────────────────────────────────────────────────────────────
+    GoRoute(
+      path: Routes.authPhone,
+      builder: (context, state) => PhoneScreen(
+        emailAuthEnabled: emailAuthEnabled ?? Env.emailAuthEnabled,
+      ),
+    ),
+    GoRoute(
+      path: Routes.authOtp,
+      builder: (context, state) => const OtpScreen(),
+    ),
     GoRoute(
       path: Routes.authEmail,
       builder: (context, state) => const EmailScreen(),

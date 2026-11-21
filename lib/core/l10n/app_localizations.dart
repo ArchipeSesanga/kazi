@@ -1969,6 +1969,120 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Supprimer la photo'**
   String get profilePhotoRemove;
+
+  /// Phone sign-in title
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre numéro de téléphone'**
+  String get authPhoneTitle;
+
+  /// Phone sign-in subtitle
+  ///
+  /// In fr, this message translates to:
+  /// **'Nous vous envoyons un code par SMS pour vous connecter.'**
+  String get authPhoneSubtitle;
+
+  /// Phone field label
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de téléphone'**
+  String get authPhoneLabel;
+
+  /// Phone field hint
+  ///
+  /// In fr, this message translates to:
+  /// **'81 234 5678'**
+  String get authPhoneHint;
+
+  /// Send code button
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir le code'**
+  String get authPhoneContinue;
+
+  /// Invalid phone error
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de téléphone invalide.'**
+  String get authPhoneInvalid;
+
+  /// Dev-only link to email sign-in
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion par e-mail (test)'**
+  String get authPhoneUseEmail;
+
+  /// OTP screen title
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrez le code'**
+  String get authOtpTitle;
+
+  /// OTP field label
+  ///
+  /// In fr, this message translates to:
+  /// **'Code à 6 chiffres'**
+  String get authOtpCodeLabel;
+
+  /// OTP verify button
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider'**
+  String get authOtpVerify;
+
+  /// OTP resend button
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer le code'**
+  String get authOtpResend;
+
+  /// OTP change number
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le numéro'**
+  String get authOtpChangeNumber;
+
+  /// OTP wrong code
+  ///
+  /// In fr, this message translates to:
+  /// **'Code incorrect. Vérifiez et réessayez.'**
+  String get authOtpWrong;
+
+  /// OTP expired
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce code a expiré. Demandez-en un nouveau.'**
+  String get authOtpExpired;
+
+  /// Too many OTP attempts
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop de tentatives. Réessayez dans quelques minutes.'**
+  String get authOtpTooMany;
+
+  /// Network error on sign-in
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de connexion. Vérifiez votre réseau.'**
+  String get authPhoneNetwork;
+
+  /// SMS quota exceeded
+  ///
+  /// In fr, this message translates to:
+  /// **'Service SMS momentanément indisponible. Réessayez plus tard.'**
+  String get authPhoneQuota;
+
+  /// Resend countdown
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer dans {seconds} s'**
+  String authOtpResendIn(int seconds);
+
+  /// OTP subtitle
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrez le code à 6 chiffres envoyé au {phone}.'**
+  String authOtpSubtitle(String phone);
 }
 
 class _AppLocalizationsDelegate

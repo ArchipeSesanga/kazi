@@ -1034,4 +1034,68 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get profilePhotoRemove => 'Supprimer la photo';
+
+  @override
+  String get authPhoneTitle => 'Votre numéro de téléphone';
+
+  @override
+  String get authPhoneSubtitle =>
+      'Nous vous envoyons un code par SMS pour vous connecter.';
+
+  @override
+  String get authPhoneLabel => 'Numéro de téléphone';
+
+  @override
+  String get authPhoneHint => '81 234 5678';
+
+  @override
+  String get authPhoneContinue => 'Recevoir le code';
+
+  @override
+  String get authPhoneInvalid => 'Numéro de téléphone invalide.';
+
+  @override
+  String get authPhoneUseEmail => 'Connexion par e-mail (test)';
+
+  @override
+  String get authOtpTitle => 'Entrez le code';
+
+  @override
+  String get authOtpCodeLabel => 'Code à 6 chiffres';
+
+  @override
+  String get authOtpVerify => 'Valider';
+
+  @override
+  String get authOtpResend => 'Renvoyer le code';
+
+  @override
+  String get authOtpChangeNumber => 'Modifier le numéro';
+
+  @override
+  String get authOtpWrong => 'Code incorrect. Vérifiez et réessayez.';
+
+  @override
+  String get authOtpExpired => 'Ce code a expiré. Demandez-en un nouveau.';
+
+  @override
+  String get authOtpTooMany =>
+      'Trop de tentatives. Réessayez dans quelques minutes.';
+
+  @override
+  String get authPhoneNetwork => 'Pas de connexion. Vérifiez votre réseau.';
+
+  @override
+  String get authPhoneQuota =>
+      'Service SMS momentanément indisponible. Réessayez plus tard.';
+
+  @override
+  String authOtpResendIn(int seconds) {
+    return 'Renvoyer dans $seconds s';
+  }
+
+  @override
+  String authOtpSubtitle(String phone) {
+    return 'Entrez le code à 6 chiffres envoyé au $phone.';
+  }
 }

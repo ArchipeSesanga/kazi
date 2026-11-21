@@ -209,7 +209,8 @@ Readable by the owner and moderators only.
 |---|---|---|---|
 | `displayName` | string 2–60 | client | |
 | `photoUrl` | string? | client | Storage download URL |
-| `phone` | string | client (create only) | Empty for email/password accounts in dev; if Auth has a phone number, must match it. **Dev exception only; revisit before production.** |
+| `phone` | string (E.164) | client (create only) | **The account identity.** Must equal the verified `phone_number` in the Auth token; email/password accounts cannot create a profile. |
+| `email` | string? 3–254 | client | Optional contact email (unverified); not an identity |
 | `locale` | `fr` \| `en` | client | |
 | `city` | string | client | City id, e.g. `kinshasa` |
 | `commune` | string? | client | Commune id, e.g. `gombe` |
@@ -322,7 +323,7 @@ Readable by anyone when `visible == true`; always by the owner and moderators.
 | `firstAt` | timestamp | client (create) |
 | `lastAt` | timestamp | client |
 
-**Rules changes recorded for the current dev contract:** email/password accounts may create `users/{uid}` with `phone: ''` (dev only; revisit before production); contact documents include the `providerVerified`, `whatsappNumber`, and `callNumber` snapshot fields.
+**Rules changes recorded:** `users/{uid}` create now requires `phone == request.auth.token.phone_number` (phone OTP is the identity; the former dev exception for email/password accounts is removed); contact documents include the `providerVerified`, `whatsappNumber`, and `callNumber` snapshot fields.
 
 ### 4.8 `reports/{reporterUid}_{targetType}_{targetKey}`
 
@@ -440,7 +441,7 @@ Starter files: [`firebase/firestore.rules`](firebase/firestore.rules) and [`fire
 
 | Path | Read | Create | Update | Delete |
 |---|---|---|---|---|
-| `users/{uid}` | owner, moderator | owner (whitelisted fields, empty phone for email accounts, status `active`) | owner (whitelisted mutable fields) | ❌ (callable) |
+| `users/{uid}` | owner, moderator | owner (whitelisted fields, `phone` = verified Auth phone, status `active`) | owner (whitelisted mutable fields) | ❌ (callable) |
 | `users/{uid}/favorites|blocks|devices` | owner | owner | owner | owner |
 | `providers/{uid}` | anyone if approved; owner; moderator | owner, status `pending`, server fields zeroed | owner, client fields only; `rejected → pending` resubmit | ❌ |
 | `providers/{pid}/reviews/{rid}` | anyone | rid = auth.uid ≠ pid, contact exists, valid | author (rating/text); provider (reply only) | author, moderator |
@@ -662,6 +663,11 @@ Repositories map `DocumentSnapshot` → model by injecting the doc id (`{...doc.
 ```dart
 abstract interface class AuthRepository {
   Stream<AuthUser?> authStateChanges();
+  // Phone OTP: the production sign-in path. Provider-agnostic: Firebase SMS
+  // today, a WhatsApp OTP provider may replace the implementation later.
+  Future<void> verifyPhone(String e164, {bool resend = false}); // throws AuthFailure
+  Future<void> confirmCode(String code); // throws AuthFailure
+  // Email/password: dev/test/emulator builds and the admin app only.
   Future<bool> signInWithEmail(String email, String password);
   Future<bool> registerWithEmail(String email, String password);
   Future<void> sendPasswordResetEmail(String email);
@@ -846,7 +852,8 @@ In widgets, use `context.select` for fine-grained rebuilds, e.g. `context.select
 | `/publish` | Publier hub (tab 3): routes to sign-in / onboarding / status / new listing | signed in |
 | `/messages` | Recent contacts + "chat coming soon" (tab 4) | signed in |
 | `/me` | Profil (tab 5): account, favourites, provider space, settings | guest sees sign-in CTA |
-| `/auth/email` → `/auth/profile` | Email/password sign-in and registration (`?from=` return path) | — |
+| `/auth/phone` → `/auth/otp` → `/auth/profile` | Phone number (+243 default), one-time code, profile setup (`?from=` return path) | — |
+| `/auth/email` | Email/password sign-in; **only when `Env.emailAuthEnabled`** (dev flavor, emulators or `--dart-define=EMAIL_AUTH=true`); in a prod build the router redirects it to `/auth/phone` | — |
 | `/search?q=&cat=&commune=&verified=&sort=` | Results | guest OK |
 | `/category/:categoryId` | Results pre-filtered by category | guest OK |
 | `/p/:providerId` | Provider profile | guest OK |
@@ -883,7 +890,7 @@ Pre-filled message (FR): `Bonjour {providerName}, je vous ai trouvé sur Kazi po
 
 ### 9.8 Phone numbers
 
-- Phone numbers are provider contact details, not an authentication method. Input with a country picker defaulting to **CD (+243)**, using `phone_numbers_parser`. Accept national formats (`0812345678`, `812345678`) and normalise to E.164.
+- A user's verified phone number (E.164) is their account identity (`users/{uid}.phone`, phone OTP via `AuthRepository.verifyPhone`/`confirmCode`). Phone numbers are also provider contact details. Input with a country picker defaulting to **CD (+243)**, using `phone_numbers_parser`. Accept national formats (`0812345678`, `812345678`) and normalise to E.164.
 - Validate as a **mobile** number for the selected country.
 - Display format: `+243 81 234 5678`.
 

@@ -37,7 +37,7 @@
 
 | Path | Allow | Deny |
 |---|---|---|
-| users create | owner with matching phone or email account with empty phone | phone ≠ token phone; extra field `isProvider`; status `suspended` |
+| users create | owner whose `phone` equals the verified token phone (E.164), optional `email` | phone ≠ token phone; empty phone; email/password account with no verified phone; extra field `isProvider`; status `suspended` |
 | users update | name change | changing `phone`, `status`, `isProvider` |
 | providers create | exact `ProviderProfile.toCreateMap()` payload with pending status and zeroed server fields | extra keys; `verified: true`; `status: approved`; `ratingAvg: 5`; 4 categories |
 | providers update | bio change; rejected → pending | pending → approved; owner when suspended; set `verified` |
@@ -61,7 +61,8 @@
 - Admin callables: reject without claim, reject without App Check (in an emulator with enforcement on), log every action.
 
 ### 2.5 Controllers (examples)
-- `AuthController`: email registration, sign-in, password reset, and Firebase auth error mapping.
+- `PhoneAuthController`: E.164 normalisation (+243 default), invalid number, send failures, wrong/expired/too-many code, resend cooldown (uses a fake repository modelled on Firebase test numbers; no real SMS). Router: `/auth/email` is redirected to `/auth/phone` unless `Env.emailAuthEnabled`.
+- `AuthController`: email registration, sign-in, password reset, and Firebase auth error mapping (dev/admin only).
 - `SearchResultsController`: debounce; filter change resets pagination; client-side commune filter when keyword present; auto-fetch extra pages when the filtered result is short.
 - `ListingFormController`: validation messages; quote clears amount; upload progress; publish sets `status active`; can't add a 7th photo.
 - `ContactController`: guest → redirect to sign-in; signed in → records the contact once, then launches the URL.

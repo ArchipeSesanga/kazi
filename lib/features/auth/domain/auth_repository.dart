@@ -2,13 +2,47 @@ import 'auth_user.dart';
 
 export 'auth_user.dart';
 
+enum AuthFailureReason {
+  invalidPhone,
+  invalidCode,
+  codeExpired,
+  tooManyRequests,
+  quotaExceeded,
+  network,
+  unknown,
+}
+
+/// Provider-agnostic sign-in failure. Implementations map their own error
+/// codes to a [reason] so controllers and screens never parse provider strings.
+class AuthFailure implements Exception {
+  const AuthFailure(this.reason);
+
+  final AuthFailureReason reason;
+
+  @override
+  String toString() => 'AuthFailure($reason)';
+}
+
 abstract interface class AuthRepository {
   Stream<AuthUser?> authStateChanges();
 
-  /// Returns true if this is a new user.
+  /// Starts phone verification for [e164] and sends a one-time code.
+  ///
+  /// Completes once the code has been sent. Set [resend] to request a new
+  /// code for the same number. On some devices the provider verifies
+  /// automatically; the user then appears on [authStateChanges] without
+  /// [confirmCode] being called. Throws [AuthFailure].
+  Future<void> verifyPhone(String e164, {bool resend = false});
+
+  /// Confirms the code for the number passed to [verifyPhone] and signs in.
+  /// Throws [AuthFailure].
+  Future<void> confirmCode(String code);
+
+  /// Email/password sign-in: dev/test/emulator builds and the admin app only
+  /// (see `Env.emailAuthEnabled`). Returns true if this is a new user.
   Future<bool> signInWithEmail(String email, String password);
 
-  /// Creates a new account; always returns true.
+  /// Creates a new email account; always returns true. Dev/test/admin only.
   Future<bool> registerWithEmail(String email, String password);
   Future<void> sendPasswordResetEmail(String email);
   Future<void> signOut();

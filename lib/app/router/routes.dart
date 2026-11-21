@@ -7,6 +7,9 @@ abstract final class Routes {
   static const messages = '/messages';
   static const profile = '/me';
 
+  static const authPhone = '/auth/phone';
+  static const authOtp = '/auth/otp';
+  /// Dev/test/emulator and admin only (see Env.emailAuthEnabled).
   static const authEmail = '/auth/email';
   static const authSetupProfile = '/auth/profile';
 

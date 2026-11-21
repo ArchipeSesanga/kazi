@@ -35,18 +35,18 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 |---|---|---|---|
 | KZ-001 | Project scaffolding | done |  |
 | KZ-002 | Firebase wiring | done |  |
-| KZ-003 | Functions scaffolding | in progress | no emulator CI |
-| KZ-004 | Rules & indexes baseline | done |  |
+| KZ-003 | Functions scaffolding | in progress | Verified in code: TS project, config.ts, build and vitest work. `npm run lint` fails (ESLint 9 with no `eslint.config.js`), there is no emulator test script, and `firebase.json` storage emulator config is invalid (`emulators:exec` with storage fails: missing `target`) |
+| KZ-004 | Rules & indexes baseline | in progress | Rules and indexes exist. Rules tests cover users, listing limit, profile photo and provider create only; reviews, contacts, reports, verification and storage cases (Test plan §2.3) are missing |
 | KZ-005 | CI pipeline | in progress | PR workflow: analyze, test, functions tests. Format check, ARB parity and ESLint not yet wired |
 | KZ-006 | Theme & tokens | done |  |
-| KZ-007 | Design-system widgets (part 1) | done |  |
-| KZ-008 | Design-system widgets (part 2) | done |  |
+| KZ-007 | Design-system widgets (part 1) | in progress | Widgets and `/dev/components` exist except `KaziTextArea`; no per-variant widget tests; the catalogue route is not restricted to dev |
+| KZ-008 | Design-system widgets (part 2) | in progress | All 12 widgets exist; no widget tests and no Figma screenshot comparison |
 | KZ-009 | Core utils | done |  |
 | KZ-010 | Models | done |  |
 | KZ-011 | Router & shell | done |  |
-| KZ-012 | Localisation baseline | in progress | no ARB parity CI script |
+| KZ-012 | Localisation baseline | in progress | ARB files have identical keys today (verified); no parity check script in CI |
 | KZ-020 | Welcome & language | done |  |
-| KZ-021 | Email/password sign-in and registration | in progress | email/password added; phone OTP path to be confirmed |
+| KZ-021 | Email/password sign-in and registration | in progress | Phone OTP built (screens, controller, rules, tests); needs Firebase console setup and a real-device test before done |
 | KZ-022 | Profile setup | done |  |
 | KZ-023 | Session controller & guards | in progress | guards.dart still a stub |
 | KZ-024 | Account screen (S20) & settings | done |  |
@@ -155,7 +155,7 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 - AC: first launch shows the language picker; second launch skips it; changing language updates the UI immediately.
 
 **KZ-021 Email/password sign-in and registration.** `AuthRepository`, `AuthController`, S03 with email/password validation, forgot-password flow, and sign-in/register switch.
-- AC: onboarding leads to email/password auth; registration creates an account and collects a profile; existing accounts sign in; password reset sends an email; no phone OTP sign-in remains.
+- AC: onboarding leads to **phone OTP** sign-in (+243 default, 6-digit code, resend timer, clear errors for wrong/expired/too many attempts); the verified phone (E.164) is the identity and `users/{uid}.phone` must match it; email is optional. Email/password exists only for the admin app and dev/test/emulator builds (`Env.emailAuthEnabled`); a prod consumer build hides it and the router blocks `/auth/email`. `AuthRepository` stays provider-agnostic. Tests use Firebase test phone numbers (no real SMS in CI).
 
 **KZ-022 Profile setup.** S05; creates `users/{uid}` per rules; optional avatar upload.
 - AC: user doc matches TDD §4.3; rules accept it; returning users skip this screen.
