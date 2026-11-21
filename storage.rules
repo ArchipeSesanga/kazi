@@ -3,11 +3,13 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Verified phone number (the account identity) or the admin claim; an
+    // Verified phone number (the account identity) or a staff claim; an
     // email-only account is treated like a guest (mirrors firestore.rules).
     function signedIn() {
       return request.auth != null
-        && ('phone_number' in request.auth.token || request.auth.token.get('admin', false) == true);
+        && ('phone_number' in request.auth.token
+            || request.auth.token.get('admin', false) == true
+            || request.auth.token.get('moderator', false) == true);
     }
     function isOwner(userId) { return signedIn() && request.auth.uid == userId; }
     function isImageUnder(mb) {
@@ -16,8 +18,10 @@ service firebase.storage {
         && request.resource.size < mb * 1024 * 1024;
     }
 
+    // Sign-in only. Download URLs carry their own token, so images still load
+    // in the app; this limits SDK reads and listing.
     match /media/{userId}/{allPaths=**} {
-      allow read: if true;
+      allow read: if signedIn();
     }
 
     match /media/{userId}/{kind}/{fileName} {

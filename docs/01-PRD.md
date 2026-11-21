@@ -74,7 +74,7 @@ Priority: **P0** = launch blocker, **P1** = should ship in v1, **P2** = nice to 
 | ID | Feature | Priority |
 |---|---|---|
 | F-01 | Splash, language picker (FR/EN) on first launch, 3-slide intro | P1 |
-| F-02 | **Browse without an account** (home, search, profiles visible to guests) | P0 |
+| F-02 | **Browse without an account** (home, search, profiles visible to guests). *Beta decision: the app is sign-in only (phone OTP); guest browsing is deferred until after the beta. Rules deny all reads to guests.* | P0 (deferred for beta) |
 | F-03 | Sign in and register with **email + password** (Firebase Auth), with password reset | P0 |
 | F-04 | Basic profile: display name, optional photo, preferred language, home city/commune | P0 |
 | F-05 | Sign out, **delete account** (in app; required by Google Play) | P0 |

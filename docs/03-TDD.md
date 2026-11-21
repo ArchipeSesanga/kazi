@@ -227,7 +227,7 @@ Readable by the owner and moderators only.
 
 ### 4.4 `providers/{uid}` — public provider profile
 
-Readable by anyone when `status == 'approved'`; always by the owner and moderators.
+Readable by any signed-in user when `status == 'approved'`; always by the owner and moderators.
 
 | Field | Type | Writer | Notes |
 |---|---|---|---|
@@ -276,7 +276,7 @@ Create is allowed only if `contacts/{reviewerUid}_{pid}` exists and the reviewer
 
 ### 4.6 `listings/{listingId}`
 
-Readable by anyone when `visible == true`; always by the owner and moderators.
+Readable by any signed-in user when `visible == true`; always by the owner and moderators.
 
 | Field | Type | Writer | Notes |
 |---|---|---|---|
@@ -439,25 +439,27 @@ Readable by all, written by seed/admin only (`config/{docId}` rule). Missing doc
 
 Starter files: [`firebase/firestore.rules`](firebase/firestore.rules) and [`firebase/storage.rules`](firebase/storage.rules). Summary:
 
+**Access model (beta: sign-in only).** "Signed in" means a verified phone number (`phone_number` in the token) **or** a staff claim (`admin` / `moderator`). Guests and email-only accounts can read and write nothing: there are no public reads. `moderator` may perform moderation actions only (read queues, resolve reports, remove abusive reviews, decide verification, set provider status); `admin` adds roles, categories and the audit log (admin-only: `admin_upsertCategory`, `admin_setRole`, `adminLogs`). Callables use the same definitions (`functions/src/lib/caller.ts`). Where the table below says "anyone", read "any signed-in user".
+
 | Path | Read | Create | Update | Delete |
 |---|---|---|---|---|
 | `users/{uid}` | owner, moderator | owner (whitelisted fields, `phone` = verified Auth phone, status `active`) | owner (whitelisted mutable fields) | ❌ (callable) |
 | `users/{uid}/favorites|blocks|devices` | owner | owner | owner | owner |
-| `providers/{uid}` | anyone if approved; owner; moderator | owner, status `pending`, server fields zeroed | owner, client fields only; `rejected → pending` resubmit | ❌ |
-| `providers/{pid}/reviews/{rid}` | anyone | rid = auth.uid ≠ pid, contact exists, valid | author (rating/text); provider (reply only) | author, moderator |
-| `listings/{id}` | anyone if `visible`; owner; moderator | owner, client fields only, `providers.listingCount < config/limits.maxListingsPerProvider` (fallback 10 if the doc is missing; the count is active + paused only), provider not suspended | owner, client fields only | owner |
+| `providers/{uid}` | signed-in if approved; owner; moderator | owner, status `pending`, server fields zeroed | owner, client fields only; `rejected → pending` resubmit | ❌ |
+| `providers/{pid}/reviews/{rid}` | signed-in | rid = auth.uid ≠ pid, contact exists, valid | author (rating/text); provider (reply only) | author, moderator |
+| `listings/{id}` | signed-in if `visible`; owner; moderator | owner, client fields only, `providers.listingCount < config/limits.maxListingsPerProvider` (fallback 10 if the doc is missing; the count is active + paused only), provider not suspended | owner, client fields only | owner |
 | `contacts/{id}` | client or provider of the pair; moderator | client, id = `uid_providerId` | client (`listingId`, `channel`, `lastAt`, snapshots) | ❌ |
 | `reports/{id}` | moderator | reporter, deterministic id, status `open` | ❌ | ❌ |
 | `verificationRequests/{uid}` | owner, moderator | ❌ (callable) | ❌ | ❌ |
-| `categories`, `config` | anyone | ❌ | ❌ | ❌ |
+| `categories`, `config` | signed-in | ❌ | ❌ | ❌ |
 | `adminLogs` | admin | ❌ | ❌ | ❌ |
 
 **Storage**
 
 | Path | Read | Write |
 |---|---|---|
-| `media/{uid}/{kind}/{...}` where kind ∈ `avatar, cover, portfolio, listings` | anyone | owner; `image/*`; < 2 MB; delete by owner |
-| `media/{uid}/**/thumbs/*` | anyone | ❌ (extension writes with Admin SDK) |
+| `media/{uid}/{kind}/{...}` where kind ∈ `avatar, cover, portfolio, listings` | signed-in | owner; `image/*`; < 2 MB; delete by owner |
+| `media/{uid}/**/thumbs/*` | signed-in | ❌ (extension writes with Admin SDK) |
 | `private/verification/{uid}/{file}` | ❌ (admin uses signed URLs) | owner; `image/*`; < 5 MB; create only |
 
 > **Listing limit.** The limit is read from `config/limits` (§4.11a), never hard-coded in the rules. Rules tests cover: allowed at 9 of 10, denied at 10 of 10, follows a raised/lowered value, fallback to 10 when the doc is missing, clients cannot write `config/limits`.
@@ -847,18 +849,18 @@ In widgets, use `context.select` for fine-grained rebuilds, e.g. `context.select
 |---|---|---|
 | `/splash` | Splash / bootstrap gate | — |
 | `/welcome` | Language picker + intro slides (first launch) | — |
-| `/home` | Accueil (tab 1) | guest OK |
-| `/explore` | Explorer: categories + search (tab 2) | guest OK |
+| `/home` | Accueil (tab 1) | signed in |
+| `/explore` | Explorer: categories + search (tab 2) | signed in |
 | `/publish` | Publier hub (tab 3): routes to sign-in / onboarding / status / new listing | signed in |
 | `/messages` | Recent contacts + "chat coming soon" (tab 4) | signed in |
-| `/me` | Profil (tab 5): account, favourites, provider space, settings | guest sees sign-in CTA |
+| `/me` | Profil (tab 5): account, favourites, provider space, settings | signed in |
 | `/auth/phone` → `/auth/otp` → `/auth/profile` | Phone number (+243 default), one-time code, profile setup (`?from=` return path) | — |
 | `/auth/email` | Email/password sign-in; **only when `Env.emailAuthEnabled`** (dev flavor, emulators or `--dart-define=EMAIL_AUTH=true`); in a prod build the router redirects it to `/auth/phone` | — |
-| `/search?q=&cat=&commune=&verified=&sort=` | Results | guest OK |
-| `/category/:categoryId` | Results pre-filtered by category | guest OK |
-| `/p/:providerId` | Provider profile | guest OK |
-| `/l/:listingId` | Listing detail (photos, price, description, provider card, CTAs) | guest OK |
-| `/p/:providerId/reviews` | All reviews | guest OK |
+| `/search?q=&cat=&commune=&verified=&sort=` | Results | signed in |
+| `/category/:categoryId` | Results pre-filtered by category | signed in |
+| `/p/:providerId` | Provider profile | signed in |
+| `/l/:listingId` | Listing detail (photos, price, description, provider card, CTAs) | signed in |
+| `/p/:providerId/reviews` | All reviews | signed in |
 | `/p/:providerId/review` | Write/edit review | signed in + contacted |
 | `/provider/onboarding` | Become a provider (multi-step) | signed in |
 | `/provider/dashboard` | Provider space | provider |
@@ -869,15 +871,15 @@ In widgets, use `context.select` for fine-grained rebuilds, e.g. `context.select
 | `/legal/terms`, `/legal/privacy`, `/help` | Static pages (bundled Markdown) | — |
 | `/update-required`, `/maintenance` | Remote Config gates | — |
 
-Guards (in `guards.dart`): `requireSignedIn`, `requireProfile`, `requireProvider`, `requireApprovedProvider`. Redirects preserve the original location in `?from=`.
+Guards (in `guards.dart`, one `resolveRedirect`): level 1 no session → only `/welcome` and `/auth/phone` (+ OTP); level 2 session without `users/{uid}` → only `/auth/profile`; level 3 complete profile → the app, with provider-space routes needing `providers/{uid}` and `/admin` routes needing a staff claim (`/admin/categories|roles|logs` admin only). The `?from=` return path is not used in the sign-in-only beta.
 
-**Admin web routes:** `/login`, `/providers?status=pending`, `/providers/:id`, `/verifications`, `/reports`, `/categories`, `/audit`. Every route requires the `admin` or `moderator` claim (`getIdTokenResult(true)`).
+**Admin web routes:** `/login`, `/providers?status=pending`, `/providers/:id`, `/verifications`, `/reports`, `/categories`, `/audit`. Every route requires the `admin` or `moderator` claim (`getIdTokenResult(true)`); `/categories` and `/audit` (and role management) are admin-only, moderators get the moderation queues only.
 
 ### 9.7 Contact action (WhatsApp / call)
 
 ```
 onTapContact(channel):
-  if guest → push /auth/email?from=current, then resume
+  if no session → /auth/phone (beta: the whole app is sign-in only)
   if provider is self → disabled
   record contact (fire-and-forget, offline-queued)
   analytics.log('contact_tap', {channel, provider_id, listing_id, category_id})

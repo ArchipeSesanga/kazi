@@ -5,6 +5,7 @@ class AuthUser {
     this.phone,
     this.email,
     this.isAdmin = false,
+    this.isModerator = false,
   });
 
   final String uid;
@@ -15,4 +16,7 @@ class AuthUser {
 
   /// The `admin` custom claim on the ID token.
   final bool isAdmin;
+
+  /// The `moderator` custom claim (moderation actions only).
+  final bool isModerator;
 }

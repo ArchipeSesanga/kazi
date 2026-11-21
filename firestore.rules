@@ -8,14 +8,19 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ---------- helpers ----------
-    // "Signed in" means a verified phone number (the account identity) or the
-    // admin claim. An email/password account without either is treated like a guest.
-    function signedIn() {
+    // "Signed in" means a verified phone number (the account identity) or a
+    // staff claim (admin / moderator). An email/password account with none of
+    // these is treated like a guest, and guests can read nothing (sign-in only).
+    function isStaffClaim() {
       return request.auth != null
-        && ('phone_number' in request.auth.token || request.auth.token.get('admin', false) == true);
+        && (request.auth.token.get('admin', false) == true || request.auth.token.get('moderator', false) == true);
+    }
+    function signedIn() {
+      return request.auth != null && ('phone_number' in request.auth.token || isStaffClaim());
     }
     function uid() { return request.auth.uid; }
     function isAdmin() { return signedIn() && request.auth.token.get('admin', false) == true; }
+    // Moderators and admins: moderation actions. Admin-only: roles, categories, audit log.
     function isModerator() { return signedIn() && (request.auth.token.get('moderator', false) == true || isAdmin()); }
 
     function data() { return request.resource.data; }
@@ -122,7 +127,7 @@ service cloud.firestore {
           && (!('portfolio' in data()) || (data().portfolio is list && data().portfolio.size() <= 12));
       }
 
-      allow read: if isOwner() || isModerator() || resource.data.status == 'approved';
+      allow read: if signedIn() && (isOwner() || isModerator() || resource.data.status == 'approved');
 
       allow create: if isOwner()
         && userActive()
@@ -156,7 +161,7 @@ service cloud.firestore {
             && optStr('authorPhotoUrl', 10, 2048);
         }
 
-        allow read: if true;
+        allow read: if signedIn();
 
         allow create: if isAuthor()
           && reviewerId != providerId
@@ -212,9 +217,8 @@ service cloud.firestore {
           : 10;
       }
 
-      allow read: if resource.data.visible == true
-        || (signedIn() && resource.data.providerId == uid())
-        || isModerator();
+      allow read: if signedIn()
+        && (resource.data.visible == true || resource.data.providerId == uid() || isModerator());
 
       allow create: if signedIn()
         && data().providerId == uid()
@@ -291,13 +295,13 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // ---------- public reference data ----------
+    // ---------- reference data (sign-in only) ----------
     match /categories/{categoryId} {
-      allow read: if true;
+      allow read: if signedIn();
       allow write: if false;
     }
     match /config/{docId} {
-      allow read: if true;
+      allow read: if signedIn();
       allow write: if false;
     }
 
@@ -307,9 +311,9 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Collection-group read for reviews (provider profile pages, account deletion uses Admin SDK)
+    // Collection-group read for reviews (signed-in only) (provider profile pages, account deletion uses Admin SDK)
     match /{path=**}/reviews/{reviewerId} {
-      allow read: if true;
+      allow read: if signedIn();
     }
   }
 }

@@ -20,9 +20,11 @@ class FirebaseAuthRepository implements AuthRepository {
     return _auth.authStateChanges().asyncMap((user) async {
       if (user == null) return null;
       var isAdmin = false;
+      var isModerator = false;
       try {
         final token = await user.getIdTokenResult();
         isAdmin = token.claims?['admin'] == true;
+        isModerator = token.claims?['moderator'] == true;
       } catch (_) {
         // Offline: treat as non-admin; claims are re-read on the next sign-in.
       }
@@ -31,6 +33,7 @@ class FirebaseAuthRepository implements AuthRepository {
         phone: user.phoneNumber,
         email: user.email,
         isAdmin: isAdmin,
+        isModerator: isModerator,
       );
     });
   }

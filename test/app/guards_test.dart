@@ -79,6 +79,7 @@ Future<_Env> _env({
   bool signedIn = false,
   bool withProfile = false,
   bool admin = false,
+  bool moderator = false,
   bool providerDoc = false,
   bool onboarded = true,
   _Gate? gate,
@@ -90,7 +91,12 @@ Future<_Env> _env({
     _Users(withProfile ? _profile : null),
     FakeAuthRepository(
       signedIn: signedIn
-          ? AuthUser(uid: 'u1', phone: '+243810000001', isAdmin: admin)
+          ? AuthUser(
+              uid: 'u1',
+              phone: '+243810000001',
+              isAdmin: admin,
+              isModerator: moderator,
+            )
           : null,
     ),
     providerExists: (uid) async {
@@ -206,16 +212,39 @@ void main() {
       expect(no.providerLookups, hasLength(2));
     });
 
-    test('admin routes need the admin claim', () async {
+    test('admin routes need a staff claim', () async {
       final user = await _env(signedIn: true, withProfile: true);
       expect(await user.settle('/admin'), Routes.home);
       expect(await user.settle('/admin/providers'), Routes.home);
+      expect(await user.settle('/admin/categories'), Routes.home);
 
       final admin =
           await _env(signedIn: true, withProfile: true, admin: true);
       expect(await admin.settle('/admin/providers'), '/admin/providers');
       // Lookalike paths are not admin routes.
       expect(await user.settle('/administrators'), '/administrators');
+    });
+
+    test('moderators get moderation routes, not admin-only ones', () async {
+      final mod =
+          await _env(signedIn: true, withProfile: true, moderator: true);
+      for (final r in ['/admin', '/admin/providers', '/admin/reports']) {
+        expect(await mod.settle(r), r, reason: r);
+      }
+      for (final r in [
+        '/admin/categories',
+        '/admin/categories/new',
+        '/admin/roles',
+        '/admin/logs',
+      ]) {
+        expect(await mod.settle(r), Routes.home, reason: r);
+      }
+
+      final admin =
+          await _env(signedIn: true, withProfile: true, admin: true);
+      for (final r in ['/admin/categories', '/admin/roles', '/admin/logs']) {
+        expect(await admin.settle(r), r, reason: r);
+      }
     });
   });
 
@@ -263,6 +292,8 @@ void main() {
     expect(isProviderRoute('/provider/listings/new'), isTrue);
     expect(isAdminRoute('/admin'), isTrue);
     expect(isAdminRoute('/administrators'), isFalse);
+    expect(isAdminOnlyRoute('/admin/roles'), isTrue);
+    expect(isAdminOnlyRoute('/admin/reports'), isFalse);
   });
 }
 

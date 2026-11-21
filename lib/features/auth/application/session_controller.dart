@@ -68,6 +68,10 @@ class SessionController extends ChangeNotifier {
   bool get hasSession =>
       _authUser != null && _status != SessionStatus.unauthenticated;
   bool get isAdmin => _authUser?.isAdmin ?? false;
+  bool get isModerator => _authUser?.isModerator ?? false;
+
+  /// Admin or moderator.
+  bool get isStaff => isAdmin || isModerator;
 
   /// Whether the signed-in user has a `providers/{uid}` document.
   ///

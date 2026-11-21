@@ -65,9 +65,19 @@ describe('media — avatar, cover, portfolio', () => {
     await assertFails(upload(ownerStorage(), `media/${owner}/listings/l1/thumbs/a.jpg`));
   });
 
-  it('allows public reads', async () => {
-    await assertSucceeds(upload(ownerStorage(), `media/${owner}/avatar/read.jpg`));
-    await assertSucceeds(getBytes(ref(testEnv.unauthenticatedContext().storage(), `media/${owner}/avatar/read.jpg`)));
+  it('reads are sign-in only: verified phone yes, guest and email-only no', async () => {
+    await upload(ownerStorage(), `media/${owner}/avatar/read.jpg`);
+    const path = `media/${owner}/avatar/read.jpg`;
+    await assertSucceeds(getBytes(ref(storageOf(other), path))); // another verified-phone user
+    await assertFails(getBytes(ref(testEnv.unauthenticatedContext().storage(), path)));
+    await assertFails(getBytes(ref(storageOf('e3', { email: 'dev@example.com' }), path)));
+  });
+
+  it('a moderator can read and an admin can read (staff claims)', async () => {
+    await upload(ownerStorage(), `media/${owner}/avatar/staff.jpg`);
+    const path = `media/${owner}/avatar/staff.jpg`;
+    await assertSucceeds(getBytes(ref(storageOf('m1', { moderator: true }), path)));
+    await assertSucceeds(getBytes(ref(storageOf('a1', { admin: true }), path)));
   });
 
   it('only the owner can delete', async () => {

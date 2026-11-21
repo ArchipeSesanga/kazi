@@ -10,11 +10,20 @@ import 'routes.dart';
 /// 1. No session: only the welcome flow and phone sign-in ([_guestRoutes]).
 /// 2. Session but no `users/{uid}` profile: only profile setup.
 /// 3. Complete profile: the app. Provider-space routes additionally need
-///    `providers/{uid}`; `/admin` routes need the admin claim.
+///    `providers/{uid}`; `/admin` routes need a staff claim (admin or
+///    moderator), and `/admin/categories|roles|logs` need the admin claim.
 ///
 /// Every state redirects to exactly one fixed destination, and that
 /// destination is itself allowed in that state, so redirects cannot loop.
 const _adminPrefix = '/admin';
+
+/// Under `/admin`, these are for admins only; everything else under `/admin`
+/// (providers, reports, verification) is open to moderators too.
+const _adminOnlyPrefixes = [
+  '/admin/categories',
+  '/admin/roles',
+  '/admin/logs',
+];
 
 /// Routes a signed-out user may open, before the onboarding is completed.
 const _preOnboardingRoutes = {
@@ -45,6 +54,10 @@ bool isProviderRoute(String location) =>
 
 bool isAdminRoute(String location) =>
     location == _adminPrefix || location.startsWith('$_adminPrefix/');
+
+bool isAdminOnlyRoute(String location) => _adminOnlyPrefixes.any(
+      (p) => location == p || location.startsWith('$p/'),
+    );
 
 bool _isAuthRoute(String location) => location.startsWith('/auth/');
 
@@ -98,7 +111,9 @@ FutureOr<String?> resolveRedirect({
     return Routes.home;
   }
   if (isAdminRoute(location)) {
-    return session.isAdmin ? null : Routes.home;
+    final allowed =
+        isAdminOnlyRoute(location) ? session.isAdmin : session.isStaff;
+    return allowed ? null : Routes.home;
   }
   if (isProviderRoute(location)) {
     return session.hasProviderProfile().then(
