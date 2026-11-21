@@ -146,57 +146,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authProfileSave => 'Enregistrer mon profil';
 
   @override
-  String get authEmailTitle => 'Connexion par e-mail';
-
-  @override
-  String get authEmailSubtitle => 'Entrez votre e-mail et mot de passe.';
-
-  @override
-  String get authEmailLabel => 'Adresse e-mail';
-
-  @override
-  String get authEmailHint => 'exemple@email.com';
-
-  @override
-  String get authPasswordLabel => 'Mot de passe';
-
-  @override
-  String get authPasswordHint => 'Au moins 6 caractères';
-
-  @override
-  String get authEmailSignIn => 'Se connecter';
-
-  @override
-  String get authEmailRegister => 'Créer un compte';
-
-  @override
-  String get authEmailCreateAccountPrompt => 'Pas encore de compte ?';
-
-  @override
-  String get authEmailHasAccountPrompt => 'Déjà un compte ?';
-
-  @override
-  String get authEmailForgotPassword => 'Mot de passe oublié ?';
-
-  @override
-  String get authEmailResetSent => 'E-mail de réinitialisation envoyé.';
-
-  @override
-  String get authEmailInUse => 'Cet e-mail est déjà utilisé.';
-
-  @override
-  String get authWeakPassword => 'Mot de passe trop court (6 caractères min).';
-
-  @override
-  String get authUserNotFound => 'Aucun compte trouvé pour cet e-mail.';
-
-  @override
-  String get authWrongPassword => 'E-mail ou mot de passe incorrect.';
-
-  @override
-  String get authEmailInvalid => 'Adresse e-mail invalide.';
-
-  @override
   String get homeSearchHint => 'Rechercher un service…';
 
   @override
@@ -1053,9 +1002,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get authPhoneInvalid => 'Numéro de téléphone invalide.';
-
-  @override
-  String get authPhoneUseEmail => 'Connexion par e-mail (test)';
 
   @override
   String get authOtpTitle => 'Entrez le code';

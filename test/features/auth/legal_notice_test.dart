@@ -75,7 +75,7 @@ void main() {
           (tester) async {
         final launcher = _Launcher();
         await tester.pumpWidget(_app(
-          const PhoneScreen(emailAuthEnabled: false),
+          const PhoneScreen(),
           lang: entry.key,
           providers: [
             Provider<LauncherService>.value(value: launcher),

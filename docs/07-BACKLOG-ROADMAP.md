@@ -46,7 +46,7 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-011 | Router & shell | done |  |
 | KZ-012 | Localisation baseline | in progress | ARB parity check (`tool/check_arb_parity.dart`) runs in CI; keys and placeholders match. Remaining: nothing known; mark done after the first green CI run |
 | KZ-020 | Welcome & language | done |  |
-| KZ-021 | Phone OTP sign-in (email/password for staff and dev) | done | Phone OTP, E.164 identity, email gated by `Env.emailAuthEnabled`, staff claims bypass phone/profile (rules, guards, twin tests); confirmed on a device against kazi-dev. Console setup for prod still to do (see runbook) |
+| KZ-021 | Phone OTP sign-in | done | Phone OTP, E.164 identity; the Flutter app has no email sign-in (staff use the React admin app); confirmed on a device against kazi-dev. Console setup for prod still to do (see runbook) |
 | KZ-022 | Profile setup | done |  |
 | KZ-023 | Session controller & guards | done | Three access levels in `guards.dart` (no session / no profile / complete profile + provider doc + admin claim), tests per level. `?from=` return path is not implemented: guests go to phone sign-in and then home |
 | KZ-024 | Account screen (S20) & settings | done |  |
@@ -155,8 +155,8 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 **KZ-020 Welcome & language.** S02 screens; locale persisted locally.
 - AC: first launch shows the language picker; second launch skips it; changing language updates the UI immediately.
 
-**KZ-021 Phone OTP sign-in (email/password for staff and dev).** `AuthRepository` (`verifyPhone`/`confirmCode`), `PhoneAuthController`, phone and OTP screens; `AuthController` and the email screen stay for staff and dev/test builds.
-- AC: onboarding leads to **phone OTP** sign-in (+243 default, 6-digit code, resend timer, clear errors for wrong/expired/too many attempts); the verified phone (E.164) is the identity and `users/{uid}.phone` must match it; email is optional. Email/password exists only for the admin app and dev/test/emulator builds (`Env.emailAuthEnabled`); a prod consumer build hides it and the router blocks `/auth/email`. `AuthRepository` stays provider-agnostic. Tests use Firebase test phone numbers (no real SMS in CI).
+**KZ-021 Phone OTP sign-in.** `AuthRepository` (`verifyPhone`/`confirmCode`), `PhoneAuthController`, phone and OTP screens. No email sign-in in the Flutter app.
+- AC: onboarding leads to **phone OTP** sign-in (+243 default, 6-digit code, resend timer, clear errors for wrong/expired/too many attempts); the verified phone (E.164) is the identity and `users/{uid}.phone` must match it; email is optional. There is no email/password sign-in in the Flutter app; staff sign in to the React admin app. `AuthRepository` stays provider-agnostic. Tests use Firebase test phone numbers (no real SMS in CI).
 
 **KZ-022 Profile setup.** S05; creates `users/{uid}` per rules; optional avatar upload.
 - AC: user doc matches TDD §4.3; rules accept it; returning users skip this screen.

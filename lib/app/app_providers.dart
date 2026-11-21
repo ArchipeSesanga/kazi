@@ -15,7 +15,6 @@ import '../core/services/connectivity_controller.dart';
 import '../core/services/firebase_analytics_service.dart';
 import '../core/services/launcher_service.dart';
 import '../core/services/url_launcher_service.dart';
-import '../features/auth/application/auth_controller.dart';
 import '../features/auth/application/phone_auth_controller.dart';
 import '../features/auth/application/session_controller.dart';
 import '../features/auth/data/firebase_auth_repository.dart';
@@ -133,10 +132,6 @@ class AppProviders extends StatelessWidget {
         ChangeNotifierProxyProvider<SharedPreferences, ExploreController>(
           create: (ctx) => ExploreController(ctx.read<SharedPreferences>()),
           update: (_, prefs, prev) => prev ?? ExploreController(prefs),
-        ),
-        ChangeNotifierProxyProvider<AuthRepository, AuthController>(
-          create: (ctx) => AuthController(ctx.read<AuthRepository>()),
-          update: (_, repo, prev) => prev ?? AuthController(repo),
         ),
         ChangeNotifierProxyProvider<AuthRepository, PhoneAuthController>(
           create: (ctx) => PhoneAuthController(ctx.read<AuthRepository>()),

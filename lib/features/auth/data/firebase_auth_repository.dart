@@ -106,27 +106,5 @@ class FirebaseAuthRepository implements AuthRepository {
       };
 
   @override
-  Future<bool> signInWithEmail(String email, String password) async {
-    final result = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    return result.additionalUserInfo?.isNewUser ?? false;
-  }
-
-  @override
-  Future<bool> registerWithEmail(String email, String password) async {
-    final result = await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    return result.additionalUserInfo?.isNewUser ?? true;
-  }
-
-  @override
-  Future<void> sendPasswordResetEmail(String email) =>
-      _auth.sendPasswordResetEmail(email: email);
-
-  @override
   Future<void> signOut() => _auth.signOut();
 }

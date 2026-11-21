@@ -33,7 +33,7 @@ flowchart LR
   Admin([Admin\nweb browser]) -->|approve, moderate| Kazi
   Kazi -->|deep link| WhatsApp[WhatsApp]
   Kazi -->|tel: link| Phone[Phone dialer]
-  Kazi -->|Email / password| AUTH[Firebase Authentication]
+  Kazi -->|Phone OTP| AUTH[Firebase Authentication]
   Kazi -->|push| FCM[Firebase Cloud Messaging]
 ```
 
@@ -87,7 +87,7 @@ flowchart TB
 |---|---|---|
 | **Mobile app** | Flutter (Dart 3), Provider, go_router | All client and provider features. Reads via Firestore SDK with offline cache; writes allowed by security rules |
 | **Admin panel** | React + TypeScript (Vite), folder `/admin`, own Hosting target `admin`, shares `shared/` types with the functions | Moderation queues, categories, audit log. Privileged writes only via callable Functions |
-| **Firebase Auth** | Phone provider (users), Email/Password (admins) | Identity. Roles via **custom claims** (`admin`, `moderator`) |
+| **Firebase Auth** | Phone provider (users), Email/Password (staff, used only by the React admin app) | Identity. Roles via **custom claims** (`admin`, `moderator`) |
 | **Cloud Firestore** | Native mode, region `africa-south1` (Johannesburg) | Primary database. Offline persistence on mobile |
 | **Cloud Storage** | Default bucket, same region | Profile, cover, listing and portfolio images (public read), ID documents (private, admin-only via signed URLs) |
 | **Cloud Functions** | 2nd gen, TypeScript, Node 22, same region where supported | Derived data (ratings, denormalisation, search keywords), moderation, notifications, account deletion, admin actions |
@@ -122,7 +122,7 @@ flowchart TB
 
 ### 5.2 State management with Provider
 
-- **App-scoped providers** (created once in `AppProviders`): Firebase instances, repositories (`Provider<…>`), `AuthController`, `SessionController` (current user and provider profile), `LocaleController`, `ConnectivityController`, `RemoteConfigController`.
+- **App-scoped providers** (created once in `AppProviders`): Firebase instances, repositories (`Provider<…>`), `PhoneAuthController`, `SessionController` (current user and provider profile), `LocaleController`, `ConnectivityController`, `RemoteConfigController`.
 - **Screen-scoped providers**: `ChangeNotifierProvider(create: …)` wrapping each route that needs a controller, so state is disposed when the route is popped.
 - **Dependency wiring**: `ProxyProvider` / `ChangeNotifierProxyProvider` where a controller depends on the session (e.g. `FavoritesController` depends on `uid`).
 - **Router integration**: `go_router` with `refreshListenable` on session/gate/onboarding with the three-level guards in `guards.dart` (no session → phone sign-in, no profile → setup, complete → app; provider and staff guards).
@@ -207,7 +207,7 @@ ID verification documents go to `private/verification/{uid}/…`. They are never
 
 | Layer | Control |
 |---|---|
-| **Identity** | Phone OTP for users (the verified E.164 number is the identity); email/password for staff only (admin app, dev/test builds). Staff access requires a custom claim (`admin` or `moderator`); a staff claim counts as signed in without a phone. Claims are set only via a CLI script/callable restricted to `superAdmin` |
+| **Identity** | Phone OTP for users (the verified E.164 number is the identity); email/password for staff only (the React admin app; the Flutter app has no email sign-in). Staff access requires a custom claim (`admin` or `moderator`); a staff claim counts as signed in without a phone. Claims are set only via a CLI script/callable restricted to `superAdmin` |
 | **Device integrity** | App Check enforced on Firestore, Storage, Functions; Play Integrity on Android |
 | **Data access** | Firestore and Storage rules, **deny by default**, field-level validation (types, lengths, enums, immutable fields), ownership checks, role checks via `request.auth.token.admin` |
 | **Privileged operations** | Only via callable Functions that verify claims and write `adminLogs` |

@@ -48,15 +48,6 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<bool> signInWithEmail(String email, String password) async => false;
-
-  @override
-  Future<bool> registerWithEmail(String email, String password) async => true;
-
-  @override
-  Future<void> sendPasswordResetEmail(String email) async {}
-
-  @override
   Future<void> signOut() async {
     signedIn = null;
     _controller.add(null);

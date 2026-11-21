@@ -678,11 +678,8 @@ abstract interface class AuthRepository {
   // Phone OTP: the production sign-in path. Provider-agnostic: Firebase SMS
   // today, a WhatsApp OTP provider may replace the implementation later.
   Future<void> verifyPhone(String e164, {bool resend = false}); // throws AuthFailure
-  Future<void> confirmCode(String code); // throws AuthFailure
-  // Email/password: dev/test/emulator builds and the admin app only.
-  Future<bool> signInWithEmail(String email, String password);
-  Future<bool> registerWithEmail(String email, String password);
-  Future<void> sendPasswordResetEmail(String email);
+  Future<void> confirmCode(String code, {bool reauthenticate = false}); // throws AuthFailure
+  // No email/password in the Flutter app: staff sign in to the React admin app.
   Future<void> signOut();
 }
 
@@ -765,7 +762,6 @@ The admin panel is not part of the Flutter app: it lives in `/admin` (React). Th
 | Controller | Scope | Responsibilities |
 |---|---|---|
 | `PhoneAuthController` | global | Phone entry + OTP (E.164 normalisation, resend timer, `AuthFailure` reasons); the production sign-in path |
-| `AuthController` | global | Email/password sign-in, registration, password reset (dev/test and admin only) |
 | `DeleteAccountController` | screen | Typed word → OTP re-confirmation → `deleteAccount` callable, retry-safe |
 | `OnboardingController` | global | Persists completion of the first-launch intro |
 | `SessionController` | global (proxy on `AuthRepository`) | Current `AppUser` + `ProviderProfile?` streams; `needsProfileSetup`, `isProvider`, `providerStatus`; registers FCM token |
@@ -821,7 +817,6 @@ MultiProvider(
 
     // Global controllers
     ChangeNotifierProvider(create: (c) => PhoneAuthController(c.read())),
-    ChangeNotifierProvider(create: (c) => AuthController(c.read())), // dev/admin email
     ChangeNotifierProxyProvider<AuthRepository, SessionController>(
       create: (c) => SessionController(c.read(), c.read(), c.read()),
       update: (_, auth, session) => session!..onAuthChanged(auth.user),
@@ -868,7 +863,6 @@ In widgets, use `context.select` for fine-grained rebuilds, e.g. `context.select
 | `/messages` | Recent contacts + "chat coming soon" (tab 4) | signed in |
 | `/me` | Profil (tab 5): account, favourites, provider space, settings | signed in |
 | `/auth/phone` → `/auth/otp` → `/auth/profile` | Phone number (+243 default), one-time code, profile setup (`?from=` return path) | — |
-| `/auth/email` | Email/password sign-in; **only when `Env.emailAuthEnabled`** (dev flavor, emulators or `--dart-define=EMAIL_AUTH=true`); in a prod build the router redirects it to `/auth/phone` | — |
 | `/search?q=&cat=&commune=&verified=&sort=` | Results | signed in |
 | `/category/:categoryId` | Results pre-filtered by category | signed in |
 | `/p/:providerId` | Provider profile | signed in |

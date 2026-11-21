@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../app/router/routes.dart';
-import '../../../core/config/env.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
@@ -16,10 +15,7 @@ import 'auth_error_text.dart';
 
 /// Phone number entry: the real sign-in path (default country +243).
 class PhoneScreen extends StatefulWidget {
-  const PhoneScreen({super.key, this.emailAuthEnabled});
-
-  /// Overrides [Env.emailAuthEnabled] (tests).
-  final bool? emailAuthEnabled;
+  const PhoneScreen({super.key});
 
   @override
   State<PhoneScreen> createState() => _PhoneScreenState();
@@ -27,8 +23,6 @@ class PhoneScreen extends StatefulWidget {
 
 class _PhoneScreenState extends State<PhoneScreen> {
   final _controller = TextEditingController();
-
-  bool get _showEmail => widget.emailAuthEnabled ?? Env.emailAuthEnabled;
 
   @override
   void initState() {
@@ -124,16 +118,6 @@ class _PhoneScreenState extends State<PhoneScreen> {
               ),
               const SizedBox(height: KaziSpacing.lg),
               const LegalNotice(),
-              if (_showEmail) ...[
-                const SizedBox(height: KaziSpacing.lg),
-                Center(
-                  child: TextButton(
-                    key: const Key('use-email-sign-in'),
-                    onPressed: () => context.push(Routes.authEmail),
-                    child: Text(l.authPhoneUseEmail),
-                  ),
-                ),
-              ],
             ],
           ),
         ),

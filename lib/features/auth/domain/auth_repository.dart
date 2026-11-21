@@ -41,12 +41,5 @@ abstract interface class AuthRepository {
   /// sign-in time that sensitive callables check. Throws [AuthFailure].
   Future<void> confirmCode(String code, {bool reauthenticate = false});
 
-  /// Email/password sign-in: dev/test/emulator builds and the admin app only
-  /// (see `Env.emailAuthEnabled`). Returns true if this is a new user.
-  Future<bool> signInWithEmail(String email, String password);
-
-  /// Creates a new email account; always returns true. Dev/test/admin only.
-  Future<bool> registerWithEmail(String email, String password);
-  Future<void> sendPasswordResetEmail(String email);
   Future<void> signOut();
 }

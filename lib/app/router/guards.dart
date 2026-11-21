@@ -56,7 +56,6 @@ FutureOr<String?> resolveRedirect({
   required SessionController session,
   required GateController gate,
   required OnboardingController onboarding,
-  required bool emailAuthEnabled,
 }) {
   // Stay on splash until both session and gate checks resolve.
   if (session.isLoading || gate.isChecking) {
@@ -76,7 +75,6 @@ FutureOr<String?> resolveRedirect({
   // ── Level 1: no session ──────────────────────────────────────────────────
   if (!session.hasSession) {
     final entry = onboarded ? Routes.authPhone : Routes.welcome;
-    if (location == Routes.authEmail && emailAuthEnabled) return null;
     final allowed = onboarded ? _guestRoutes : _preOnboardingRoutes;
     if (location == Routes.welcome && onboarded) return Routes.authPhone;
     return allowed.contains(location) ? null : entry;

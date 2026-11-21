@@ -73,9 +73,8 @@
 - CI job `admin`: lint, typecheck, test, build.
 
 ### 2.5 Controllers (examples)
-- `PhoneAuthController`: E.164 normalisation (+243 default), invalid number, send failures, wrong/expired/too-many code, resend cooldown (uses a fake repository modelled on Firebase test numbers; no real SMS). Router: `/auth/email` is redirected to `/auth/phone` unless `Env.emailAuthEnabled`.
-- Guards (`guards_test.dart`): the three access levels, provider and staff routes, loop-freedom; staff (moderator/admin claim) without a phone or profile bypass profile setup (twin: the same account without the claim is held at setup).
-- `AuthController`: email registration, sign-in, password reset, and Firebase auth error mapping (dev/admin only).
+- `PhoneAuthController`: E.164 normalisation (+243 default), invalid number, send failures, wrong/expired/too-many code, resend cooldown (uses a fake repository modelled on Firebase test numbers; no real SMS). Router: the removed `/auth/email` route falls back to `/auth/phone`.
+- Guards (`guards_test.dart`): the three access levels, provider and staff routes, loop-freedom.
 - `SearchResultsController`: debounce; filter change resets pagination; client-side commune filter when keyword present; auto-fetch extra pages when the filtered result is short.
 - `ListingFormController`: validation messages; quote clears amount; upload progress; publish sets `status active`; can't add a 7th photo.
 - `ContactController`: guest → redirect to sign-in; signed in → records the contact once, then launches the URL.

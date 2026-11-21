@@ -54,20 +54,19 @@ class _Env {
   final OnboardingController onboarding;
   final List<String> providerLookups;
 
-  Future<String?> redirect(String location, {bool email = false}) async =>
+  Future<String?> redirect(String location) async =>
       resolveRedirect(
         location: location,
         session: session,
         gate: gate,
         onboarding: onboarding,
-        emailAuthEnabled: email,
       );
 
   /// Follows redirects like go_router does; fails on a loop.
-  Future<String> settle(String location, {bool email = false}) async {
+  Future<String> settle(String location) async {
     var current = location;
     for (var i = 0; i < 4; i++) {
-      final next = await redirect(current, email: email);
+      final next = await redirect(current);
       if (next == null) return current;
       current = next;
     }
@@ -132,11 +131,11 @@ void main() {
       expect(await e.settle(Routes.home), Routes.welcome);
     });
 
-    test('email sign-in is only reachable when enabled', () async {
-      final e = await _env();
-      expect(await e.settle(Routes.authEmail), Routes.authPhone);
-      expect(await e.settle(Routes.authEmail, email: true), Routes.authEmail);
-    });
+  });
+
+  test('the removed /auth/email route is not a sign-in path', () async {
+    final e = await _env();
+    expect(await e.settle('/auth/email'), Routes.authPhone);
   });
 
   group('level 2 — session without users/{uid}', () {
@@ -238,7 +237,6 @@ void main() {
         session: session,
         gate: GateController(_Gate()),
         onboarding: OnboardingController(prefs),
-        emailAuthEnabled: false,
       );
       expect(r, Routes.splash);
       await never.close();

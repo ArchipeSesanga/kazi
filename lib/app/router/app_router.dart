@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../core/config/env.dart';
 import '../../features/auth/application/session_controller.dart';
-import '../../features/auth/presentation/email_screen.dart';
 import '../../features/auth/presentation/otp_screen.dart';
 import '../../features/auth/presentation/phone_screen.dart';
 import '../../features/auth/presentation/setup_profile_screen.dart';
@@ -46,7 +45,6 @@ GoRouter createAppRouter(
   SessionController session,
   GateController gate,
   OnboardingController onboarding, {
-  bool? emailAuthEnabled,
   bool? devToolsEnabled,
 }) =>
     GoRouter(
@@ -57,7 +55,6 @@ GoRouter createAppRouter(
     session: session,
     gate: gate,
     onboarding: onboarding,
-    emailAuthEnabled: emailAuthEnabled ?? Env.emailAuthEnabled,
   ),
   routes: [
     // ── Splash & Welcome ────────────────────────────────────────────────────
@@ -73,17 +70,12 @@ GoRouter createAppRouter(
     // ── Auth flow ────────────────────────────────────────────────────────────
     GoRoute(
       path: Routes.authPhone,
-      builder: (context, state) => PhoneScreen(
-        emailAuthEnabled: emailAuthEnabled ?? Env.emailAuthEnabled,
-      ),
+      builder: (context, state) => const PhoneScreen(
+          ),
     ),
     GoRoute(
       path: Routes.authOtp,
       builder: (context, state) => const OtpScreen(),
-    ),
-    GoRoute(
-      path: Routes.authEmail,
-      builder: (context, state) => const EmailScreen(),
     ),
     GoRoute(
       path: Routes.authSetupProfile,
