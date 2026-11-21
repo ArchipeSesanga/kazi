@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../app/router/routes.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
@@ -21,8 +19,8 @@ class _EmailScreenState extends State<EmailScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _isRegisterMode = false;
   bool _obscurePassword = true;
+  bool _isRegisterMode = false;
 
   @override
   void dispose() {
@@ -61,9 +59,7 @@ class _EmailScreenState extends State<EmailScreen> {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).authEmailInvalid),
-        ),
+        SnackBar(content: Text(AppLocalizations.of(context).authEmailInvalid)),
       );
       return;
     }
@@ -97,7 +93,7 @@ class _EmailScreenState extends State<EmailScreen> {
               children: [
                 const SizedBox(height: KaziSpacing.lg),
                 Text(
-                  l.authEmailTitle,
+                  _isRegisterMode ? l.authEmailRegister : l.authEmailTitle,
                   style: const TextStyle(
                     fontFamily: 'Montserrat',
                     fontSize: 26,
@@ -172,53 +168,45 @@ class _EmailScreenState extends State<EmailScreen> {
                 ],
                 const SizedBox(height: KaziSpacing.xl),
                 KaziButton(
-                  label: _isRegisterMode ? l.authEmailRegister : l.authEmailSignIn,
+                  label: _isRegisterMode
+                      ? l.authEmailRegister
+                      : l.authEmailSignIn,
                   onPressed: isLoading ? null : _submit,
                   isLoading: isLoading,
                 ),
                 const SizedBox(height: KaziSpacing.lg),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _isRegisterMode
-                          ? l.authEmailHasAccountPrompt
-                          : l.authEmailCreateAccountPrompt,
-                      style: const TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 13,
-                        color: KaziColors.muted,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        setState(() => _isRegisterMode = !_isRegisterMode);
-                        context.read<AuthController>().resetError();
-                      },
-                      child: Text(
-                        _isRegisterMode ? l.authEmailSignIn : l.authEmailRegister,
+                Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _isRegisterMode
+                            ? l.authEmailHasAccountPrompt
+                            : l.authEmailCreateAccountPrompt,
                         style: const TextStyle(
                           fontFamily: 'Montserrat',
                           fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: KaziColors.primary,
+                          color: KaziColors.muted,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: KaziSpacing.sm),
-                Center(
-                  child: TextButton(
-                    onPressed: () => context.go(Routes.authPhone),
-                    child: Text(
-                      l.authEmailUsePhone,
-                      style: const TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 13,
-                        color: KaziColors.muted,
+                      TextButton(
+                        onPressed: () {
+                          context.read<AuthController>().resetError();
+                          setState(() => _isRegisterMode = !_isRegisterMode);
+                        },
+                        child: Text(
+                          _isRegisterMode
+                              ? l.authEmailSignIn
+                              : l.authEmailRegister,
+                          style: const TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: KaziColors.primary,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ],

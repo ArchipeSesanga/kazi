@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../../../app/router/routes.dart';
+import '../../../core/errors/app_exception.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
@@ -11,6 +12,8 @@ import '../../../core/utils/category_icon.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/category_circle.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/error_view.dart';
+import '../../../core/widgets/kazi_logo.dart';
 import '../../../core/widgets/kazi_search_bar.dart';
 import '../../../core/widgets/offline_banner.dart';
 import '../../../core/widgets/promo_banner.dart';
@@ -19,6 +22,7 @@ import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../block/application/block_controller.dart';
 import '../../catalog/application/catalog_controller.dart';
+import '../../listings/presentation/listing_result_tile.dart';
 import '../application/home_controller.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -142,24 +146,89 @@ class _HomeBody extends StatelessWidget {
           ),
         ),
 
-        // Recent listings — stubbed empty (KZ-033 will wire fetchRecent)
+        // Recent listings (visible, publishedAt desc)
+        ..._buildRecentSliver(context, home, blocked, locale, l),
+
+        const SliverPadding(padding: EdgeInsets.only(bottom: KaziSpacing.xxxl)),
+      ],
+    );
+  }
+
+  List<Widget> _buildRecentSliver(
+    BuildContext context,
+    HomeController home,
+    BlockController blocked,
+    String locale,
+    AppLocalizations l,
+  ) {
+    const padding = EdgeInsets.symmetric(horizontal: KaziSpacing.screenPadding);
+
+    if (home.isLoadingRecent && home.recentListings.isEmpty) {
+      return [
+        SliverPadding(
+          padding: padding,
+          sliver: SliverList.separated(
+            itemCount: 3,
+            separatorBuilder: (_, __) => const SizedBox(height: KaziSpacing.md),
+            itemBuilder: (_, __) =>
+                const SkeletonBox(width: double.infinity, height: 84),
+          ),
+        ),
+      ];
+    }
+
+    if (home.recentError != null) {
+      return [
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: KaziSpacing.screenPadding,
+            padding: padding,
+            child: ErrorView(
+              message: home.recentError is NetworkException
+                  ? l.errorNetwork
+                  : l.listingsLoadFailed,
+              onRetry: home.refresh,
+              retryLabel: l.buttonRetry,
             ),
+          ),
+        ),
+      ];
+    }
+
+    final listings = home.recentListings
+        .where((x) => !blocked.isBlocked(x.providerId))
+        .toList();
+
+    if (listings.isEmpty) {
+      return [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: padding,
             child: EmptyState(
               icon: LucideIcons.packageOpen,
               message: l.homeEmptyRecent,
             ),
           ),
         ),
+      ];
+    }
 
-        const SliverPadding(
-          padding: EdgeInsets.only(bottom: KaziSpacing.xxxl),
+    return [
+      SliverPadding(
+        padding: padding,
+        sliver: SliverList.separated(
+          itemCount: listings.length,
+          separatorBuilder: (_, __) => const SizedBox(height: KaziSpacing.md),
+          itemBuilder: (ctx, i) {
+            final listing = listings[i];
+            return ListingResultTile(
+              listing: listing,
+              locale: locale,
+              onTap: () => ctx.push(Routes.listingDetail(listing.id)),
+            );
+          },
         ),
-      ],
-    );
+      ),
+    ];
   }
 
   List<Widget> _buildProviderSliver(
@@ -259,15 +328,7 @@ class _AppBar extends StatelessWidget {
       titleSpacing: KaziSpacing.screenPadding,
       title: Row(
         children: [
-          const Text(
-            'Kazi',
-            style: TextStyle(
-              fontFamily: 'Montserrat',
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              color: KaziColors.primary,
-            ),
-          ),
+          const KaziLogo(height: 26),
           const SizedBox(width: KaziSpacing.sm),
           GestureDetector(
             onTap: () => _showCommunePicker(context),

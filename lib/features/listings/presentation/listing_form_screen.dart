@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/constants/limits.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/theme/kazi_colors.dart';
@@ -66,10 +69,13 @@ class _ListingFormScreenState extends State<ListingFormScreen> {
     if (status != null && !_handledSave) {
       _handledSave = true;
       final l = AppLocalizations.of(context);
-      if (status == ListingStatus.active) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l.listingFormPublished)),
-        );
+      if (ctrl.savedAsUpdate) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l.listingFormUpdated)));
+        Navigator.of(context).pop();
+      } else if (status == ListingStatus.active) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l.listingFormPublished)));
         Navigator.of(context).pop();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -88,6 +94,32 @@ class _ListingFormScreenState extends State<ListingFormScreen> {
     _descCtrl.dispose();
     _priceCtrl.dispose();
     super.dispose();
+  }
+
+  Future<bool> _onPop() async {
+    final ctrl = context.read<ListingFormController>();
+    if (!ctrl.hasDraft || ctrl.savedStatus != null) return true;
+    final l = AppLocalizations.of(context);
+    final keep = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.listingFormDraftDialogTitle),
+        content: Text(l.listingFormDraftDialogBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l.listingFormDraftDiscard),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l.listingFormDraftKeep),
+          ),
+        ],
+      ),
+    );
+    if (keep == null) return false;
+    if (!keep) await ctrl.discardDraft();
+    return true;
   }
 
   Future<void> _pickPhoto() async {
@@ -121,9 +153,14 @@ class _ListingFormScreenState extends State<ListingFormScreen> {
   String _errorMessage(BuildContext context, String code) {
     final l = AppLocalizations.of(context);
     return switch (code) {
-      'errorNetwork' => l.errorNetwork,
-      'errorPermissionDenied' => l.errorPermissionDenied,
-      'errorSaveFailed' => l.errorSaveFailed,
+      'network' => l.errorNetwork,
+      'permissionDenied' => l.errorPermissionDenied,
+      'notFound' => l.errorNotFound,
+      'unauthenticated' => l.errorUnauthenticated,
+      'quotaExceeded' => l.listingLimitReachedBody(
+        context.read<ListingFormController>().quota?.max ??
+            Limits.maxListingsPerProvider,
+      ),
       _ => l.errorUnknown,
     };
   }
@@ -153,75 +190,142 @@ class _ListingFormScreenState extends State<ListingFormScreen> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(ctrl.isEditing ? l.listingFormEditTitle : l.listingFormTitle),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          KaziSpacing.lg,
-          KaziSpacing.lg,
-          KaziSpacing.lg,
-          120,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        if (await _onPop()) {
+          if (context.mounted) Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            ctrl.isEditing ? l.listingFormEditTitle : l.listingFormTitle,
+          ),
         ),
-        children: [
-          _PhotoSection(
-            photos: ctrl.photos,
-            canAdd: ctrl.canAddPhoto,
-            onAdd: _pickPhoto,
-            onRemove: ctrl.removePhoto,
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            KaziSpacing.lg,
+            KaziSpacing.lg,
+            KaziSpacing.lg,
+            176,
           ),
-          const SizedBox(height: KaziSpacing.xl),
-          KaziTextField(
-            label: l.listingFormTitleLabel,
-            hint: l.listingFormTitleHint,
-            controller: _titleCtrl,
-            errorText: ctrl.titleError != null ? l.listingFormTitleError : null,
-            maxLength: 80,
-          ),
-          const SizedBox(height: KaziSpacing.lg),
-          _CategoryPicker(
-            selectedId: ctrl.categoryId,
-            errorText: ctrl.categoryError != null
-                ? l.listingFormCategoryError
-                : null,
-            onSelected: ctrl.setCategory,
-          ),
-          const SizedBox(height: KaziSpacing.lg),
-          KaziTextArea(
-            label: l.listingFormDescriptionLabel,
-            hint: l.listingFormDescriptionHint,
-            controller: _descCtrl,
-            maxLength: 1000,
-          ),
-          const SizedBox(height: KaziSpacing.lg),
-          _PriceSection(
-            priceType: ctrl.priceType,
-            currency: ctrl.currency,
-            priceCtrl: _priceCtrl,
-            onPriceType: ctrl.setPriceType,
-            onCurrency: ctrl.setCurrency,
-          ),
-          const SizedBox(height: KaziSpacing.lg),
-          _CommuneSection(
-            selected: ctrl.communes,
-            errorText: ctrl.communeError != null ? l.listingFormCommuneError : null,
-            onToggle: ctrl.toggleCommune,
-          ),
-          if (ctrl.error != null) ...[
-            const SizedBox(height: KaziSpacing.lg),
-            ErrorView(
-              message: _errorMessage(context, ctrl.error!.code),
-              onRetry: ctrl.clearError,
+          children: [
+            if (ctrl.limitReached) ...[
+              _LimitBanner(
+                title: l.listingLimitReachedTitle,
+                body: l.listingLimitReachedBody(ctrl.quota!.max),
+              ),
+              const SizedBox(height: KaziSpacing.lg),
+            ],
+            _PhotoSection(
+              photos: ctrl.photos,
+              canAdd: ctrl.canAddPhoto,
+              onAdd: _pickPhoto,
+              onRemove: ctrl.removePhoto,
             ),
+            const SizedBox(height: KaziSpacing.xl),
+            KaziTextField(
+              label: l.listingFormTitleLabel,
+              hint: l.listingFormTitleHint,
+              controller: _titleCtrl,
+              errorText: ctrl.titleError != null
+                  ? l.listingFormTitleError
+                  : null,
+              maxLength: 80,
+            ),
+            const SizedBox(height: KaziSpacing.lg),
+            _CategoryPicker(
+              selectedId: ctrl.categoryId,
+              errorText: ctrl.categoryError != null
+                  ? l.listingFormCategoryError
+                  : null,
+              onSelected: ctrl.setCategory,
+            ),
+            const SizedBox(height: KaziSpacing.lg),
+            KaziTextArea(
+              label: l.listingFormDescriptionLabel,
+              hint: l.listingFormDescriptionHint,
+              controller: _descCtrl,
+              maxLength: 1000,
+            ),
+            const SizedBox(height: KaziSpacing.lg),
+            _PriceSection(
+              priceType: ctrl.priceType,
+              currency: ctrl.currency,
+              priceCtrl: _priceCtrl,
+              onPriceType: ctrl.setPriceType,
+              onCurrency: ctrl.setCurrency,
+            ),
+            const SizedBox(height: KaziSpacing.lg),
+            _CommuneSection(
+              selected: ctrl.communes,
+              errorText: ctrl.communeError != null
+                  ? l.listingFormCommuneError
+                  : null,
+              onToggle: ctrl.toggleCommune,
+            ),
+            if (ctrl.error != null) ...[
+              const SizedBox(height: KaziSpacing.lg),
+              ErrorView(
+                message: _errorMessage(context, ctrl.error!.code),
+                onRetry: ctrl.clearError,
+              ),
+            ],
           ],
-        ],
+        ),
+        bottomNavigationBar: ListingFormBottomBar(
+          isSaving: ctrl.isSaving,
+          hasUploading: ctrl.photos.any((p) => p.isUploading),
+          limitReached: ctrl.limitReached,
+          singleSave: ctrl.preservesStatus,
+          onDraft: ctrl.saveDraft,
+          onPublish: ctrl.publish,
+          onSave: ctrl.save,
+        ),
       ),
-      bottomNavigationBar: _BottomBar(
-        isSaving: ctrl.isSaving,
-        hasUploading: ctrl.photos.any((p) => p.isUploading),
-        onDraft: ctrl.saveDraft,
-        onPublish: ctrl.publish,
+    );
+  }
+}
+
+class _LimitBanner extends StatelessWidget {
+  const _LimitBanner({required this.title, required this.body});
+
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(KaziSpacing.md),
+      decoration: BoxDecoration(
+        color: KaziColors.error.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(KaziRadius.card),
+        border: Border.all(color: KaziColors.error.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontFamily: 'Montserrat',
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: KaziColors.error,
+            ),
+          ),
+          const SizedBox(height: KaziSpacing.xs),
+          Text(
+            body,
+            style: const TextStyle(
+              fontFamily: 'Montserrat',
+              fontSize: 13,
+              color: KaziColors.ink,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -303,6 +407,15 @@ class _PhotoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget image;
+    if (entry.url != null) {
+      image = Image.network(entry.url!, fit: BoxFit.cover);
+    } else if (entry.localFile != null) {
+      image = Image.file(File(entry.localFile!.path), fit: BoxFit.cover);
+    } else {
+      image = const SizedBox.shrink();
+    }
+
     return Stack(
       children: [
         Container(
@@ -314,23 +427,38 @@ class _PhotoTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(KaziRadius.card),
           ),
           clipBehavior: Clip.antiAlias,
-          child: entry.url != null
-              ? Image.network(entry.url!, fit: BoxFit.cover)
-              : entry.hasError
-                  ? const Center(
-                      child: Icon(
-                        LucideIcons.alertTriangle,
-                        color: KaziColors.error,
-                      ),
-                    )
-                  : Center(
-                      child: CircularProgressIndicator(
-                        value: entry.progress,
-                        strokeWidth: 2,
-                        color: KaziColors.accent,
-                      ),
-                    ),
+          child: image,
         ),
+        if (entry.isUploading)
+          Positioned.fill(
+            child: Container(
+              margin: const EdgeInsets.only(right: KaziSpacing.sm),
+              decoration: BoxDecoration(
+                color: Colors.black38,
+                borderRadius: BorderRadius.circular(KaziRadius.card),
+              ),
+              child: Center(
+                child: CircularProgressIndicator(
+                  value: entry.progress,
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        if (entry.hasError)
+          Positioned.fill(
+            child: Container(
+              margin: const EdgeInsets.only(right: KaziSpacing.sm),
+              decoration: BoxDecoration(
+                color: Colors.black38,
+                borderRadius: BorderRadius.circular(KaziRadius.card),
+              ),
+              child: const Center(
+                child: Icon(LucideIcons.alertTriangle, color: KaziColors.error),
+              ),
+            ),
+          ),
         if (!entry.isUploading)
           Positioned(
             top: 4,
@@ -480,7 +608,7 @@ class _PriceSection extends StatelessWidget {
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
+                    FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
                   ],
                 ),
               ),
@@ -632,23 +760,33 @@ class _CommuneSection extends StatelessWidget {
 
 // ── Bottom bar ────────────────────────────────────────────────────────────────
 
-class _BottomBar extends StatelessWidget {
-  const _BottomBar({
+/// Bottom action bar of the listing form.
+class ListingFormBottomBar extends StatelessWidget {
+  const ListingFormBottomBar({
+    super.key,
     required this.isSaving,
     required this.hasUploading,
+    required this.limitReached,
+    required this.singleSave,
     required this.onDraft,
     required this.onPublish,
+    required this.onSave,
   });
 
   final bool isSaving;
   final bool hasUploading;
+  final bool limitReached;
+
+  /// Editing an active/paused listing: one Save button, status unchanged.
+  final bool singleSave;
   final VoidCallback onDraft;
   final VoidCallback onPublish;
+  final VoidCallback onSave;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final disabled = isSaving || hasUploading;
+    final disabled = isSaving || hasUploading || limitReached;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
@@ -657,26 +795,31 @@ class _BottomBar extends StatelessWidget {
           KaziSpacing.lg,
           KaziSpacing.md,
         ),
-        child: Row(
-          children: [
-            Expanded(
-              child: KaziButton(
-                label: l.listingFormSaveDraft,
-                onPressed: disabled ? null : onDraft,
-                variant: KaziButtonVariant.outline,
+        child: singleSave
+            ? KaziButton(
+                label: l.buttonSave,
+                onPressed: disabled ? null : onSave,
                 isLoading: isSaving,
+              )
+            // Stacked, not side by side: "Enregistrer le brouillon" does not
+            // fit in half the screen width (and never at larger text sizes).
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  KaziButton(
+                    label: l.listingFormPublish,
+                    onPressed: disabled ? null : onPublish,
+                    isLoading: isSaving,
+                  ),
+                  const SizedBox(height: KaziSpacing.sm),
+                  KaziButton(
+                    label: l.listingFormSaveDraft,
+                    onPressed: disabled ? null : onDraft,
+                    variant: KaziButtonVariant.outline,
+                    isLoading: isSaving,
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(width: KaziSpacing.sm),
-            Expanded(
-              child: KaziButton(
-                label: l.listingFormPublish,
-                onPressed: disabled ? null : onPublish,
-                isLoading: isSaving,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

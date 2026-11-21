@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../utils/phone.dart';
 import 'enums.dart';
 import 'timestamp_converter.dart';
 
@@ -81,42 +82,55 @@ abstract class ProviderProfile with _$ProviderProfile {
 extension ProviderProfileWrite on ProviderProfile {
   /// Create payload: client fields + zeroed server fields per TDD §4.4.
   Map<String, dynamic> toCreateMap() => {
-        'displayName': displayName,
-        'bio': bio,
-        if (photoUrl != null) 'photoUrl': photoUrl,
-        if (coverUrl != null) 'coverUrl': coverUrl,
-        'categoryIds': categoryIds,
-        'city': city,
-        'baseCommune': baseCommune,
-        'communes': communes,
-        'whatsappNumber': whatsappNumber,
-        if (callNumber != null) 'callNumber': callNumber,
-        'yearsExperience': yearsExperience,
-        'portfolio': portfolio.map((p) => p.toJson()).toList(),
-        // Server fields must be sent with initial values on create:
-        'status': 'pending',
-        'verified': false,
-        'ratingAvg': 0,
-        'ratingCount': 0,
-        'ratingSum': 0,
-        'listingCount': 0,
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      };
+    'displayName': displayName,
+    'bio': bio,
+    'photoUrl': _optionalUrl(photoUrl),
+    'coverUrl': _optionalUrl(coverUrl),
+    'categoryIds': categoryIds,
+    'city': city,
+    'baseCommune': baseCommune,
+    'communes': <String>{baseCommune, ...communes}.toList(),
+    'whatsappNumber': _normalisePhone(whatsappNumber),
+    'callNumber': callNumber == null || callNumber!.trim().isEmpty
+        ? null
+        : _normalisePhone(callNumber!),
+    'yearsExperience': yearsExperience,
+    'portfolio': portfolio.map((p) => p.toJson()).toList(),
+    // Server fields must be sent with initial values on create:
+    'status': 'pending',
+    'verified': false,
+    'ratingAvg': 0,
+    'ratingCount': 0,
+    'ratingSum': 0,
+    'listingCount': 0,
+    'createdAt': FieldValue.serverTimestamp(),
+    'updatedAt': FieldValue.serverTimestamp(),
+  };
 
   /// Update payload: only mutable client fields.
   Map<String, dynamic> toUpdateMap() => {
-        'displayName': displayName,
-        if (photoUrl != null) 'photoUrl': photoUrl,
-        if (coverUrl != null) 'coverUrl': coverUrl,
-        'bio': bio,
-        'categoryIds': categoryIds,
-        'baseCommune': baseCommune,
-        'communes': communes,
-        'whatsappNumber': whatsappNumber,
-        if (callNumber != null) 'callNumber': callNumber,
-        'yearsExperience': yearsExperience,
-        'portfolio': portfolio.map((p) => p.toJson()).toList(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      };
+    'displayName': displayName,
+    if (photoUrl != null) 'photoUrl': photoUrl,
+    if (coverUrl != null) 'coverUrl': coverUrl,
+    'bio': bio,
+    'categoryIds': categoryIds,
+    'baseCommune': baseCommune,
+    'communes': communes,
+    'whatsappNumber': whatsappNumber,
+    if (callNumber != null) 'callNumber': callNumber,
+    'yearsExperience': yearsExperience,
+    'portfolio': portfolio.map((p) => p.toJson()).toList(),
+    'updatedAt': FieldValue.serverTimestamp(),
+  };
 }
+
+String? _optionalUrl(String? value) {
+  final trimmed = value?.trim();
+  if (trimmed == null || trimmed.isEmpty) return null;
+  final uri = Uri.tryParse(trimmed);
+  if (uri == null || !uri.hasScheme || uri.host.isEmpty) return null;
+  return trimmed;
+}
+
+String _normalisePhone(String value) =>
+    PhoneUtils.toE164(value) ?? value.trim();

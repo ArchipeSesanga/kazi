@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
 import '../../../core/widgets/kazi_button.dart';
+import '../../../core/widgets/kazi_logo.dart';
+import '../application/onboarding_controller.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -32,11 +35,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      context.go(Routes.authPhone);
+      _completeOnboarding();
     }
   }
 
-  void _skip() => context.go(Routes.authPhone);
+  void _skip() => _completeOnboarding();
+
+  Future<void> _completeOnboarding() async {
+    await context.read<OnboardingController>().complete();
+    if (mounted) context.go(Routes.authPhone);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,14 +80,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               child: Row(
                 children: [
                   const Expanded(
-                    child: Text(
-                      'Kazi',
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        color: KaziColors.primary,
-                      ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: KaziLogo(height: 32),
                     ),
                   ),
                   TextButton(
@@ -112,14 +115,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   _DotIndicator(total: _total, current: _page),
                   const SizedBox(height: KaziSpacing.xl),
                   KaziButton(
-                    label: _page == _total - 1 ? l.welcomeStart : l.buttonContinue,
+                    label: _page == _total - 1
+                        ? l.welcomeStart
+                        : l.buttonContinue,
                     onPressed: _next,
-                  ),
-                  const SizedBox(height: KaziSpacing.sm),
-                  KaziButton(
-                    label: l.profileSignInButton,
-                    onPressed: _skip,
-                    variant: KaziButtonVariant.outline,
                   ),
                   const SizedBox(height: KaziSpacing.sm),
                   KaziButton(
@@ -161,7 +160,9 @@ class _SlideView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: KaziSpacing.screenPadding),
+      padding: const EdgeInsets.symmetric(
+        horizontal: KaziSpacing.screenPadding,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -202,9 +203,18 @@ class _Illustration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (bg, icon) = switch (type) {
-      _IllustrationIndex.search => (KaziColors.primarySurface, Icons.search_rounded),
-      _IllustrationIndex.whatsapp => (const Color(0xFFE6FAF0), Icons.chat_bubble_rounded),
-      _IllustrationIndex.publish => (const Color(0xFFFFF1EA), Icons.add_circle_rounded),
+      _IllustrationIndex.search => (
+        KaziColors.primarySurface,
+        Icons.search_rounded,
+      ),
+      _IllustrationIndex.whatsapp => (
+        const Color(0xFFE6FAF0),
+        Icons.chat_bubble_rounded,
+      ),
+      _IllustrationIndex.publish => (
+        const Color(0xFFFFF1EA),
+        Icons.add_circle_rounded,
+      ),
     };
 
     final iconColor = switch (type) {
@@ -216,10 +226,7 @@ class _Illustration extends StatelessWidget {
     return Container(
       width: 200,
       height: 200,
-      decoration: BoxDecoration(
-        color: bg,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
       child: Icon(icon, size: 88, color: iconColor),
     );
   }

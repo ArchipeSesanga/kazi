@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -43,10 +45,38 @@ android {
         }
     }
 
+    // Release signing (KZ-107). The upload keystore is never in git: CI writes
+    // it from a secret and passes these variables; locally use
+    // android/key.properties (git-ignored) with the same four keys.
+    val keyProps = Properties().apply {
+        val f = rootProject.file("key.properties")
+        if (f.exists()) f.inputStream().use { load(it) }
+    }
+    fun signingValue(env: String, prop: String): String? =
+        System.getenv(env) ?: keyProps.getProperty(prop)
+    val storePath = signingValue("ANDROID_KEYSTORE_PATH", "storeFile")
+    val hasReleaseKey = storePath != null && file(storePath).exists()
+
+    signingConfigs {
+        if (hasReleaseKey) {
+            create("release") {
+                storeFile = file(storePath!!)
+                storePassword = signingValue("ANDROID_STORE_PASSWORD", "storePassword")
+                keyAlias = signingValue("ANDROID_KEY_ALIAS", "keyAlias")
+                keyPassword = signingValue("ANDROID_KEY_PASSWORD", "keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO(KZ-107): add release signing config from GitHub secrets.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (hasReleaseKey) {
+                signingConfigs.getByName("release")
+            } else {
+                // Local convenience only. The release workflow refuses to ship
+                // anything not signed with the upload key.
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }

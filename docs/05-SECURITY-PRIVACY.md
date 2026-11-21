@@ -13,7 +13,7 @@
 
 | Threat | Example | Mitigation |
 |---|---|---|
-| **Spoofing** | Bot sign-ups; SMS pumping fraud on Phone Auth | App Check (Play Integrity), SMS region policy (allow `CD` + selected), Firebase Auth abuse protection, budget alerts on SMS |
+| **Spoofing** | Bot sign-ups and password attacks | App Check (Play Integrity), Firebase Auth abuse protection, password reset, and monitoring |
 | **Spoofing** | Fake provider impersonating a real business | Admin approval, optional ID verification, reporting |
 | **Tampering** | Client sets own `verified = true` or `ratingAvg = 5` | Server-only fields; rules `changedOnly` whitelists; rules tests |
 | **Tampering** | Fake reviews | One review per client per provider; requires recorded contact; moderators can delete; anomaly review in admin |

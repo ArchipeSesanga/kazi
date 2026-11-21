@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/catalog_repository.dart';
+import 'catalog_defaults.dart';
 
 const _kCategoriesKey = 'catalog_categories_v1';
 const _kLocationsKey  = 'catalog_locations_v1';
@@ -25,13 +26,15 @@ class FirestoreCatalogRepository implements CatalogRepository {
           .map((d) => Category.fromJson({...d.data(), 'id': d.id}))
           .where((c) => c.active)
           .toList();
+      if (categories.isEmpty) return defaultCategories;
       await _prefs.setString(
         _kCategoriesKey,
         jsonEncode(categories.map((c) => c.toJson()).toList()),
       );
       return categories;
     } on FirebaseException {
-      return _categoriesFromCache();
+      final cached = _categoriesFromCache();
+      return cached.isEmpty ? defaultCategories : cached;
     }
   }
 
@@ -39,19 +42,21 @@ class FirestoreCatalogRepository implements CatalogRepository {
   Future<List<City>> getLocations() async {
     try {
       final snap = await _db.collection('config').doc('locations').get();
-      if (!snap.exists) return [];
+      if (!snap.exists) return defaultCities;
       final raw = snap.data()!;
       final cities = (raw['cities'] as List<dynamic>)
           .map((e) => City.fromJson(Map<String, dynamic>.from(e as Map)))
           .where((c) => c.active)
           .toList();
+      if (cities.isEmpty) return defaultCities;
       await _prefs.setString(
         _kLocationsKey,
         jsonEncode(cities.map((c) => c.toJson()).toList()),
       );
       return cities;
     } on FirebaseException {
-      return _locationsFromCache();
+      final cached = _locationsFromCache();
+      return cached.isEmpty ? defaultCities : cached;
     }
   }
 

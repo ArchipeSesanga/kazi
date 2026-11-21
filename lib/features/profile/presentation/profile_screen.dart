@@ -6,6 +6,7 @@ import '../../../app/router/routes.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
+import '../../../core/widgets/kazi_avatar.dart';
 import '../../../core/widgets/kazi_button.dart';
 import '../../../core/widgets/offline_banner.dart';
 import '../../auth/application/session_controller.dart';
@@ -48,12 +49,15 @@ class _AuthenticatedBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final displayName = user?.displayName as String? ?? '';
     final phone = user?.phone as String? ?? '';
-    final initials = _initials(displayName);
 
     return ListView(
       padding: EdgeInsets.zero,
       children: [
-        _Header(displayName: displayName, phone: phone, initials: initials),
+        _Header(
+          displayName: displayName,
+          phone: phone,
+          photoUrl: user?.photoUrl as String?,
+        ),
         const SizedBox(height: KaziSpacing.sm),
         _SectionCard(
           children: [
@@ -138,25 +142,18 @@ class _AuthenticatedBody extends StatelessWidget {
       await context.read<AuthRepository>().signOut();
     }
   }
-
-  String _initials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty || parts[0].isEmpty) return '?';
-    if (parts.length == 1) return parts[0][0].toUpperCase();
-    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-  }
 }
 
 class _Header extends StatelessWidget {
   const _Header({
     required this.displayName,
     required this.phone,
-    required this.initials,
+    required this.photoUrl,
   });
 
   final String displayName;
   final String phone;
-  final String initials;
+  final String? photoUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -172,23 +169,10 @@ class _Header extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: const BoxDecoration(
-              gradient: KaziColors.brandGradient,
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              initials,
-              style: const TextStyle(
-                fontFamily: 'Montserrat',
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
+          // Tapping the picture opens "Modifier mon profil".
+          GestureDetector(
+            onTap: () => context.push(Routes.mySettings),
+            child: KaziAvatar(name: displayName, photoUrl: photoUrl, size: 64),
           ),
           const SizedBox(width: KaziSpacing.lg),
           Expanded(
@@ -267,7 +251,7 @@ class _GuestBody extends StatelessWidget {
           const SizedBox(height: KaziSpacing.xl),
           KaziButton(
             label: l.profileSignInButton,
-            onPressed: () => context.go(Routes.authPhone),
+            onPressed: () => context.go(Routes.authEmail),
           ),
         ],
       ),

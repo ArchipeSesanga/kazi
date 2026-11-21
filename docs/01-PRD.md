@@ -74,8 +74,8 @@ Priority: **P0** = launch blocker, **P1** = should ship in v1, **P2** = nice to 
 | ID | Feature | Priority |
 |---|---|---|
 | F-01 | Splash, language picker (FR/EN) on first launch, 3-slide intro | P1 |
-| F-02 | **Browse without an account** (home, search, profiles visible to guests) | P0 |
-| F-03 | Sign in with **phone number + SMS OTP** (Firebase Phone Auth), DRC (+243) by default, other country codes allowed | P0 |
+| F-02 | **Browse without an account** (home, search, profiles visible to guests). *Beta decision: the app is sign-in only (phone OTP); guest browsing is deferred until after the beta. Rules deny all reads to guests.* | P0 (deferred for beta) |
+| F-03 | Sign in and register with **email + password** (Firebase Auth), with password reset | P0 |
 | F-04 | Basic profile: display name, optional photo, preferred language, home city/commune | P0 |
 | F-05 | Sign out, **delete account** (in app; required by Google Play) | P0 |
 | F-06 | Accept Terms of Service and Privacy Policy at sign-up (versioned) | P0 |
@@ -127,7 +127,9 @@ Priority: **P0** = launch blocker, **P1** = should ship in v1, **P2** = nice to 
 | F-44 | Block a user (hides their content from you) | P1 |
 | F-45 | Basic content rules: no phone numbers in titles, profanity filter (FR/EN word list), image count/size limits | P1 |
 
-### 6.6 Admin web panel (Flutter Web)
+### 6.6 Admin web panel (React web app, separate from the Flutter app)
+
+*The admin panel is a standalone React + TypeScript web app (`/admin`), not part of the Flutter app. v0 ships only the reports queue (F-53); the other features follow.*
 
 | ID | Feature | Priority |
 |---|---|---|
@@ -234,7 +236,7 @@ Plomberie · Électricité · Coiffure & beauté · Couture · Menuiserie · Ma�
 |---|---|---|---|
 | Empty marketplace at launch | High | High | Recruit supply in person first; launch commune by commune |
 | Scams / fake providers | Medium | High | Admin approval, verified badge, contact-gated reviews, report auto-hide |
-| SMS OTP cost and delivery problems on +243 numbers | Medium | Medium | App Check + Play Integrity to block abuse, SMS region policy, rate limits, monitoring; consider WhatsApp OTP in v1.1 |
+| Users may not have reliable email access or may forget passwords | Medium | Medium | Keep registration simple, provide password reset, and monitor sign-in completion |
 | Firebase cost spikes | Low | Medium | Pagination, denormalised reads, budget alerts, caching |
 | Low provider literacy with apps | Medium | Medium | Minimal-step onboarding, icons, assisted onboarding by team |
 | Legal/data protection non-compliance | Medium | High | Privacy policy, minimal data, ID deletion, review against DRC Digital Code (Ordonnance-loi n° 23/010) with local counsel |

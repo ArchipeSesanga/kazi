@@ -18,6 +18,8 @@ Kazi is a free, Android-first marketplace where people in the DRC publish and fi
 | 07 | [Backlog & Sprint Plan](07-BACKLOG-ROADMAP.md) | Epics, stories (KZ-xxx) with acceptance criteria, sprints | Planning, agents |
 | 08 | [Coding Standards](08-CODING-STANDARDS.md) | Conventions, architecture rules, Definition of Done | Agents |
 | 09 | [DevOps & Release](09-DEVOPS-RELEASE.md) | Firebase setup, environments, CI/CD, Play release, monitoring | Owner |
+| 12 | [Play Data safety draft](12-PLAY-DATA-SAFETY.md) | Draft answers for Google Play's Data safety form, from the code | Owner |
+| 11 | [Production runbook](11-PROD-RUNBOOK.md) | One-time prod setup, each release step by step, verification, rollback, Play reviewer account | Owner |
 | 10 | [AGENTS.md](10-AGENTS.md) | Operating rules for AI coding agents (copy to repo root) | Agents |
 | — | [`firebase/`](firebase/) | Starter `firestore.rules`, `storage.rules`, `firestore.indexes.json` | Agents |
 
@@ -39,7 +41,7 @@ Kazi is a free, Android-first marketplace where people in the DRC publish and fi
 | Launch city | Kinshasa (24 communes seeded) |
 | Languages | French (default) + English; Lingala/Swahili in v1.1 |
 | Contact | WhatsApp deep link + phone call; in-app chat in v2 |
-| Admin | Flutter Web admin panel in the same repo |
+| Admin | React web app (Vite + TypeScript) in `/admin`, shares `shared/` types with the functions |
 | State management | Provider (`ChangeNotifier`), no other state library |
 | Region | Firebase `africa-south1` (Johannesburg) |
 | Font / colours | Montserrat; `#F25912`, `#5C3E94`, `#412B6B`, `#211832` |

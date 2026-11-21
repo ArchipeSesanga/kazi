@@ -188,18 +188,6 @@ abstract class AppLocalizations {
   /// **'Trop de tentatives. Veuillez patienter.'**
   String get errorRateLimited;
 
-  /// OTP invalid
-  ///
-  /// In fr, this message translates to:
-  /// **'Code incorrect. Vérifiez et réessayez.'**
-  String get errorOtpInvalid;
-
-  /// OTP expired
-  ///
-  /// In fr, this message translates to:
-  /// **'Code expiré. Demandez un nouveau code.'**
-  String get errorOtpExpired;
-
   /// Too many requests
   ///
   /// In fr, this message translates to:
@@ -326,102 +314,6 @@ abstract class AppLocalizations {
   /// **'Passer'**
   String get welcomeSkip;
 
-  /// Phone sign-in title
-  ///
-  /// In fr, this message translates to:
-  /// **'Entrez votre numéro'**
-  String get authPhoneTitle;
-
-  /// Phone sign-in subtitle
-  ///
-  /// In fr, this message translates to:
-  /// **'Nous vous enverrons un code de confirmation.'**
-  String get authPhoneSubtitle;
-
-  /// Phone field label
-  ///
-  /// In fr, this message translates to:
-  /// **'Numéro de téléphone'**
-  String get authPhoneLabel;
-
-  /// Phone field hint
-  ///
-  /// In fr, this message translates to:
-  /// **'081 234 5678'**
-  String get authPhoneHint;
-
-  /// Send OTP button
-  ///
-  /// In fr, this message translates to:
-  /// **'Recevoir le code'**
-  String get authPhoneSend;
-
-  /// Terms prefix text
-  ///
-  /// In fr, this message translates to:
-  /// **'En continuant, vous acceptez nos '**
-  String get authPhoneTermsPrefix;
-
-  /// Terms link text
-  ///
-  /// In fr, this message translates to:
-  /// **'Conditions d\'utilisation'**
-  String get authPhoneTermsLink;
-
-  /// Terms and privacy separator
-  ///
-  /// In fr, this message translates to:
-  /// **' et notre '**
-  String get authPhoneTermsAnd;
-
-  /// Privacy link text
-  ///
-  /// In fr, this message translates to:
-  /// **'Politique de confidentialité'**
-  String get authPhonePrivacyLink;
-
-  /// Terms not accepted error
-  ///
-  /// In fr, this message translates to:
-  /// **'Veuillez accepter les conditions pour continuer.'**
-  String get authPhoneTermsError;
-
-  /// Invalid phone number error
-  ///
-  /// In fr, this message translates to:
-  /// **'Numéro invalide. Vérifiez et réessayez.'**
-  String get authPhoneInvalid;
-
-  /// OTP screen title
-  ///
-  /// In fr, this message translates to:
-  /// **'Entrez le code'**
-  String get authOtpTitle;
-
-  /// OTP sent to phone
-  ///
-  /// In fr, this message translates to:
-  /// **'Code envoyé au {phone}'**
-  String authOtpSubtitle(String phone);
-
-  /// Resend countdown
-  ///
-  /// In fr, this message translates to:
-  /// **'Renvoyer dans {seconds}s'**
-  String authOtpResendIn(int seconds);
-
-  /// Resend OTP button
-  ///
-  /// In fr, this message translates to:
-  /// **'Renvoyer le code'**
-  String get authOtpResend;
-
-  /// Change number link
-  ///
-  /// In fr, this message translates to:
-  /// **'Changer de numéro'**
-  String get authOtpChangeNumber;
-
   /// Profile setup title
   ///
   /// In fr, this message translates to:
@@ -535,18 +427,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'E-mail de réinitialisation envoyé.'**
   String get authEmailResetSent;
-
-  /// Switch to phone auth link
-  ///
-  /// In fr, this message translates to:
-  /// **'Se connecter par téléphone'**
-  String get authEmailUsePhone;
-
-  /// Switch to email auth link
-  ///
-  /// In fr, this message translates to:
-  /// **'Se connecter par e-mail'**
-  String get authPhoneUseEmail;
 
   /// Email already in use error
   ///
@@ -1040,10 +920,10 @@ abstract class AppLocalizations {
   /// **'Publiez vos services gratuitement et touchez des milliers de clients.'**
   String get publishHubBecomeProviderSubtitle;
 
-  /// Pending status message
+  /// Pending status message (brief, auto-approve is instant in v1)
   ///
   /// In fr, this message translates to:
-  /// **'Votre dossier est en cours d\'examen.'**
+  /// **'Activation de votre profil…'**
   String get publishHubPending;
 
   /// Rejected status message
@@ -1352,10 +1232,28 @@ abstract class AppLocalizations {
   /// **'0'**
   String get listingFormAmountHint;
 
+  /// Main commune picker label
+  ///
+  /// In fr, this message translates to:
+  /// **'Commune principale'**
+  String get listingFormBaseCommuneLabel;
+
+  /// Main commune picker hint
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez votre commune principale'**
+  String get listingFormBaseCommuneHint;
+
+  /// Main commune validation error
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez votre commune principale'**
+  String get listingFormBaseCommuneError;
+
   /// Communes picker hint
   ///
   /// In fr, this message translates to:
-  /// **'Sélectionnez vos zones (max 10)'**
+  /// **'Sélectionnez des zones supplémentaires (max 10)'**
   String get listingFormCommuneHint;
 
   /// Title validation error
@@ -1387,6 +1285,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Brouillon enregistré'**
   String get listingFormDraftSaved;
+
+  /// Draft dialog title
+  ///
+  /// In fr, this message translates to:
+  /// **'Garder le brouillon ?'**
+  String get listingFormDraftDialogTitle;
+
+  /// Draft dialog body
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous avez un brouillon non enregistré. Voulez-vous le garder ou le supprimer ?'**
+  String get listingFormDraftDialogBody;
+
+  /// Keep draft button
+  ///
+  /// In fr, this message translates to:
+  /// **'Garder'**
+  String get listingFormDraftKeep;
+
+  /// Discard draft button
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get listingFormDraftDiscard;
+
+  /// Photo upload error
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'envoi de la photo a échoué. Appuyez sur Réessayer.'**
+  String get listingFormPhotoUploadError;
 
   /// Provider dashboard title
   ///
@@ -1745,7 +1673,7 @@ abstract class AppLocalizations {
   /// Delete account consequences
   ///
   /// In fr, this message translates to:
-  /// **'Vos annonces et votre profil prestataire seront supprimés.'**
+  /// **'Vos annonces, votre profil prestataire, vos favoris, vos contacts et vos photos seront supprimés. Les avis que vous avez laissés restent visibles, sans votre nom.'**
   String get deleteAccountConsequences;
 
   /// Delete confirmation input label
@@ -1945,6 +1873,324 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Débloqué(e)'**
   String get providerUnblockedSnackbar;
+
+  /// Listing quota label
+  ///
+  /// In fr, this message translates to:
+  /// **'{used}/{max} annonces'**
+  String listingLimitUsage(int used, int max);
+
+  /// Listing limit dialog title
+  ///
+  /// In fr, this message translates to:
+  /// **'Limite d\'annonces atteinte'**
+  String get listingLimitReachedTitle;
+
+  /// Listing limit explanation
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous avez atteint la limite de {max} annonces. Supprimez une annonce existante pour en créer une nouvelle.'**
+  String listingLimitReachedBody(int max);
+
+  /// Listing edit saved snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce mise à jour.'**
+  String get listingFormUpdated;
+
+  /// Listing paused snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce mise en pause.'**
+  String get listingActionPaused;
+
+  /// Listing resumed snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce réactivée.'**
+  String get listingActionResumed;
+
+  /// Listing deleted snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce supprimée.'**
+  String get listingActionDeleted;
+
+  /// Listing action failed snackbar
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'action a échoué. Veuillez réessayer.'**
+  String get listingActionFailed;
+
+  /// Listings load error
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les annonces.'**
+  String get listingsLoadFailed;
+
+  /// Listing hidden by moderation
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquée'**
+  String get dashboardListingHidden;
+
+  /// Chip: listing hidden because the limit was reached
+  ///
+  /// In fr, this message translates to:
+  /// **'Limite atteinte'**
+  String get dashboardListingOverLimit;
+
+  /// Explanation for an over-limit listing
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette annonce est masquée : vous avez atteint la limite d\'annonces actives ou en pause. Supprimez une annonce, puis enregistrez celle-ci pour la republier.'**
+  String get listingOverLimitNote;
+
+  /// Dashboard app bar: open own public profile
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir mon profil public'**
+  String get dashboardViewPublicProfile;
+
+  /// Edit profile: add photo
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une photo'**
+  String get profilePhotoAdd;
+
+  /// Edit profile: change photo
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer la photo'**
+  String get profilePhotoChange;
+
+  /// Edit profile: remove photo
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer la photo'**
+  String get profilePhotoRemove;
+
+  /// Phone sign-in title
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre numéro de téléphone'**
+  String get authPhoneTitle;
+
+  /// Phone sign-in subtitle
+  ///
+  /// In fr, this message translates to:
+  /// **'Nous vous envoyons un code par SMS pour vous connecter.'**
+  String get authPhoneSubtitle;
+
+  /// Phone field label
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de téléphone'**
+  String get authPhoneLabel;
+
+  /// Phone field hint
+  ///
+  /// In fr, this message translates to:
+  /// **'81 234 5678'**
+  String get authPhoneHint;
+
+  /// Send code button
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir le code'**
+  String get authPhoneContinue;
+
+  /// Invalid phone error
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de téléphone invalide.'**
+  String get authPhoneInvalid;
+
+  /// Dev-only link to email sign-in
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion par e-mail (test)'**
+  String get authPhoneUseEmail;
+
+  /// OTP screen title
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrez le code'**
+  String get authOtpTitle;
+
+  /// OTP field label
+  ///
+  /// In fr, this message translates to:
+  /// **'Code à 6 chiffres'**
+  String get authOtpCodeLabel;
+
+  /// OTP verify button
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider'**
+  String get authOtpVerify;
+
+  /// OTP resend button
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer le code'**
+  String get authOtpResend;
+
+  /// OTP change number
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le numéro'**
+  String get authOtpChangeNumber;
+
+  /// OTP wrong code
+  ///
+  /// In fr, this message translates to:
+  /// **'Code incorrect. Vérifiez et réessayez.'**
+  String get authOtpWrong;
+
+  /// OTP expired
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce code a expiré. Demandez-en un nouveau.'**
+  String get authOtpExpired;
+
+  /// Too many OTP attempts
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop de tentatives. Réessayez dans quelques minutes.'**
+  String get authOtpTooMany;
+
+  /// Network error on sign-in
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de connexion. Vérifiez votre réseau.'**
+  String get authPhoneNetwork;
+
+  /// SMS quota exceeded
+  ///
+  /// In fr, this message translates to:
+  /// **'Service SMS momentanément indisponible. Réessayez plus tard.'**
+  String get authPhoneQuota;
+
+  /// Resend countdown
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer dans {seconds} s'**
+  String authOtpResendIn(int seconds);
+
+  /// OTP subtitle
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrez le code à 6 chiffres envoyé au {phone}.'**
+  String authOtpSubtitle(String phone);
+
+  /// Delete account: continue to OTP
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get deleteAccountContinue;
+
+  /// Delete account OTP intro
+  ///
+  /// In fr, this message translates to:
+  /// **'Par sécurité, confirmez avec le code envoyé au {phone}.'**
+  String deleteAccountOtpIntro(String phone);
+
+  /// Delete account retry
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get deleteAccountRetry;
+
+  /// Delete account: reauth expired
+  ///
+  /// In fr, this message translates to:
+  /// **'La confirmation a expiré. Demandez un nouveau code.'**
+  String get deleteAccountReauthExpired;
+
+  /// Delete account without phone
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre compte n\'a pas de numéro vérifié : suppression impossible depuis l\'application.'**
+  String get deleteAccountNoPhone;
+
+  /// Invalid provider phone number
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro invalide. Exemple : +243 81 234 5678'**
+  String get onboardingPhoneInvalid;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Arnaque'**
+  String get reportReasonScam;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Contenu inapproprié'**
+  String get reportReasonInappropriate;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Faux profil ou fausse annonce'**
+  String get reportReasonFake;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Mauvaise catégorie'**
+  String get reportReasonWrongCategory;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get reportReasonOther;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà signalé'**
+  String get reportAlready;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop de signalements aujourd\'hui. Réessayez demain.'**
+  String get reportRateLimited;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous ne pouvez pas signaler votre propre contenu.'**
+  String get reportOwnTarget;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce contenu n\'existe plus.'**
+  String get reportNotFound;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Connectez-vous avec votre numéro pour signaler.'**
+  String get reportNotVerified;
+
+  /// Legal page
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce document est publié sur notre site. Il s\'ouvre dans votre navigateur.'**
+  String get legalOpenHint;
+
+  /// Legal page
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir la page'**
+  String get legalOpenButton;
 }
 
 class _AppLocalizationsDelegate

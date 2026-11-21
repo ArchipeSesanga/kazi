@@ -4,9 +4,9 @@
 
 ## 1. What you're building
 
-Kazi is a free Android-first marketplace app for local services in the DRC (Kinshasa first). Clients find providers and contact them via WhatsApp or a phone call. Providers publish service listings. Admins moderate through a Flutter Web panel.
+Kazi is a free Android-first marketplace app for local services in the DRC (Kinshasa first). Clients find providers and contact them via WhatsApp or a phone call. Providers publish service listings. Staff moderate through a separate React web app in `/admin` (not Flutter).
 
-**Stack (non-negotiable):** Flutter (Dart 3) · Firebase (Auth phone OTP, Firestore, Storage, Functions 2nd gen in TypeScript, FCM, Remote Config, App Check, Analytics, Crashlytics, Hosting) · **Provider** for state management · go_router · freezed.
+**Stack (non-negotiable):** Flutter (Dart 3) · Firebase (Auth phone OTP, email/password for staff, Firestore, Storage, Functions 2nd gen in TypeScript, FCM, Remote Config, App Check, Analytics, Crashlytics, Hosting) · **Provider** for state management · go_router · freezed.
 
 ## 2. Read before coding (in this order)
 
@@ -42,8 +42,8 @@ dart analyze
 flutter test
 flutter run --flavor dev -t lib/main.dart --dart-define=FLAVOR=dev --dart-define=USE_EMULATORS=true
 
-# Admin web
-flutter run -d chrome -t lib/main_admin.dart --dart-define=FLAVOR=dev --dart-define=USE_EMULATORS=true
+# Admin web app (React, folder /admin)
+cd admin && npm ci && npm run dev      # lint / typecheck / test / build: npm run lint|typecheck|test|build
 
 # Functions + rules tests
 cd functions && npm ci && npm run lint && npm run build
@@ -62,7 +62,8 @@ npx ts-node scripts/seed-demo.ts --emulator
 4. Add or extend tests per the test plan. Run format, analyze, tests and (if touched) the functions/rules tests.
 5. For UI: implement loading, empty, error and offline states, and check FR + EN at 1.3× text scale.
 6. Open a PR with: story ID, summary, screenshots or GIF for UI, test evidence, and any doc changes.
-7. Stop and ask the owner when: acceptance criteria conflict with the TDD, a new package or field seems necessary, a rule needs loosening, or a task needs production access.
+7. **Update the ticket status.** Any change to a ticket (started, partly delivered, finished, blocked) updates its row in the Status board of `docs/07-BACKLOG-ROADMAP.md` (`todo` / `in progress` / `done`, plus a short note) in the same PR.
+8. Stop and ask the owner when: acceptance criteria conflict with the TDD, a new package or field seems necessary, a rule needs loosening, or a task needs production access.
 
 ## 6. Patterns to copy
 

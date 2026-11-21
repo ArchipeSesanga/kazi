@@ -16,6 +16,7 @@ import '../core/services/firebase_analytics_service.dart';
 import '../core/services/launcher_service.dart';
 import '../core/services/url_launcher_service.dart';
 import '../features/auth/application/auth_controller.dart';
+import '../features/auth/application/phone_auth_controller.dart';
 import '../features/auth/application/session_controller.dart';
 import '../features/auth/data/firebase_auth_repository.dart';
 import '../features/auth/data/firebase_user_repository.dart';
@@ -40,8 +41,11 @@ import '../features/provider_profile/data/firebase_media_repository.dart';
 import '../features/provider_profile/data/firestore_provider_repository.dart';
 import '../features/provider_profile/domain/media_repository.dart';
 import '../features/provider_profile/domain/provider_repository.dart';
+import '../features/reports/data/firebase_report_repository.dart';
+import '../features/reports/domain/report_repository.dart';
 import '../features/search/data/firestore_search_repository.dart';
 import '../features/search/domain/search_repository.dart';
+import '../features/welcome/application/onboarding_controller.dart';
 import 'router/app_router.dart';
 
 class AppProviders extends StatelessWidget {
@@ -76,8 +80,13 @@ class AppProviders extends StatelessWidget {
         ProxyProvider<FirebaseAuth, AuthRepository>(
           update: (_, auth, __) => FirebaseAuthRepository(auth),
         ),
-        ProxyProvider2<FirebaseFirestore, FirebaseAuth, UserRepository>(
-          update: (_, db, auth, __) => FirebaseUserRepository(db, auth),
+        ProxyProvider3<FirebaseFirestore, FirebaseAuth, FirebaseFunctions,
+            UserRepository>(
+          update: (_, db, auth, functions, __) =>
+              FirebaseUserRepository(db, auth, functions),
+        ),
+        ProxyProvider<FirebaseFunctions, ReportRepository>(
+          update: (_, functions, __) => FirebaseReportRepository(functions),
         ),
         ProxyProvider<FirebaseFirestore, BlockRepository>(
           update: (_, db, __) => FirestoreBlockRepository(db),
@@ -104,13 +113,22 @@ class AppProviders extends StatelessWidget {
         // Global controllers.
         ChangeNotifierProvider(create: (_) => ConnectivityController()),
         ChangeNotifierProvider(create: (_) => LocaleController(prefs)),
+        ChangeNotifierProvider(create: (_) => OnboardingController(prefs)),
         ChangeNotifierProxyProvider<CatalogRepository, CatalogController>(
           create: (ctx) => CatalogController(ctx.read<CatalogRepository>())..load(),
           update: (_, repo, prev) => prev ?? (CatalogController(repo)..load()),
         ),
-        ChangeNotifierProxyProvider<ProviderRepository, HomeController>(
-          create: (ctx) => HomeController(ctx.read<ProviderRepository>())..load(),
-          update: (_, repo, prev) => prev ?? (HomeController(repo)..load()),
+        ChangeNotifierProxyProvider2<
+          ProviderRepository,
+          SearchRepository,
+          HomeController
+        >(
+          create: (ctx) => HomeController(
+            ctx.read<ProviderRepository>(),
+            ctx.read<SearchRepository>(),
+          )..load(),
+          update: (_, providers, search, prev) =>
+              prev ?? (HomeController(providers, search)..load()),
         ),
         ChangeNotifierProxyProvider<SharedPreferences, ExploreController>(
           create: (ctx) => ExploreController(ctx.read<SharedPreferences>()),
@@ -120,13 +138,19 @@ class AppProviders extends StatelessWidget {
           create: (ctx) => AuthController(ctx.read<AuthRepository>()),
           update: (_, repo, prev) => prev ?? AuthController(repo),
         ),
+        ChangeNotifierProxyProvider<AuthRepository, PhoneAuthController>(
+          create: (ctx) => PhoneAuthController(ctx.read<AuthRepository>()),
+          update: (_, repo, prev) => prev ?? PhoneAuthController(repo),
+        ),
         ChangeNotifierProxyProvider2<AuthRepository, UserRepository, SessionController>(
           create: (ctx) => SessionController(
-            ctx.read<AuthRepository>(),
             ctx.read<UserRepository>(),
+            ctx.read<AuthRepository>(),
+            providerExists: (uid) async =>
+                await ctx.read<ProviderRepository>().getProvider(uid) != null,
           ),
           update: (_, authRepo, userRepo, prev) =>
-              prev ?? SessionController(authRepo, userRepo),
+              prev ?? SessionController(userRepo, authRepo),
         ),
         // MediaRepository depends on SessionController.uid — must come after it.
         ProxyProvider2<FirebaseStorage, SessionController, MediaRepository>(
@@ -154,14 +178,15 @@ class AppProviders extends StatelessWidget {
           update: (_, service, prev) => prev ?? GateController(service),
         ),
 
-        // Router — created once, refreshes on SessionController + GateController.
-        ProxyProvider2<SessionController, GateController, GoRouter>(
+        // Router — created once, refreshes on session, gate, and onboarding.
+        ProxyProvider3<SessionController, GateController, OnboardingController, GoRouter>(
           create: (ctx) => createAppRouter(
             ctx.read<SessionController>(),
             ctx.read<GateController>(),
+            ctx.read<OnboardingController>(),
           ),
-          update: (_, session, gate, prev) =>
-              prev ?? createAppRouter(session, gate),
+          update: (_, session, gate, onboarding, prev) =>
+              prev ?? createAppRouter(session, gate, onboarding),
           dispose: (_, router) => router.dispose(),
         ),
 

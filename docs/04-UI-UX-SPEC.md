@@ -85,10 +85,9 @@ Status: **F** = designed in Figma, **N** = new; build from components.
 | # | Screen | Status | Key elements |
 |---|---|---|---|
 | S01 | Splash | N | Logo mark on `primary`, no network wait > 3 s |
-| S02 | Welcome / language | N | FR / EN choice, 3 intro slides (find, contact on WhatsApp, offer your services), "Commencer" |
-| S03 | Phone sign-in | N | Country code (+243), phone field, legal checkbox with Terms/Privacy links, "Recevoir le code" |
-| S04 | OTP | N | 6-digit `pinput`, resend countdown 60 s, change number |
-| S05 | Profile setup | N | Name, optional photo, commune picker |
+| S02 | Welcome / language | N | FR / EN choice, 3 intro slides (find, contact on WhatsApp, offer your services), "Commencer" → email sign-in/register |
+| S03 | Email sign-in / registration | N | Email, password, forgot password, switch between sign-in and registration |
+| S05 | Profile setup | N | First and last name |
 | S06 | **Accueil** | F (01) | Logo + location chip, notifications bell, search bar + filter, category row (horizontal scroll), promo banner, "Prestataires populaires" grid (2 columns), "Ajoutés récemment" |
 | S07 | Explorer | N | Search field focused, recent searches (local), category grid (all 20) |
 | S08 | **Résultats** | F (02) | App bar with category/query, filter chips (Près de moi / commune, Vérifiés, Note 4+, Prix), result count, Provider List Items, infinite scroll |

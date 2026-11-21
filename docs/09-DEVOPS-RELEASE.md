@@ -9,17 +9,17 @@
 
 ## 1. One-time setup checklist
 
-1. Create Firebase projects **`kazi-dev`** and **`kazi-prod`**; upgrade both to **Blaze** (needed for Cloud Storage default buckets, Functions and Phone Auth SMS beyond the free allowance). Set **budget alerts** in Google Cloud Billing: $25, $50, $100.
+1. Create Firebase projects **`kazi-dev`** and **`kazi-prod`**; upgrade both to **Blaze** (needed for Cloud Storage default buckets and Functions). Set **budget alerts** in Google Cloud Billing: $25, $50, $100.
 2. Firestore: Native mode, location **`africa-south1`**. This can't be changed later.
 3. Storage: default bucket in the same region if offered; enable the **Resize Images** extension (`storage-resize-images`) with: sizes `200x200,800x800`, format `webp`, paths `/media`, keep originals, cache-control `public, max-age=31536000`.
-4. Auth: enable **Phone** (users) and **Email/Password** (admins only, no public sign-up UI). Set the **SMS region policy** to allow `CD` and the countries you expect. Add test phone numbers for dev.
+4. Auth: enable **Phone** (users) and **Email/Password** (staff only: admin and moderator accounts, no public sign-up UI). Set the **SMS region policy** to allow `CD` and the countries you expect. Add test phone numbers in **`kazi-dev`**. In **`kazi-prod`** the only allowed test number is **one** dedicated Play-reviewer number, added for the duration of the Play review and **removed immediately afterwards** (a fixed code on a real project is a sign-in backdoor); never add any other.
 5. App Check: register the Android app with **Play Integrity** (SHA-256 of the upload key and of the Play app signing key) and web with **reCAPTCHA Enterprise**. Enforce for Firestore, Storage, Functions and Auth once the clients ship tokens (start in monitor mode during beta).
 6. FCM: Android notification channel `kazi_default` created in the app.
 7. Remote Config: create the keys from TDD §3.3 in both projects.
 8. Analytics: data retention 14 months; enable Crashlytics.
-9. Hosting targets: `admin` (admin panel) and `web` (legal pages, `/delete-account`, `/p/:id` share landing + Android App Links `assetlinks.json`).
+9. Hosting targets: `admin` (React admin panel from `admin/dist`; create its own site with `firebase hosting:sites:create <site-id>` and map it with `firebase target:apply hosting admin <site-id>`) and `web` (legal pages, `/delete-account`, `/p/:id` share landing + Android App Links `assetlinks.json`).
 10. Run `scripts/seed-categories.ts` and `scripts/seed-locations.ts` against both projects.
-11. Create the first admin: create an email/password user in the console, then run `scripts/set-claims.ts --project kazi-prod --uid <uid> --role superAdmin` with a service account key stored **only** on your machine (never in git).
+11. Create the first admin: create an email/password user in the console, then run `cd scripts && npx tsx set-claims.ts --project kazi-prod --email <email> --role admin --confirm-prod` with Application Default Credentials / a service account key stored **only** on your machine (never in git). Moderators get `--role moderator`.
 12. `flutterfire configure` for each flavor → `firebase_options_dev.dart` / `firebase_options_prod.dart`.
 
 ## 2. Local development
@@ -31,8 +31,8 @@ cd functions && npm ci && npm run build && cd ..
 firebase emulators:start --import=./.emulator-data --export-on-exit
 npx ts-node scripts/seed-demo.ts --emulator
 flutter run --flavor dev -t lib/main.dart --dart-define=FLAVOR=dev --dart-define=USE_EMULATORS=true
-# Admin panel
-flutter run -d chrome -t lib/main_admin.dart --dart-define=FLAVOR=dev --dart-define=USE_EMULATORS=true
+# Admin panel (React, /admin): set VITE_USE_EMULATORS=true in admin/.env.local to use the emulators
+cd admin && npm ci && npm run dev
 ```
 
 Android emulator → host emulators: use `10.0.2.2`; physical device: use your machine's LAN IP (`--dart-define=EMULATOR_HOST=192.168.x.x`).
@@ -43,7 +43,7 @@ Android emulator → host emulators: use `10.0.2.2`; physical device: use your m
 |---|---|---|
 | `ci.yml` | PR, push to `main` | Flutter: pub get → format check → analyze → `flutter test --coverage` → ARB key parity check. Functions: `npm ci` → lint → build → `firebase emulators:exec "npm test"` (rules + functions tests) |
 | `deploy-dev.yml` | push to `main` | Deploy rules, indexes, functions and the admin (hosting) to `kazi-dev`; build dev APK and upload to Firebase App Distribution (testers group) |
-| `release.yml` | tag `v*.*.*` | Deploy rules/indexes/functions/hosting to `kazi-prod`; build prod **App Bundle** signed with the upload key (from GitHub secrets); upload to Google Play **internal** track via `r0adkll/upload-google-play` or Fastlane |
+| `release.yml` | tag `v*.*.*` | Verify (tag = pubspec version, legal placeholders, all tests) → build the prod **App Bundle** signed with the upload key and refuse any other certificate → **after a manual approval** (`production` environment) deploy indexes → rules → functions (one at a time) → hosting `web` to `kazi-prod` → upload to the Play **internal** track as a draft. Step by step: [11-PROD-RUNBOOK.md](11-PROD-RUNBOOK.md) |
 
 Secrets (GitHub): `FIREBASE_SERVICE_ACCOUNT_DEV`, `FIREBASE_SERVICE_ACCOUNT_PROD` (least-privilege deploy roles), `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `ANDROID_STORE_PASSWORD`, `PLAY_SERVICE_ACCOUNT_JSON`.
 
