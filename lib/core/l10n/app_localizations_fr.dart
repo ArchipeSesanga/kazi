@@ -1121,4 +1121,37 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get onboardingPhoneInvalid =>
       'Numéro invalide. Exemple : +243 81 234 5678';
+
+  @override
+  String get reportReasonScam => 'Arnaque';
+
+  @override
+  String get reportReasonInappropriate => 'Contenu inapproprié';
+
+  @override
+  String get reportReasonFake => 'Faux profil ou fausse annonce';
+
+  @override
+  String get reportReasonWrongCategory => 'Mauvaise catégorie';
+
+  @override
+  String get reportReasonOther => 'Autre';
+
+  @override
+  String get reportAlready => 'Déjà signalé';
+
+  @override
+  String get reportRateLimited =>
+      'Trop de signalements aujourd\'hui. Réessayez demain.';
+
+  @override
+  String get reportOwnTarget =>
+      'Vous ne pouvez pas signaler votre propre contenu.';
+
+  @override
+  String get reportNotFound => 'Ce contenu n\'existe plus.';
+
+  @override
+  String get reportNotVerified =>
+      'Connectez-vous avec votre numéro pour signaler.';
 }

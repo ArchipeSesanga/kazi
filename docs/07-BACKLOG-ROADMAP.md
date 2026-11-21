@@ -74,18 +74,18 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-060 | Reviews list & summary | in progress | screen only |
 | KZ-061 | Write/edit/delete review (S12) | in progress | screen only |
 | KZ-062 | Favourites | in progress | screen only |
-| KZ-063 | Report sheet (S13) | in progress | repository interface only |
+| KZ-063 | Report sheet (S13) | done | `submitReport` callable (rate-limited), report sheet for listings and providers, "Déjà signalé"; reviews not reportable yet. Needs deploy to kazi-dev and a device test |
 | KZ-064 | Provider review reply (P2) | todo |  |
 | KZ-070 | Normalise + keywords lib (TS) | todo |  |
 | KZ-071 | `onListingWritten` | done |  |
 | KZ-072 | `onProviderWritten` | done |  |
 | KZ-073 | `onReviewWritten` | todo |  |
 | KZ-074 | `onContactWritten` | todo |  |
-| KZ-075 | `onReportCreated` | todo |  |
+| KZ-075 | `onReportCreated` | done | 3 open reports hide a listing or all of a provider's listings (`auto_reports`); emulator tests. Needs deploy |
 | KZ-076 | Notifications lib | todo |  |
 | KZ-077 | `deleteAccount` callable | done | Fresh-login check, idempotent steps, review anonymisation, Storage and Auth removal; emulator tests; deployed to kazi-dev and confirmed on a device |
-| KZ-078 | Scheduled cleanups | in progress | only cleanupOrphanMedia |
-| KZ-079 | Admin callables | todo |  |
+| KZ-078 | Scheduled cleanups | in progress | `cleanupOrphanMedia` and `cleanupDraftListings` (nightly, 30 days) done; `cleanupVerificationFiles` waits for the verification flow |
+| KZ-079 | Admin callables | in progress | Moderator callables done (hide/restore listing, suspend provider, dismiss report, with `adminLogs`); `admin_setProviderStatus`, `admin_upsertCategory`, `admin_setRole` remain |
 | KZ-080 | Admin shell & auth | todo |  |
 | KZ-081 | Providers queue & detail | todo |  |
 | KZ-082 | Reports queue | todo |  |

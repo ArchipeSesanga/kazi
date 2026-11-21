@@ -41,6 +41,8 @@ import '../features/provider_profile/data/firebase_media_repository.dart';
 import '../features/provider_profile/data/firestore_provider_repository.dart';
 import '../features/provider_profile/domain/media_repository.dart';
 import '../features/provider_profile/domain/provider_repository.dart';
+import '../features/reports/data/firebase_report_repository.dart';
+import '../features/reports/domain/report_repository.dart';
 import '../features/search/data/firestore_search_repository.dart';
 import '../features/search/domain/search_repository.dart';
 import '../features/welcome/application/onboarding_controller.dart';
@@ -82,6 +84,9 @@ class AppProviders extends StatelessWidget {
             UserRepository>(
           update: (_, db, auth, functions, __) =>
               FirebaseUserRepository(db, auth, functions),
+        ),
+        ProxyProvider<FirebaseFunctions, ReportRepository>(
+          update: (_, functions, __) => FirebaseReportRepository(functions),
         ),
         ProxyProvider<FirebaseFirestore, BlockRepository>(
           update: (_, db, __) => FirestoreBlockRepository(db),

@@ -25,6 +25,7 @@ import '../../block/application/block_controller.dart';
 import '../../catalog/application/catalog_controller.dart';
 import '../../contact/application/contact_controller.dart';
 import '../../listings/domain/listing_repository.dart';
+import '../../reports/presentation/report_sheet.dart';
 import '../application/provider_profile_controller.dart';
 import '../domain/provider_repository.dart';
 
@@ -180,7 +181,11 @@ class _LoadedScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(6),
                       child: _CircleIconButton(
                         icon: LucideIcons.flag,
-                        onTap: () {},
+                        onTap: () => showReportSheet(
+                          context,
+                          targetType: ReportTargetType.provider,
+                          targetKey: profile.uid,
+                        ),
                       ),
                     ),
                     Padding(

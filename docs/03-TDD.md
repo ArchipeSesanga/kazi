@@ -327,7 +327,7 @@ Readable by any signed-in user when `visible == true`; always by the owner and m
 
 ### 4.8 `reports/{reporterUid}_{targetType}_{targetKey}`
 
-`targetKey` = `listingId`, `providerId`, or `{providerId}__{reviewerUid}` for reviews. The deterministic ID gives one report per user per target.
+`targetKey` = `listingId`, `providerId`, or `{providerId}__{reviewerUid}` for reviews. The deterministic ID gives one report per user per target. **Reports are created only by the `submitReport` callable** (rules deny client writes): it checks the target exists and is not the reporter's own, applies the per-user limit and returns `already_reported` for a repeat. Only `listing` and `provider` targets are accepted until reviews ship. The limit is `REPORTS_PER_DAY` (10 new reports per rolling 24 h) tracked in the server-only `reportQuota/{uid}` (`{ windowStart, count }`).
 
 | Field | Type | Writer |
 |---|---|---|
@@ -449,7 +449,8 @@ Starter files: [`firebase/firestore.rules`](firebase/firestore.rules) and [`fire
 | `providers/{pid}/reviews/{rid}` | signed-in | rid = auth.uid ≠ pid, contact exists, valid | author (rating/text); provider (reply only) | author, moderator |
 | `listings/{id}` | signed-in if `visible`; owner; moderator | owner, client fields only, `providers.listingCount < config/limits.maxListingsPerProvider` (fallback 10 if the doc is missing; the count is active + paused only), provider not suspended | owner, client fields only | owner |
 | `contacts/{id}` | client or provider of the pair; moderator | client, id = `uid_providerId` | client (`listingId`, `channel`, `lastAt`, snapshots) | ❌ |
-| `reports/{id}` | moderator | reporter, deterministic id, status `open` | ❌ | ❌ |
+| `reports/{id}` | moderator | ❌ (`submitReport` callable) | ❌ | ❌ |
+| `reportQuota/{uid}` | ❌ | ❌ | ❌ | ❌ (server only) |
 | `verificationRequests/{uid}` | owner, moderator | ❌ (callable) | ❌ | ❌ |
 | `categories`, `config` | signed-in | ❌ | ❌ | ❌ |
 | `adminLogs` | admin | ❌ | ❌ | ❌ |
@@ -478,13 +479,14 @@ All functions use `region: config.REGION` and are 2nd gen. Callables use `enforc
 | `onListingWritten` | `listings/{id}` written | (1) On create/update: fill denormalised provider + category fields, compute `searchKeywords`, `visible`, set `publishedAt` the first time it becomes visible. (2) Validate content (no phone numbers in title; profanity list) → set `moderation = hidden`, `moderationReason = 'auto_content'` if it fails. (3) Maintain `providers.listingCount` through `countsTowardLimit` (state-based, idempotent: +1 when a listing becomes active/paused with a free slot, −1 when it goes to draft or is deleted); with no free slot the listing is hidden with `over_limit` instead of counted. `providers.headline` and `categories.listingCount` are **not yet implemented**. (4) On delete: delete the listing's Storage objects (also on update when photos are removed); only paths under `media/{providerId}/listings/` are ever deleted (the `photos` array is client-written). Server writes happen only when a computed value differs, so the invocation caused by the function's own write is a no-op (logged as `wrote: false`) |
 | `onReviewWritten` | `providers/{pid}/reviews/{rid}` written | In a transaction, apply the delta to `ratingSum` / `ratingCount`; set `ratingAvg = round(sum / count, 1)` |
 | `onContactWritten` | `contacts/{id}` written | Increment `providers.stats.contactsTotal`, `stats.contactsByMonth[YYYY-MM]` and `listings.contactCount`. **Ignore** updates where `lastAt - before.lastAt < 10 min` (anti-inflation) |
-| `onReportCreated` | `reports/{id}` created | Count open reports for the target (`where targetType, targetKey, status == open`). If ≥ `AUTO_HIDE_THRESHOLD` (3): hide the listing (`moderation = hidden`, reason `auto_reports`) or, for a provider, set every listing to `hidden` (the provider stays approved until an admin decides). Write `adminLogs` |
+| `onReportCreated` | `reports/{id}` created | **Implemented.** Count open reports for the target (`where targetType, targetKey, status == open`). If ≥ `AUTO_HIDE_THRESHOLD` (3): hide the listing (`moderation = hidden`, reason `auto_reports`) or, for a provider, set every listing to `hidden` (the provider stays approved until an admin decides). Write `adminLogs` |
 
 ### 6.2 Callables (mobile)
 
 | Function | Input | Behaviour |
 |---|---|---|
 | `submitVerification` | `{ idDocumentPath, selfiePath }` | Caller must be a provider. Verify both files exist under `private/verification/{uid}/`. Upsert `verificationRequests/{uid}` with `status = pending` |
+| `submitReport` | `{ targetType: listing\|provider, targetKey, reason, details? }` | Verified callers only. One report per user and target (`already_reported` otherwise, no quota used); target must exist and not be the caller's; `resource-exhausted: rate-limited` beyond 10 new reports per 24 h. Creates `reports/{uid}_{type}_{key}` with status `open` |
 | `deleteAccount` | `{}` | Caller must have a verified phone and a sign-in at most **5 minutes old** (`auth_time`): the client re-confirms with a fresh OTP first, otherwise `failed-precondition: recent-login-required`. See §6.5 |
 
 ### 6.3 Callables (admin — require `admin` or `moderator` claim)
@@ -494,6 +496,10 @@ All functions use `region: config.REGION` and are 2nd gen. Callables use `enforc
 | `admin_setProviderStatus` | `{ providerId, status: approved\|rejected\|suspended\|pending, reason? }` | Update the provider; `approvedAt` on first approval; notify provider (FCM); `adminLogs` |
 | `admin_getVerificationFiles` | `{ uid }` | Returns signed read URLs (10 min) for both files |
 | `admin_decideVerification` | `{ uid, approved: bool, reason? }` | Set `providers.verified`; update request; **delete both files** and clear paths; notify; `adminLogs` |
+| `moderator_hideListing` | `{ listingId, note? }` | **Implemented.** Staff (moderator or admin). `moderation = hidden`, reason `admin`; open reports on it → `actioned`; `adminLogs` |
+| `moderator_restoreListing` | `{ listingId, note? }` | **Implemented.** Clears an `admin`/`auto_reports` hide (refuses `over_limit`, which the slot logic owns); open reports → `dismissed`; `adminLogs` |
+| `moderator_suspendProvider` | `{ providerId, reason }` | **Implemented.** `providers.status = suspended` (`onProviderWritten` then hides their listings); open reports on the provider → `actioned`; `adminLogs` |
+| `moderator_dismissReport` | `{ reportId, note? }` | **Implemented.** Dismisses the report and every other open report on the same target; `adminLogs` |
 | `admin_resolveReport` | `{ reportId, action: dismiss\|hide_target\|unhide_target\|suspend_provider\|delete_review, note? }` | Apply the action; mark all open reports on the same target as resolved; `adminLogs` |
 | `admin_upsertCategory` | `{ id, name: {fr,en}, icon, order, active }` | `adminLogs` |
 | `admin_setRole` | `{ uid, role: admin\|moderator, enabled }` | **superAdmin claim only**. Sets custom claims |
@@ -503,7 +509,7 @@ All functions use `region: config.REGION` and are 2nd gen. Callables use `enforc
 | Function | Schedule | Behaviour |
 |---|---|---|
 | `cleanupVerificationFiles` | daily 02:00 Africa/Kinshasa | Delete `private/verification/**` files older than 30 days and mark stale pending requests `rejected` (reason `expired`) |
-| `cleanupDraftListings` | weekly | Delete `draft` listings not updated for 90 days (and their media) |
+| `cleanupDraftListings` | daily 03:30 Africa/Kinshasa (runs in `europe-west1`) | **Implemented.** Delete `draft` listings not updated for **30 days**; `onListingWritten` removes their media; needs the composite index `listings(status, updatedAt)` |
 | `cleanupOrphanMedia` | daily 03:00 Africa/Kinshasa | List files under `media/{uid}/listings/{listingId}/`. For each group: if the listing doc doesn't exist or doesn't reference the file in its `photos` array, and the file is older than 24 hours, delete it. Logs the count of deleted files. |
 
 ### 6.5 Account deletion (`deleteAccount`)
@@ -924,7 +930,7 @@ Implement events from PRD §9 in `AnalyticsService`. Event names are lower_snake
 - Entry: `lib/main_admin.dart`, built with `flutter build web -t lib/main_admin.dart --release`, deployed to Firebase Hosting target `admin` (e.g. `admin.<domain>`).
 - Auth: email/password (staff only); a staff claim is enough to be signed in, no phone or consumer profile needed; after sign-in, force-refresh the ID token and require the `admin` or `moderator` claim, otherwise sign out with an error.
 - Layout: left navigation rail + content; data tables with pagination (20 rows).
-- All mutations go through `admin_*` callables. The admin panel never writes Firestore directly.
+- All mutations go through `admin_*` / `moderator_*` callables. The admin panel never writes Firestore directly.
 - First admin bootstrap: `scripts/set-claims.ts --uid <uid> --role superAdmin` run locally with a service account (documented in [Ops](09-DEVOPS-RELEASE.md)).
 
 ## 11. Error codes (Functions → app)

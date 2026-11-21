@@ -21,6 +21,8 @@ import '../../auth/application/session_controller.dart';
 import '../../catalog/application/catalog_controller.dart';
 import '../../contact/application/contact_controller.dart';
 import '../../provider_profile/domain/provider_repository.dart';
+import '../../reports/domain/report_repository.dart';
+import '../../reports/presentation/report_sheet.dart';
 import '../application/listing_detail_controller.dart';
 import '../domain/listing_repository.dart';
 import 'listing_status_chip.dart';
@@ -168,6 +170,19 @@ class _LoadedScreenState extends State<_LoadedScreen> {
                         onTap: () {},
                       ),
                     ),
+                    if (listing.providerId !=
+                        context.read<SessionController>().uid)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: _CircleIconButton(
+                          icon: LucideIcons.flag,
+                          onTap: () => showReportSheet(
+                            context,
+                            targetType: ReportTargetType.listing,
+                            targetKey: listing.id,
+                          ),
+                        ),
+                      ),
                   ],
                   flexibleSpace: FlexibleSpaceBar(
                     background: photos.isEmpty

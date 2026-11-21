@@ -2119,6 +2119,66 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Numéro invalide. Exemple : +243 81 234 5678'**
   String get onboardingPhoneInvalid;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Arnaque'**
+  String get reportReasonScam;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Contenu inapproprié'**
+  String get reportReasonInappropriate;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Faux profil ou fausse annonce'**
+  String get reportReasonFake;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Mauvaise catégorie'**
+  String get reportReasonWrongCategory;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get reportReasonOther;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà signalé'**
+  String get reportAlready;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop de signalements aujourd\'hui. Réessayez demain.'**
+  String get reportRateLimited;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous ne pouvez pas signaler votre propre contenu.'**
+  String get reportOwnTarget;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce contenu n\'existe plus.'**
+  String get reportNotFound;
+
+  /// Report sheet
+  ///
+  /// In fr, this message translates to:
+  /// **'Connectez-vous avec votre numéro pour signaler.'**
+  String get reportNotVerified;
 }
 
 class _AppLocalizationsDelegate

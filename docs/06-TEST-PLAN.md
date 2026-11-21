@@ -46,7 +46,7 @@
 | listings read | visible by guest; draft by owner | draft by another user; query without `visible == true` by guest |
 | reviews create | after contact | without contact; self-review; rating 6; doc id ≠ uid |
 | contacts create | `uid_pid` id | wrong id format; self-contact |
-| reports create | deterministic id | wrong id; status `actioned`; reading reports as user |
+| reports create | none from clients (callable only); moderator read | any client write, verified phone or not; `reportQuota` access; reading reports as user |
 | verificationRequests | read own | write by client |
 | storage media | owner image < 2 MB | other user's folder; PDF; 3 MB; write into `thumbs/` |
 | storage private | owner create | read by anyone; overwrite |
@@ -56,7 +56,10 @@
 - `onListingWritten`: over-limit → hidden `over_limit`, doc and photos kept, restored when a slot frees; only active + paused count; no write loop (self-triggered run is a no-op); visibility matrix (status × providerStatus × moderation); keywords generated; phone number in title → hidden; photo removal deletes Storage objects; listingCount maintained.
 - `onProviderWritten`: name change propagates to all listings; suspension hides all listings; no write loop (function invocation count stable).
 - `onContactWritten`: cooldown respected.
-- `onReportCreated`: third distinct report hides target; duplicate reporter can't count twice (deterministic id).
+- `submitReport`: creates, repeat = already reported (no quota), own/missing target, 10 per 24 h, per user, window rollover, concurrent calls.
+- `onReportCreated`: third distinct report hides target; duplicate reporter can't count twice (deterministic id); provider → all listings hidden, provider stays approved; idempotent; other hide reasons untouched.
+- Moderator callables: hide / restore (`over_limit` refused) / suspend / dismiss, report resolution, `adminLogs`, permission matrix (`canPerform`).
+- `cleanupDraftListings`: only drafts older than 30 days, pagination, idempotent, counters untouched.
 - `deleteAccount`: provider with listings, reviews and contacts → everything removed; reports anonymised; Auth user deleted.
 - Admin callables: reject without claim, reject without App Check (in an emulator with enforcement on), log every action.
 
