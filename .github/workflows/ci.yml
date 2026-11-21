@@ -46,6 +46,7 @@ jobs:
           distribution: temurin
           java-version: 21
       - run: npm ci
+      - run: npm run lint
       - run: npm run build
       # Firestore + Storage emulators: rules and trigger-logic tests. Demo
       # project, no credentials, no deploy.

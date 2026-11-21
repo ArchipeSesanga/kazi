@@ -35,9 +35,9 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 |---|---|---|---|
 | KZ-001 | Project scaffolding | done |  |
 | KZ-002 | Firebase wiring | done |  |
-| KZ-003 | Functions scaffolding | in progress | TS project, config.ts, build and vitest work; storage emulator config fixed. Remaining: `npm run lint` fails (ESLint 9 has no `eslint.config.js`) and there is no emulator test npm script |
+| KZ-003 | Functions scaffolding | in progress | TS project, config.ts, build, vitest, ESLint (now configured, clean, in CI) and storage emulator config work. Remaining: an emulator test npm script |
 | KZ-004 | Rules & indexes baseline | in progress | Rules tests cover users, signed-in definition, listing limit, profile photo, provider create and Storage (avatar, cover, portfolio, listing photos, verification docs). Missing: reviews, contacts, reports, verificationRequests cases (Test plan §2.3) |
-| KZ-005 | CI pipeline | in progress | PR workflow: ARB parity, analyze, test, functions build + tests under Firestore and Storage emulators. Format check and ESLint not wired |
+| KZ-005 | CI pipeline | in progress | PR workflow: ARB parity, analyze, test, functions lint + build + tests under Firestore and Storage emulators. Remaining: format check |
 | KZ-006 | Theme & tokens | done |  |
 | KZ-007 | Design-system widgets (part 1) | in progress | `/dev/components` is now dev-only (tested). Still missing: `KaziTextArea` and per-variant widget tests |
 | KZ-008 | Design-system widgets (part 2) | in progress | All 12 widgets exist; no widget tests and no Figma screenshot comparison |
@@ -46,7 +46,7 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-011 | Router & shell | done |  |
 | KZ-012 | Localisation baseline | in progress | ARB parity check (`tool/check_arb_parity.dart`) runs in CI; keys and placeholders match. Remaining: nothing known; mark done after the first green CI run |
 | KZ-020 | Welcome & language | done |  |
-| KZ-021 | Email/password sign-in and registration | in progress | Phone OTP built (screens, controller, rules, tests); needs Firebase console setup and a real-device test before done |
+| KZ-021 | Phone OTP sign-in (email/password for staff and dev) | done | Phone OTP, E.164 identity, email gated by `Env.emailAuthEnabled`, staff claims bypass phone/profile (rules, guards, twin tests); confirmed on a device against kazi-dev. Console setup for prod still to do (see runbook) |
 | KZ-022 | Profile setup | done |  |
 | KZ-023 | Session controller & guards | done | Three access levels in `guards.dart` (no session / no profile / complete profile + provider doc + admin claim), tests per level. `?from=` return path is not implemented: guests go to phone sign-in and then home |
 | KZ-024 | Account screen (S20) & settings | done |  |
@@ -154,7 +154,7 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 **KZ-020 Welcome & language.** S02 screens; locale persisted locally.
 - AC: first launch shows the language picker; second launch skips it; changing language updates the UI immediately.
 
-**KZ-021 Email/password sign-in and registration.** `AuthRepository`, `AuthController`, S03 with email/password validation, forgot-password flow, and sign-in/register switch.
+**KZ-021 Phone OTP sign-in (email/password for staff and dev).** `AuthRepository` (`verifyPhone`/`confirmCode`), `PhoneAuthController`, phone and OTP screens; `AuthController` and the email screen stay for staff and dev/test builds.
 - AC: onboarding leads to **phone OTP** sign-in (+243 default, 6-digit code, resend timer, clear errors for wrong/expired/too many attempts); the verified phone (E.164) is the identity and `users/{uid}.phone` must match it; email is optional. Email/password exists only for the admin app and dev/test/emulator builds (`Env.emailAuthEnabled`); a prod consumer build hides it and the router blocks `/auth/email`. `AuthRepository` stays provider-agnostic. Tests use Firebase test phone numbers (no real SMS in CI).
 
 **KZ-022 Profile setup.** S05; creates `users/{uid}` per rules; optional avatar upload.

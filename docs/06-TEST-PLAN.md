@@ -62,6 +62,7 @@
 
 ### 2.5 Controllers (examples)
 - `PhoneAuthController`: E.164 normalisation (+243 default), invalid number, send failures, wrong/expired/too-many code, resend cooldown (uses a fake repository modelled on Firebase test numbers; no real SMS). Router: `/auth/email` is redirected to `/auth/phone` unless `Env.emailAuthEnabled`.
+- Guards (`guards_test.dart`): the three access levels, provider and staff routes, loop-freedom; staff (moderator/admin claim) without a phone or profile bypass profile setup (twin: the same account without the claim is held at setup).
 - `AuthController`: email registration, sign-in, password reset, and Firebase auth error mapping (dev/admin only).
 - `SearchResultsController`: debounce; filter change resets pagination; client-side commune filter when keyword present; auto-fetch extra pages when the filtered result is short.
 - `ListingFormController`: validation messages; quote clears amount; upload progress; publish sets `status active`; can't add a 7th photo.
@@ -71,7 +72,7 @@
 
 | ID | Journey |
 |---|---|
-| J1 | App opens → picks French → sees onboarding → continues to email/password sign-in or registration → completes profile setup → reaches the app |
+| J1 | App opens → picks French → sees onboarding → enters a phone number → confirms the OTP → completes profile setup → reaches the app |
 | J2 | New user → becomes a provider (5 steps) → sees "En attente" → admin approves (callable in test) → provider creates listing with 2 photos → listing appears in search for its commune |
 | J3 | Client who contacted provider → leaves 4-star review → provider rating shows 4,0 (1 avis) |
 | J4 | Three users report a listing → listing disappears from search → admin un-hides it → visible again |

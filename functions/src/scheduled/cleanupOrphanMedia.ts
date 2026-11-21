@@ -1,6 +1,7 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
+import { logger } from "firebase-functions";
 import "../lib/firebaseAdmin.js";
 import { SCHEDULER_REGION, ORPHAN_MEDIA_AGE_HOURS } from "../config.js";
 
@@ -83,11 +84,11 @@ export const cleanupOrphanMedia = onSchedule(
           await file.delete();
           deletedCount++;
         } catch (err) {
-          console.warn(`Failed to delete orphan: ${file.name}`, err);
+          logger.warn("Failed to delete orphan", { name: file.name, message: String(err) });
         }
       }
     }
 
-    console.log(`cleanupOrphanMedia: deleted ${deletedCount} orphan files`);
+    logger.info("cleanupOrphanMedia", { deletedCount });
   }
 );

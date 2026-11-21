@@ -93,7 +93,7 @@ kazi/
 │   │   ├── utils/                # phone.dart, text_normalize.dart, formatters.dart, debouncer.dart
 │   │   └── widgets/              # design-system widgets (see 04-UI-UX-SPEC.md §6)
 │   ├── features/
-│   │   ├── auth/                 # email/password sign-in, profile setup
+│   │   ├── auth/                 # phone OTP sign-in, profile setup (email: dev/admin only)
 │   │   ├── onboarding/           # language picker, intro slides
 │   │   ├── home/
 │   │   ├── catalog/              # categories, locations
@@ -758,9 +758,11 @@ The admin panel has its own `AdminRepository` (queues + callables) in `features/
 
 | Controller | Scope | Responsibilities |
 |---|---|---|
-| `AuthController` | global | Email/password sign-in, registration, password reset, and auth errors |
+| `PhoneAuthController` | global | Phone entry + OTP (E.164 normalisation, resend timer, `AuthFailure` reasons); the production sign-in path |
+| `AuthController` | global | Email/password sign-in, registration, password reset (dev/test and admin only) |
+| `DeleteAccountController` | screen | Typed word → OTP re-confirmation → `deleteAccount` callable, retry-safe |
 | `OnboardingController` | global | Persists completion of the first-launch intro |
-| `SessionController` | global (proxy on `AuthController`) | Current `AppUser` + `ProviderProfile?` streams; `needsProfileSetup`, `isProvider`, `providerStatus`; registers FCM token |
+| `SessionController` | global (proxy on `AuthRepository`) | Current `AppUser` + `ProviderProfile?` streams; `needsProfileSetup`, `isProvider`, `providerStatus`; registers FCM token |
 | `LocaleController` | global | Locale from `shared_preferences` → user doc |
 | `CatalogController` | global | Categories + locations cached; lookups by id |
 | `ConnectivityController` | global | Online/offline flag for `OfflineBanner` |
@@ -812,8 +814,9 @@ MultiProvider(
     // … reviews, contacts, favorites, reports, verification
 
     // Global controllers
-    ChangeNotifierProvider(create: (c) => AuthController(c.read())),
-    ChangeNotifierProxyProvider<AuthController, SessionController>(
+    ChangeNotifierProvider(create: (c) => PhoneAuthController(c.read())),
+    ChangeNotifierProvider(create: (c) => AuthController(c.read())), // dev/admin email
+    ChangeNotifierProxyProvider<AuthRepository, SessionController>(
       create: (c) => SessionController(c.read(), c.read(), c.read()),
       update: (_, auth, session) => session!..onAuthChanged(auth.user),
     ),
@@ -919,7 +922,7 @@ Implement events from PRD §9 in `AnalyticsService`. Event names are lower_snake
 ## 10. Admin panel
 
 - Entry: `lib/main_admin.dart`, built with `flutter build web -t lib/main_admin.dart --release`, deployed to Firebase Hosting target `admin` (e.g. `admin.<domain>`).
-- Auth: email/password; after sign-in, force-refresh the ID token and require the `admin` or `moderator` claim, otherwise sign out with an error.
+- Auth: email/password (staff only); a staff claim is enough to be signed in, no phone or consumer profile needed; after sign-in, force-refresh the ID token and require the `admin` or `moderator` claim, otherwise sign out with an error.
 - Layout: left navigation rail + content; data tables with pagination (20 rows).
 - All mutations go through `admin_*` callables. The admin panel never writes Firestore directly.
 - First admin bootstrap: `scripts/set-claims.ts --uid <uid> --role superAdmin` run locally with a service account (documented in [Ops](09-DEVOPS-RELEASE.md)).

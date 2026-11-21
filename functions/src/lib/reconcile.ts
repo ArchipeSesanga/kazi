@@ -1,5 +1,6 @@
 import { FieldValue, type Firestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
+import { logger } from "firebase-functions";
 import "./firebaseAdmin.js";
 import {
   changedFields,
@@ -76,7 +77,7 @@ export async function deleteListingMedia(
         bucket
           .file(p)
           .delete({ ignoreNotFound: true })
-          .catch((e) => console.warn(`media delete failed: ${p}`, e)),
+          .catch((e) => logger.warn("media delete failed", { path: p, message: String(e) })),
       ),
   );
 }

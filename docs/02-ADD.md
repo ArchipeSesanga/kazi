@@ -49,7 +49,7 @@ flowchart TB
   end
 
   subgraph Firebase["Firebase project (kazi-prod)"]
-    AUTH[Firebase Auth\nemail/password]
+    AUTH[Firebase Auth\nphone OTP; email for admins]
     FS[(Cloud Firestore\nafrica-south1)]
     ST[(Cloud Storage\nimages, private ID docs)]
     CF[Cloud Functions 2nd gen\nTypeScript]
@@ -125,7 +125,7 @@ flowchart TB
 - **App-scoped providers** (created once in `AppProviders`): Firebase instances, repositories (`Provider<…>`), `AuthController`, `SessionController` (current user and provider profile), `LocaleController`, `ConnectivityController`, `RemoteConfigController`.
 - **Screen-scoped providers**: `ChangeNotifierProvider(create: …)` wrapping each route that needs a controller, so state is disposed when the route is popped.
 - **Dependency wiring**: `ProxyProvider` / `ChangeNotifierProxyProvider` where a controller depends on the session (e.g. `FavoritesController` depends on `uid`).
-- **Router integration**: `go_router` with `refreshListenable: authController` for redirects (guest → sign-in gate, admin guard on the web).
+- **Router integration**: `go_router` with `refreshListenable` on session/gate/onboarding with the three-level guards in `guards.dart` (no session → phone sign-in, no profile → setup, complete → app; provider and staff guards).
 - **No other state libraries** (no Riverpod/Bloc/GetX). See ADR-003.
 
 ### 5.3 Navigation
@@ -207,7 +207,7 @@ ID verification documents go to `private/verification/{uid}/…`. They are never
 
 | Layer | Control |
 |---|---|
-| **Identity** | Email/password for users and admins; admin access requires a custom claim. Claims are set only via a CLI script/callable restricted to `superAdmin` |
+| **Identity** | Phone OTP for users (the verified E.164 number is the identity); email/password for staff only (admin app, dev/test builds). Staff access requires a custom claim (`admin` or `moderator`); a staff claim counts as signed in without a phone. Claims are set only via a CLI script/callable restricted to `superAdmin` |
 | **Device integrity** | App Check enforced on Firestore, Storage, Functions; Play Integrity on Android |
 | **Data access** | Firestore and Storage rules, **deny by default**, field-level validation (types, lengths, enums, immutable fields), ownership checks, role checks via `request.auth.token.admin` |
 | **Privileged operations** | Only via callable Functions that verify claims and write `adminLogs` |

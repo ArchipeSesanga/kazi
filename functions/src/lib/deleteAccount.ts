@@ -107,8 +107,8 @@ export async function deleteAccountData(
       for (const d of docs) {
         const providerId = d.ref.parent.parent?.id;
         if (!providerId) continue;
-        const { authorPhotoUrl: _photo, ...rest } = d.data(); // eslint-disable-line @typescript-eslint/no-unused-vars
-        void _photo;
+        const rest = { ...d.data() };
+        delete rest.authorPhotoUrl;
         batch.set(
           db.collection("providers").doc(providerId).collection("reviews").doc(anonymisedReviewId(uid, providerId)),
           { ...rest, authorUid: DELETED_AUTHOR_UID, authorName: DELETED_AUTHOR_NAME },
