@@ -246,8 +246,8 @@ class _Body extends StatelessWidget {
 
   List<Widget> get _listingSkeletons => List.generate(
     3,
-    (_) => Padding(
-      padding: const EdgeInsets.symmetric(
+    (_) => const Padding(
+      padding: EdgeInsets.symmetric(
         horizontal: KaziSpacing.screenPadding,
         vertical: KaziSpacing.xs,
       ),
@@ -490,7 +490,7 @@ class _Thumbnail extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: url != null
-          ? KaziNetworkImage(url: url, width: 56, height: 56, fit: BoxFit.cover)
+          ? KaziNetworkImage(url: url, width: 56, height: 56)
           : Container(
               width: 56,
               height: 56,
@@ -609,24 +609,24 @@ class _LoadingSkeleton extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: KaziSpacing.screenPadding),
       children: [
-        SkeletonBox(width: null, height: 64),
+        const SkeletonBox(width: null, height: 64),
         const SizedBox(height: KaziSpacing.lg),
-        Row(
+        const Row(
           children: [
             Expanded(child: SkeletonBox(width: null, height: 72)),
-            const SizedBox(width: KaziSpacing.sm),
+            SizedBox(width: KaziSpacing.sm),
             Expanded(child: SkeletonBox(width: null, height: 72)),
-            const SizedBox(width: KaziSpacing.sm),
+            SizedBox(width: KaziSpacing.sm),
             Expanded(child: SkeletonBox(width: null, height: 72)),
-            const SizedBox(width: KaziSpacing.sm),
+            SizedBox(width: KaziSpacing.sm),
             Expanded(child: SkeletonBox(width: null, height: 72)),
           ],
         ),
         const SizedBox(height: KaziSpacing.xl),
         ...List.generate(
           3,
-          (_) => Padding(
-            padding: const EdgeInsets.only(bottom: KaziSpacing.sm),
+          (_) => const Padding(
+            padding: EdgeInsets.only(bottom: KaziSpacing.sm),
             child: SkeletonBox(width: null, height: 80),
           ),
         ),

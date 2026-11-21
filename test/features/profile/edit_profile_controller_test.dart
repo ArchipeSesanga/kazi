@@ -4,14 +4,14 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kazi/core/errors/app_exception.dart';
+import 'package:kazi/core/models/app_user.dart';
+import 'package:kazi/core/state/paged_state.dart';
 import 'package:kazi/features/auth/application/session_controller.dart';
 import 'package:kazi/features/auth/data/firebase_auth_repository.dart';
-import 'package:kazi/core/models/app_user.dart';
 import 'package:kazi/features/auth/data/firebase_user_repository.dart';
 import 'package:kazi/features/auth/domain/user_repository.dart';
 import 'package:kazi/features/profile/application/edit_profile_controller.dart';
 import 'package:kazi/features/provider_profile/domain/media_repository.dart';
-import 'package:kazi/core/state/paged_state.dart';
 import 'package:kazi/features/provider_profile/domain/provider_repository.dart';
 import 'package:mocktail/mocktail.dart';
 

@@ -37,7 +37,7 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-002 | Firebase wiring | done |  |
 | KZ-003 | Functions scaffolding | in progress | no emulator CI |
 | KZ-004 | Rules & indexes baseline | done |  |
-| KZ-005 | CI pipeline | todo |  |
+| KZ-005 | CI pipeline | in progress | PR workflow: analyze, test, functions tests. Format check, ARB parity and ESLint not yet wired |
 | KZ-006 | Theme & tokens | done |  |
 | KZ-007 | Design-system widgets (part 1) | done |  |
 | KZ-008 | Design-system widgets (part 2) | done |  |

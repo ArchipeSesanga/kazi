@@ -7,7 +7,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kazi/app/router/routes.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:kazi/core/l10n/app_localizations.dart';
 import 'package:kazi/core/services/connectivity_controller.dart';
 import 'package:kazi/features/auth/application/session_controller.dart';
@@ -18,6 +17,7 @@ import 'package:kazi/features/listings/domain/listing_repository.dart';
 import 'package:kazi/features/provider_profile/data/firestore_provider_repository.dart';
 import 'package:kazi/features/provider_profile/domain/provider_repository.dart';
 import 'package:kazi/features/provider_profile/presentation/provider_dashboard_screen.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 void main() {

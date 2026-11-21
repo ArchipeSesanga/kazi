@@ -162,13 +162,13 @@ void main() {
     await boot(accountPhoto: _account);
     final c = OnboardingController(providers, session, media, users)
       ..prefillForResubmit(
-        ProviderProfile(
+        const ProviderProfile(
           uid: 'uid1',
           displayName: 'Alice Plomberie',
           whatsappNumber: '+243810000000',
-          categoryIds: const ['plomberie'],
+          categoryIds: ['plomberie'],
           baseCommune: 'gombe',
-          communes: const ['gombe'],
+          communes: ['gombe'],
         ),
       );
     expect(c.photoUrl, _account);

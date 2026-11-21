@@ -260,7 +260,7 @@ void main() {
           listingId: any(named: 'listingId'),
           onProgress: any(named: 'onProgress'))).thenAnswer((_) async {
         uploadCallCount++;
-        return UploadedImage(
+        return const UploadedImage(
             path: 'media/uid1/listings/draft1/photo2.jpg',
             url: 'https://storage/photo2_retry.jpg');
       });
@@ -294,7 +294,7 @@ void main() {
       when(() => mediaRepo.upload(any(), any(),
           listingId: any(named: 'listingId'),
           onProgress: any(named: 'onProgress'))).thenAnswer((_) async {
-        return UploadedImage(
+        return const UploadedImage(
             path: 'media/uid1/listings/draft1/photo1.jpg',
             url: 'https://storage/photo1.jpg');
       });
