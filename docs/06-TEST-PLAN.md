@@ -93,7 +93,7 @@
 ## 5. Test data
 
 - `scripts/seed-demo.ts` creates deterministic demo data (fixed IDs) for emulators and `kazi-dev`.
-- Auth emulator test phone numbers: `+243810000001`–`+243810000020`, code `123456`.
+- Auth emulator test phone numbers: `+243810000001`–`+243810000020`, code `123456`. Dev project and emulator only; **never configure test phone numbers in `kazi-prod`.** CI never sends real SMS.
 - **Never** seed demo data in `kazi-prod`.
 
 ## 6. Bug severity
