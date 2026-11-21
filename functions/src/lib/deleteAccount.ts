@@ -152,6 +152,8 @@ export async function deleteAccountData(
   );
   await db.recursiveDelete(providerRef);
   await db.collection("verificationRequests").doc(uid).delete();
+  // Server-only per-user counter of the report rate limit.
+  await db.collection("reportQuota").doc(uid).delete();
 
   // 7. Storage.
   for (const prefix of storagePrefixesFor(uid)) await deps.deleteStoragePrefix(prefix);

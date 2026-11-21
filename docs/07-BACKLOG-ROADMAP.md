@@ -100,7 +100,7 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-093 | Notification triggers | todo |  |
 | KZ-094 | Verified badge everywhere | todo |  |
 | KZ-100 | Analytics events | todo |  |
-| KZ-101 | Legal pages | in progress | FR/EN Terms, Privacy and `/delete-account` built under `web/public` (Hosting `web` target) and opened from the app. Remaining: fill the `{{…}}` placeholders, lawyer review, deploy to prod |
+| KZ-101 | Legal pages | in progress | FR/EN Terms, Privacy and `/delete-account` filled with the owner's details (entity, email, WhatsApp) and audited against the code; opened from the app in the user's language. Remaining: owner confirmation of the assumptions, lawyer review, no sign-up consent screen yet, then deploy to prod. Play Data safety draft: docs/12 |
 | KZ-102 | Share landing page `/p/:id` | todo |  |
 | KZ-103 | App icon, splash, store listing assets | todo |  |
 | KZ-104 | Performance pass | todo |  |

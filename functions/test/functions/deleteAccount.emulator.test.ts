@@ -56,7 +56,7 @@ describe.skipIf(!emulator)('deleteAccountData (Firestore emulator)', () => {
   const exists = async (path: string) => (await db().doc(path).get()).exists;
 
   async function clear() {
-    for (const c of ['users', 'providers', 'listings', 'contacts', 'reports', 'verificationRequests', 'config', 'categories']) {
+    for (const c of ['users', 'providers', 'listings', 'contacts', 'reports', 'reportQuota', 'verificationRequests', 'config', 'categories']) {
       await db().recursiveDelete(db().collection(c));
     }
   }
@@ -128,6 +128,14 @@ describe.skipIf(!emulator)('deleteAccountData (Firestore emulator)', () => {
     for (const p of ['favorites/p9', 'blocks/x', 'devices/d1']) {
       expect(await exists(`users/${UID}/${p}`)).toBe(false);
     }
+  });
+
+  it('deletes the report rate-limit counter of the account only', async () => {
+    await db().doc(`reportQuota/${UID}`).set({ windowStart: 1, count: 3 });
+    await db().doc('reportQuota/bob').set({ windowStart: 1, count: 1 });
+    await deleteAccountData(db(), UID, makeDeps().deps);
+    expect(await exists(`reportQuota/${UID}`)).toBe(false);
+    expect(await exists('reportQuota/bob')).toBe(true);
   });
 
   it('deletes the provider doc, its reviews and verification request', async () => {

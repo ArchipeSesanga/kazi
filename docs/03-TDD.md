@@ -519,7 +519,7 @@ The app asks the user to type the confirmation word, **re-confirms with a fresh 
 3. `reports` filed by the user are kept (safety record, 12-month retention) with `reporterUid = 'deleted'`.
 4. Delete `contacts` where `clientUid == uid` **and** where `providerId == uid` (those hold this account's phone numbers as a snapshot).
 5. Delete other users' `favorites` that point at this account (`collectionGroup('favorites').where('providerId','==',uid)`).
-6. Delete all `listings` with `providerId == uid`, then `providers/{uid}` with its `reviews` subcollection, then `verificationRequests/{uid}`.
+6. Delete all `listings` with `providerId == uid`, then `providers/{uid}` with its `reviews` subcollection, then `verificationRequests/{uid}` and the report rate-limit counter `reportQuota/{uid}`.
 7. Delete Storage prefixes `media/{uid}/` and `private/verification/{uid}/`.
 8. Delete `users/{uid}` with `favorites`, `blocks`, `devices`, and **last** the Auth user (`admin.auth().deleteUser`, "not found" ignored). Until the Auth user is gone the user can sign in again and retry.
 

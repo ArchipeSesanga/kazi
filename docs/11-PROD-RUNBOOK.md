@@ -29,7 +29,7 @@ Rules that never bend: **indexes → rules → functions → hosting → app**; 
 - [ ] First admin: create an email/password user in the console, then `cd scripts && npx tsx set-claims.ts --project kazi-prod --email <email> --role admin --confirm-prod` (Application Default Credentials or a service-account key kept outside git). Moderators: `--role moderator`. The user must sign in again. The admin app only lets `admin` / `moderator` stay signed in.
 
 ### A2. Legal pages
-- [ ] Replace the placeholders in `web/public/**` (`{{LEGAL_ENTITY}}`, `{{SUPPORT_EMAIL}}`, `{{SUPPORT_WHATSAPP}}`). `scripts/check-legal-placeholders.sh` fails the release while any remain.
+- [x] Placeholders in `web/public/**` are filled (entity "Archipe Sesanga (individual developer)", email, WhatsApp). Re-check them before publishing; `scripts/check-legal-placeholders.sh` still fails the release if any `{{…}}` is reintroduced. Draft Play Data safety answers: [12-PLAY-DATA-SAFETY.md](12-PLAY-DATA-SAFETY.md).
 - [ ] Have a lawyer review Terms and Privacy (Code du numérique, RDC). Bump the version string in the pages and `AppDefaults.termsVersion` together when the text changes.
 - [ ] Set `AppDefaults.legalBaseUrl` to your final domain when you have one.
 
