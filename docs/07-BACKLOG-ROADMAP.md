@@ -48,7 +48,7 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-020 | Welcome & language | done |  |
 | KZ-021 | Email/password sign-in and registration | in progress | Phone OTP built (screens, controller, rules, tests); needs Firebase console setup and a real-device test before done |
 | KZ-022 | Profile setup | done |  |
-| KZ-023 | Session controller & guards | in progress | guards.dart still a stub |
+| KZ-023 | Session controller & guards | done | Three access levels in `guards.dart` (no session / no profile / complete profile + provider doc + admin claim), tests per level. `?from=` return path is not implemented: guests go to phone sign-in and then home |
 | KZ-024 | Account screen (S20) & settings | done |  |
 | KZ-025 | Delete account (client) | in progress | client screen only; callable missing |
 | KZ-026 | Remote Config gates | done |  |

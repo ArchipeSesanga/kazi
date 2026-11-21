@@ -8,9 +8,24 @@ import '../domain/user_repository.dart';
 
 enum SessionStatus { loading, unauthenticated, profileIncomplete, authenticated }
 
+/// Whether `providers/{uid}` exists.
+typedef ProviderExists = Future<bool> Function(String uid);
+
 class SessionController extends ChangeNotifier {
-  SessionController(this._userRepo, AuthRepository authRepo) {
+  SessionController(
+    this._userRepo,
+    AuthRepository authRepo, {
+    this.providerExists,
+  }) {
     _authSub = authRepo.authStateChanges().listen((authUser) {
+      // Same user re-emitted (for example a claims refresh): keep the
+      // resolved session instead of flashing the splash screen again.
+      if (authUser != null && authUser.uid == _uid && !isLoading) {
+        _authUser = authUser;
+        notifyListeners();
+        return;
+      }
+      if (authUser?.uid != _uid) _providerKnownFor = null;
       _userSub?.cancel();
       _timeout?.cancel();
       _retryTimer?.cancel();
@@ -29,6 +44,9 @@ class SessionController extends ChangeNotifier {
   }
 
   final UserRepository _userRepo;
+  /// Checks `providers/{uid}` for the provider-space guard.
+  final ProviderExists? providerExists;
+  String? _providerKnownFor;
   late final StreamSubscription<AuthUser?> _authSub;
   StreamSubscription<AppUser?>? _userSub;
   Timer? _timeout;
@@ -45,6 +63,32 @@ class SessionController extends ChangeNotifier {
   AuthUser? get authUser => _authUser;
 
   bool get isLoading => _status == SessionStatus.loading;
+
+  /// A signed-in Auth user exists (profile may still be missing).
+  bool get hasSession =>
+      _authUser != null && _status != SessionStatus.unauthenticated;
+  bool get isAdmin => _authUser?.isAdmin ?? false;
+
+  /// Whether the signed-in user has a `providers/{uid}` document.
+  ///
+  /// Only a positive answer is cached (per uid): a user who has just finished
+  /// onboarding must not be bounced by a stale "no". A negative answer is
+  /// re-checked on the next call; a failed check counts as "no" unless the
+  /// profile already says `isProvider`.
+  Future<bool> hasProviderProfile() async {
+    final uid = _uid;
+    if (uid == null) return false;
+    if (_providerKnownFor == uid) return true;
+    var exists = false;
+    try {
+      exists = await (providerExists?.call(uid) ?? Future.value(false))
+          .timeout(const Duration(seconds: 5));
+    } catch (_) {
+      exists = _appUser?.isProvider ?? false;
+    }
+    if (exists && _uid == uid) _providerKnownFor = uid;
+    return exists;
+  }
   bool get isAuthenticated => _status == SessionStatus.authenticated;
   bool get isProfileIncomplete => _status == SessionStatus.profileIncomplete;
 

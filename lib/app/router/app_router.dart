@@ -39,22 +39,8 @@ import '../../features/verification/presentation/verification_screen.dart';
 import '../../features/welcome/application/onboarding_controller.dart';
 import '../../features/welcome/presentation/welcome_screen.dart';
 import '../shell/app_shell.dart';
+import 'guards.dart';
 import 'routes.dart';
-
-// Routes that unauthenticated users may visit freely.
-const _publicRoutes = {
-  Routes.splash,
-  Routes.welcome,
-  Routes.authPhone,
-  Routes.authOtp,
-  Routes.authEmail,
-  Routes.authSetupProfile,
-  Routes.myLanguage,
-  Routes.legalTerms,
-  Routes.legalPrivacy,
-  Routes.updateRequired,
-  Routes.maintenance,
-};
 
 GoRouter createAppRouter(
   SessionController session,
@@ -65,64 +51,13 @@ GoRouter createAppRouter(
     GoRouter(
   initialLocation: Routes.splash,
   refreshListenable: Listenable.merge([session, gate, onboarding]),
-  redirect: (context, state) {
-    final location = state.matchedLocation;
-    final emailAllowed = emailAuthEnabled ?? Env.emailAuthEnabled;
-
-    // Stay on splash until both session and gate checks resolve.
-    if (session.isLoading || gate.isChecking) return Routes.splash;
-
-    // Gate checks are highest priority and un-escapable.
-    if (gate.isMaintenanceMode) {
-      return location == Routes.maintenance ? null : Routes.maintenance;
-    }
-    if (gate.isUpdateRequired) {
-      return location == Routes.updateRequired ? null : Routes.updateRequired;
-    }
-
-    // If sitting on a gate screen but gates are open, redirect away.
-    if (location == Routes.maintenance || location == Routes.updateRequired) {
-      return onboarding.isComplete ? Routes.authPhone : Routes.welcome;
-    }
-
-    // Email/password sign-in does not exist in prod consumer builds.
-    if (location == Routes.authEmail && !emailAllowed) return Routes.authPhone;
-
-    final authed = session.isAuthenticated;
-    final incomplete = session.isProfileIncomplete;
-    final completedOnboarding = onboarding.isComplete;
-
-    // Always leave the splash screen once session is resolved.
-    if (location == Routes.splash) {
-      if (authed) return Routes.home;
-      if (incomplete) return Routes.authSetupProfile;
-      return completedOnboarding ? Routes.authPhone : Routes.welcome;
-    }
-
-    final isPublic = _publicRoutes.any((r) => location.startsWith(r));
-
-    if (!authed && !incomplete && !completedOnboarding &&
-        location != Routes.welcome &&
-        location != Routes.myLanguage &&
-        location != Routes.legalTerms &&
-        location != Routes.legalPrivacy) {
-      return Routes.welcome;
-    }
-    if (!authed && !incomplete && completedOnboarding &&
-        location == Routes.welcome) {
-      return Routes.authPhone;
-    }
-
-    if (!authed && !incomplete && !isPublic) return Routes.welcome;
-    if (incomplete && location != Routes.authSetupProfile) {
-      return Routes.authSetupProfile;
-    }
-    if (authed && (location == Routes.welcome ||
-        location.startsWith('/auth/'))) {
-      return Routes.home;
-    }
-    return null;
-  },
+  redirect: (context, state) => resolveRedirect(
+    location: state.matchedLocation,
+    session: session,
+    gate: gate,
+    onboarding: onboarding,
+    emailAuthEnabled: emailAuthEnabled ?? Env.emailAuthEnabled,
+  ),
   routes: [
     // ── Splash & Welcome ────────────────────────────────────────────────────
     GoRoute(

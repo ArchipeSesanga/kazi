@@ -139,6 +139,8 @@ class AppProviders extends StatelessWidget {
           create: (ctx) => SessionController(
             ctx.read<UserRepository>(),
             ctx.read<AuthRepository>(),
+            providerExists: (uid) async =>
+                await ctx.read<ProviderRepository>().getProvider(uid) != null,
           ),
           update: (_, authRepo, userRepo, prev) =>
               prev ?? SessionController(userRepo, authRepo),
