@@ -8,10 +8,15 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ---------- helpers ----------
-    function signedIn() { return request.auth != null; }
+    // "Signed in" means a verified phone number (the account identity) or the
+    // admin claim. An email/password account without either is treated like a guest.
+    function signedIn() {
+      return request.auth != null
+        && ('phone_number' in request.auth.token || request.auth.token.get('admin', false) == true);
+    }
     function uid() { return request.auth.uid; }
-    function isAdmin() { return signedIn() && request.auth.token.admin == true; }
-    function isModerator() { return signedIn() && (request.auth.token.moderator == true || isAdmin()); }
+    function isAdmin() { return signedIn() && request.auth.token.get('admin', false) == true; }
+    function isModerator() { return signedIn() && (request.auth.token.get('moderator', false) == true || isAdmin()); }
 
     function data() { return request.resource.data; }
     function prev() { return resource.data; }

@@ -29,7 +29,7 @@ afterAll(async () => {
 describe('providers/{uid} create contract', () => {
   it('allows the exact create payload emitted by ProviderProfile.toCreateMap', async () => {
     await seedActiveUser();
-    const db = testEnv.authenticatedContext(uid).firestore();
+    const db = testEnv.authenticatedContext(uid, { phone_number: '+243810000001' }).firestore();
 
     await assertSucceeds(
       setDoc(doc(db, 'providers', uid), providerCreatePayload()),
@@ -38,7 +38,7 @@ describe('providers/{uid} create contract', () => {
 
   it('rejects extra keys on the provider create payload', async () => {
     await seedActiveUser();
-    const db = testEnv.authenticatedContext(uid).firestore();
+    const db = testEnv.authenticatedContext(uid, { phone_number: '+243810000001' }).firestore();
 
     await assertFails(
       setDoc(doc(db, 'providers', uid), {

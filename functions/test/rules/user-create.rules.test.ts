@@ -100,3 +100,25 @@ describe('users/{uid} update', () => {
     );
   });
 });
+
+describe('users/{uid} create — the old empty-phone exception is gone', () => {
+  const emailAccount = () =>
+    testEnv.authenticatedContext('email-user', { email: 'dev@example.com' }).firestore();
+
+  it('denies an email account creating users/{uid} with phone: ""', async () => {
+    await assertFails(setDoc(doc(emailAccount(), 'users', 'email-user'), payload({ phone: '' })));
+  });
+
+  it('denies an email account even with a made-up phone value', async () => {
+    await assertFails(
+      setDoc(doc(emailAccount(), 'users', 'email-user'), payload({ phone: '+243810000001' })),
+    );
+  });
+
+  it('denies an admin-claim account creating a consumer profile without a phone', async () => {
+    const admin = testEnv
+      .authenticatedContext('admin1', { admin: true, email: 'admin@kazi.test' })
+      .firestore();
+    await assertFails(setDoc(doc(admin, 'users', 'admin1'), payload({ phone: '' })));
+  });
+});

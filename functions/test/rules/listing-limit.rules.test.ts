@@ -62,7 +62,7 @@ function listingPayload() {
 
 const create = (id = 'l1') =>
   setDoc(
-    doc(testEnv.authenticatedContext(uid).firestore(), 'listings', id),
+    doc(testEnv.authenticatedContext(uid, { phone_number: '+243810000001' }).firestore(), 'listings', id),
     listingPayload(),
   );
 
@@ -101,7 +101,7 @@ describe('listings create — configurable limit (config/limits)', () => {
 
   it('does not let a client write config/limits', async () => {
     await seed({ listingCount: 0, max: 10 });
-    const db = testEnv.authenticatedContext(uid).firestore();
+    const db = testEnv.authenticatedContext(uid, { phone_number: '+243810000001' }).firestore();
     await assertFails(
       updateDoc(doc(db, 'config', 'limits'), { maxListingsPerProvider: 1000 }),
     );

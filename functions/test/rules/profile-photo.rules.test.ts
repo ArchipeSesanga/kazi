@@ -39,7 +39,7 @@ beforeEach(async () => {
   });
 });
 
-const db = (id = uid) => testEnv.authenticatedContext(id).firestore();
+const db = (id = uid) => testEnv.authenticatedContext(id, { phone_number: '+243810000001' }).firestore();
 
 describe('profile picture — users/{uid}.photoUrl', () => {
   it('owner can set the picture', async () => {
