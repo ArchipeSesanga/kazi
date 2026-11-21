@@ -13,6 +13,7 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
+import '../../../core/utils/phone.dart';
 import '../../../core/widgets/kazi_button.dart';
 import '../../../core/widgets/kazi_chip.dart';
 import '../../../core/widgets/kazi_text_field.dart';
@@ -268,7 +269,6 @@ class _Step1 extends StatelessWidget {
   final TextEditingController callCtrl;
   final bool consentError;
 
-  static final _e164 = RegExp(r'^\+[1-9][0-9]{7,14}$');
 
   @override
   Widget build(BuildContext context) {
@@ -325,7 +325,9 @@ class _Step1 extends StatelessWidget {
             textInputAction: TextInputAction.next,
             onChanged: (v) => ctrl.whatsappNumber = v,
             validator: (v) {
-              if (!_e164.hasMatch(v?.trim() ?? '')) return l.errorInvalidInput;
+              if (PhoneUtils.normalise(v ?? '') == null) {
+                return l.onboardingPhoneInvalid;
+              }
               return null;
             },
           ),
@@ -340,7 +342,9 @@ class _Step1 extends StatelessWidget {
             validator: (v) {
               final val = v?.trim() ?? '';
               if (val.isEmpty) return null;
-              if (!_e164.hasMatch(val)) return l.errorInvalidInput;
+              if (PhoneUtils.normalise(val) == null) {
+                return l.onboardingPhoneInvalid;
+              }
               return null;
             },
           ),

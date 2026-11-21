@@ -23,6 +23,20 @@ abstract final class PhoneUtils {
     }
   }
 
+  /// Normalises what a user typed (`0812345678`, `812345678`,
+  /// `+243 81 234 5678`, `00243812345678`) to E.164 and checks it against the
+  /// real numbering plan. Returns null when it is not a valid number.
+  static String? normalise(String input, {IsoCode country = IsoCode.CD}) {
+    final compact = input.replaceAll(RegExp(r'[\s.\-()]'), '');
+    if (compact.isEmpty) return null;
+    if (compact.startsWith('+')) return isValidE164(compact) ? compact : null;
+    if (compact.startsWith('00')) {
+      final e164 = '+${compact.substring(2)}';
+      return isValidE164(e164) ? e164 : null;
+    }
+    return toE164(compact, country: country);
+  }
+
   /// Returns the international representation (`+countryCodeNsn`) of [e164].
   static String formatDisplay(String e164) {
     try {

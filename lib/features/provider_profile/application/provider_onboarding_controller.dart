@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/errors/app_exception.dart';
+import '../../../core/utils/phone.dart';
 import '../../auth/application/session_controller.dart';
 import '../../auth/domain/user_repository.dart';
 import '../domain/media_repository.dart';
@@ -216,8 +217,12 @@ class OnboardingController extends ChangeNotifier {
         bio: bio.trim(),
         photoUrl: photoUrl,
         coverUrl: coverUrl,
-        whatsappNumber: whatsappNumber.trim(),
-        callNumber: callNumber.trim().isEmpty ? null : callNumber.trim(),
+        // Normalised to E.164 (the form already rejected invalid numbers).
+        whatsappNumber:
+            PhoneUtils.normalise(whatsappNumber) ?? whatsappNumber.trim(),
+        callNumber: callNumber.trim().isEmpty
+            ? null
+            : (PhoneUtils.normalise(callNumber) ?? callNumber.trim()),
         yearsExperience: yearsExperience,
         categoryIds: categoryIds,
         baseCommune: baseCommune!,

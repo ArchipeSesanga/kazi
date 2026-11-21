@@ -732,5 +732,7 @@
   "deleteAccountReauthExpired": "La confirmation a expiré. Demandez un nouveau code.",
   "@deleteAccountReauthExpired": {"description": "Delete account: reauth expired"},
   "deleteAccountNoPhone": "Votre compte n'a pas de numéro vérifié : suppression impossible depuis l'application.",
-  "@deleteAccountNoPhone": {"description": "Delete account without phone"}
+  "@deleteAccountNoPhone": {"description": "Delete account without phone"},
+  "onboardingPhoneInvalid": "Numéro invalide. Exemple : +243 81 234 5678",
+  "@onboardingPhoneInvalid": { "description": "Invalid provider phone number" }
 }

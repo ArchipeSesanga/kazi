@@ -1117,4 +1117,8 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get deleteAccountNoPhone =>
       'Votre compte n\'a pas de numéro vérifié : suppression impossible depuis l\'application.';
+
+  @override
+  String get onboardingPhoneInvalid =>
+      'Numéro invalide. Exemple : +243 81 234 5678';
 }

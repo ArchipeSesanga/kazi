@@ -1104,4 +1104,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteAccountNoPhone =>
       'Your account has no verified number: it cannot be deleted from the app.';
+
+  @override
+  String get onboardingPhoneInvalid =>
+      'Invalid number. Example: +243 81 234 5678';
 }

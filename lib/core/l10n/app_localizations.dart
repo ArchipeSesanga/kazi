@@ -2113,6 +2113,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Votre compte n\'a pas de numéro vérifié : suppression impossible depuis l\'application.'**
   String get deleteAccountNoPhone;
+
+  /// Invalid provider phone number
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro invalide. Exemple : +243 81 234 5678'**
+  String get onboardingPhoneInvalid;
 }
 
 class _AppLocalizationsDelegate
