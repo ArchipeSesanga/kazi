@@ -128,12 +128,25 @@ describe('writes are verified-phone only', () => {
     }),
   );
 
-  onlyVerifiedPhone('report', (db) =>
-    setDoc(doc(db, 'reports', `${uid}_provider_p1`), {
+  describe('report', () => {
+    // Reports are created by the submitReport callable (Admin SDK), never by a
+    // client: even a verified-phone user is denied a direct write. The twin is
+    // the moderator read of the same collection, and the callable's own tests.
+    const payload = () => ({
       reporterUid: uid, targetType: 'provider', targetKey: 'p1', reason: 'scam',
       status: 'open', createdAt: stamp(),
-    }),
-  );
+    });
+    it('denies a direct client write, verified phone or not', async () => {
+      await assertFails(setDoc(doc(phone(), 'reports', `${uid}_provider_p1`), payload()));
+      await assertFails(setDoc(doc(emailOnly(), 'reports', `${uid}_provider_p1`), payload()));
+    });
+    it('twin: moderators can still read the reports queue', () =>
+      assertSucceeds(getDoc(doc(moderator(), 'reports', 'r0'))));
+    it('denies every client access to reportQuota', async () => {
+      await assertFails(setDoc(doc(phone(), 'reportQuota', uid), { windowStart: 0, count: 0 }));
+      await assertFails(getDoc(doc(phone(), 'reportQuota', uid)));
+    });
+  });
 
   onlyVerifiedPhone('review (after contact)', (db) =>
     setDoc(doc(db, 'providers', 'p1', 'reviews', uid), {

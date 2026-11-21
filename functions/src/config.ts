@@ -14,3 +14,10 @@ export const ORPHAN_MEDIA_AGE_HOURS = 24;
  * fallback in firestore.rules.
  */
 export const DEFAULT_MAX_LISTINGS_PER_PROVIDER = 10;
+
+/** Reports a user may file per rolling 24 hours (`reportQuota/{uid}`). */
+export const REPORTS_PER_DAY = 10;
+export const REPORT_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+/** Draft listings untouched for this long are deleted by `cleanupDraftListings`. */
+export const DRAFT_MAX_AGE_DAYS = 30;

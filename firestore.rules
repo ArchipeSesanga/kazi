@@ -275,18 +275,9 @@ service cloud.firestore {
     match /reports/{reportId} {
       allow read: if isModerator();
 
-      allow create: if signedIn()
-        && reportId == uid() + '_' + data().targetType + '_' + data().targetKey
-        && data().reporterUid == uid()
-        && onlyKeys(['reporterUid', 'targetType', 'targetKey', 'reason', 'details', 'status', 'createdAt'])
-        && data().targetType in ['listing', 'provider', 'review']
-        && str(data().targetKey, 1, 200)
-        && data().reason in ['scam', 'inappropriate', 'fake', 'wrong_category', 'other']
-        && optStr('details', 0, 500)
-        && data().status == 'open'
-        && isNow('createdAt');
-
-      allow update, delete: if false;
+      // Reports are created by the `submitReport` callable only (per-user rate
+      // limit, target checks, anonymisation on account deletion).
+      allow create, update, delete: if false;
     }
 
     // ---------- verification requests (callable-only writes) ----------

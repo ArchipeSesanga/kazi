@@ -38,6 +38,10 @@ export function isVerifiedCaller(token: Token): boolean {
 
 /** Actions moderators may perform (and admins, who include moderators). */
 export const MODERATION_ACTIONS = [
+  'hideListing',
+  'restoreListing',
+  'suspendProvider',
+  'dismissReport',
   'setProviderStatus',
   'resolveReport',
   'getVerificationFiles',
