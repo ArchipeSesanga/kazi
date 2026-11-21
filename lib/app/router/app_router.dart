@@ -47,6 +47,7 @@ GoRouter createAppRouter(
   GateController gate,
   OnboardingController onboarding, {
   bool? emailAuthEnabled,
+  bool? devToolsEnabled,
 }) =>
     GoRouter(
   initialLocation: Routes.splash,
@@ -248,9 +249,11 @@ GoRouter createAppRouter(
     ),
 
     // ── Dev only ─────────────────────────────────────────────────────────────
-    GoRoute(
-      path: Routes.devComponents,
-      builder: (context, state) => const DevComponentsScreen(),
-    ),
+    // Not registered at all in prod builds.
+    if (devToolsEnabled ?? Env.isDev)
+      GoRoute(
+        path: Routes.devComponents,
+        builder: (context, state) => const DevComponentsScreen(),
+      ),
   ],
 );
