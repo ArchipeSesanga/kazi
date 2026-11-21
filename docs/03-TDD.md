@@ -212,8 +212,8 @@ Readable by the owner and moderators only.
 | `locale` | `fr` \| `en` | client | |
 | `city` | string | client | City id, e.g. `kinshasa` |
 | `commune` | string? | client | Commune id, e.g. `gombe` |
-| `termsVersion` | string | client | |
-| `termsAcceptedAt` | timestamp | client | |
+| `termsVersion` | string | client | The version of the Terms and Privacy Policy in force when the profile was created (`AppDefaults.termsVersion`, equal to the "Version …" printed on the published pages) |
+| `termsAcceptedAt` | timestamp | client | Server timestamp (`request.time`, enforced by the rules). Acceptance is by continuing: the phone and profile-setup screens show "By continuing you accept the Terms and Privacy Policy" with links to the pages (`LegalNotice`) |
 | `isProvider` | bool | server | Set when a provider profile exists |
 | `status` | `active` \| `suspended` \| `deleting` | create: client `active`; then server | |
 | `createdAt`, `updatedAt` | timestamp | client | `request.time` |
@@ -524,6 +524,8 @@ The app asks the user to type the confirmation word, **re-confirms with a fresh 
 8. Delete `users/{uid}` with `favorites`, `blocks`, `devices`, and **last** the Auth user (`admin.auth().deleteUser`, "not found" ignored). Until the Auth user is gone the user can sign in again and retry.
 
 Nothing creates a document: triggers touch `providers/{uid}` with `update()` only after checking it exists (`syncListingSlot`, `releaseSlotOnDelete`, `approveProviderIfExists`), so deleting listings or racing writes cannot recreate a deleted provider. Logs contain counts only. Collection-group queries on `reviews.authorUid` and `favorites.providerId` have field overrides in `firestore.indexes.json`. Known gap: when KZ-073 (`onReviewWritten`) lands it must treat the anonymising move (delete + create, same rating) as net zero.
+
+**Operator deletion on request** (`scripts/delete-account.ts`, logic in `functions/src/lib/operatorDelete.ts`): staff only (the `--operator` Auth user must have `admin` or `moderator`), finds the account by phone number (Auth user, else a `users` doc with that phone), dry-run unless `--execute` (`--confirm-prod` for prod), reuses `deleteAccountData`, writes `adminLogs` (`operator_delete_account` / `_failed`) with the uid and a reason that may not contain phone numbers or emails. See the runbook §G.
 
 The app signs out locally after the callable resolves. A public web page (Firebase Hosting `/delete-account`) explains how to request deletion without the app, as Google Play requires.
 

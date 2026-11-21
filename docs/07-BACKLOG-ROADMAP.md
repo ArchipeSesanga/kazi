@@ -23,7 +23,7 @@ Story IDs (`KZ-xxx`) are referenced in branch names and commits. **Agents take o
 | E6 | Cloud Functions | KZ-070 – KZ-079 |
 | E7 | Admin panel | KZ-080 – KZ-087 |
 | E8 | Verification & notifications | KZ-090 – KZ-094 |
-| E9 | Launch readiness | KZ-100 – KZ-108 |
+| E9 | Launch readiness | KZ-100 – KZ-109 |
 
 ---
 
@@ -100,7 +100,7 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-093 | Notification triggers | todo |  |
 | KZ-094 | Verified badge everywhere | todo |  |
 | KZ-100 | Analytics events | todo |  |
-| KZ-101 | Legal pages | in progress | FR/EN Terms, Privacy and `/delete-account` filled with the owner's details (entity, email, WhatsApp) and audited against the code; opened from the app in the user's language. Remaining: owner confirmation of the assumptions, lawyer review, no sign-up consent screen yet, then deploy to prod. Play Data safety draft: docs/12 |
+| KZ-101 | Legal pages | in progress | FR/EN Terms, Privacy and `/delete-account` filled and audited; "By continuing you accept…" notice with links on the phone and profile screens (accepted version and server timestamp stored); operator deletion tool (`scripts/delete-account.ts`); Play data-safety draft (docs/12). Remaining: Storage region on the Privacy page (`{{STORAGE_REGION}}`, blocks the release check), owner-confirmed assumptions, lawyer review, deploy to prod |
 | KZ-102 | Share landing page `/p/:id` | todo |  |
 | KZ-103 | App icon, splash, store listing assets | todo |  |
 | KZ-104 | Performance pass | todo |  |
@@ -108,6 +108,7 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-106 | App Check enforcement | todo |  |
 | KZ-107 | Release pipeline | in progress | `release.yml` + Android release signing (tested locally with a throwaway key) + prod `google-services.json` + runbook (docs/11). Not yet run on GitHub: needs the secrets, the `production` environment and a Play app |
 | KZ-108 | Closed beta | todo |  |
+| KZ-109 | Data retention job | todo | Decided: leave audit log and report IDs as they are until this job exists; must be done before the public launch |
 
 ---
 
@@ -297,6 +298,8 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 **KZ-106 App Check enforcement** switched from monitor to enforce in prod.
 **KZ-107 Release pipeline** (`release.yml`, Play internal track).
 **KZ-108 Closed beta** with seeded real providers; triage feedback.
+**KZ-109 Data retention job** (before public launch). Scheduled function that applies the retention the privacy policy promises and the owner decides: purge old `adminLogs` entries and closed `reports` after the chosen periods, and decide what happens to report document ids that contain the reporter's uid (today only the `reporterUid` field is replaced by `deleted`). Also confirm the Analytics/Crashlytics retention setting in the Firebase console and the Google backup window, and update the privacy page with the final periods.
+- AC: periods are defined in `config.ts` and the privacy page; the job is idempotent, logs counts only, and has emulator tests; the policy text matches what runs.
 
 ---
 
@@ -310,6 +313,6 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | **S3** | 7–8 | Providers can publish | KZ-050 → KZ-055, KZ-080, KZ-081, KZ-079, KZ-076, KZ-093 |
 | **S4** | 9–10 | Trust & safety | KZ-060 → KZ-063, KZ-073, KZ-075, KZ-082, KZ-044, KZ-025, KZ-077 |
 | **S5** | 11–12 | Verification + launch prep → **closed beta** | KZ-090 → KZ-092, KZ-094, KZ-083, KZ-084, KZ-085, KZ-087, KZ-026, KZ-078, KZ-100 → KZ-107 |
-| **S6** | 13–14 | Beta fixes → **public launch** | KZ-108, bug fixes, KZ-064, KZ-086 |
+| **S6** | 13–14 | Beta fixes → **public launch** | KZ-108, **KZ-109 (retention job, before launch)**, bug fixes, KZ-064, KZ-086 |
 
 **Parallel non-dev work (owner):** legal entity and Play developer account (start in S0), domain, privacy policy review, recruiting 50–100 providers (S3–S5), moderator onboarding (S4).

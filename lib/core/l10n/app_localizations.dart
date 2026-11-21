@@ -2191,6 +2191,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ouvrir la page'**
   String get legalOpenButton;
+
+  /// Consent notice on sign-in
+  ///
+  /// In fr, this message translates to:
+  /// **'En continuant, vous acceptez les '**
+  String get legalAcceptPrefix;
+
+  /// Consent notice on sign-in
+  ///
+  /// In fr, this message translates to:
+  /// **'Conditions d\'utilisation'**
+  String get legalLinkTerms;
+
+  /// Consent notice on sign-in
+  ///
+  /// In fr, this message translates to:
+  /// **' et la '**
+  String get legalAcceptAnd;
+
+  /// Consent notice on sign-in
+  ///
+  /// In fr, this message translates to:
+  /// **'Politique de confidentialité'**
+  String get legalLinkPrivacy;
+
+  /// Consent notice on sign-in
+  ///
+  /// In fr, this message translates to:
+  /// **'.'**
+  String get legalAcceptSuffix;
 }
 
 class _AppLocalizationsDelegate

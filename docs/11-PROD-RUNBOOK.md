@@ -30,6 +30,8 @@ Rules that never bend: **indexes → rules → functions → hosting → app**; 
 
 ### A2. Legal pages
 - [x] Placeholders in `web/public/**` are filled (entity "Archipe Sesanga (individual developer)", email, WhatsApp). Re-check them before publishing; `scripts/check-legal-placeholders.sh` still fails the release if any `{{…}}` is reintroduced. Draft Play Data safety answers: [12-PLAY-DATA-SAFETY.md](12-PLAY-DATA-SAFETY.md).
+- [ ] **Storage region on the Privacy page.** `web/public/{fr,en}/privacy.html` contain `{{STORAGE_REGION}}` (the check script blocks a release until it is replaced). Once the prod bucket exists, get its location with `gcloud storage buckets describe gs://kazi-prod-d9c00.firebasestorage.app --format='value(location)'` (the CLI `firebase projects:list` shows "[Not specified]" for the default resource location, so it cannot answer this) and write it as, for example, `africa-south1 (Johannesburg, South Africa)`. Prod has no Firestore database or bucket yet; create them in `africa-south1` first.
+- [ ] Confirm the Analytics and Crashlytics data-retention setting in the Firebase console (Analytics → Data settings → Data retention, 14 months is the maximum). The privacy text says retention equals whatever is configured there.
 - [ ] Have a lawyer review Terms and Privacy (Code du numérique, RDC). Bump the version string in the pages and `AppDefaults.termsVersion` together when the text changes.
 - [ ] Set `AppDefaults.legalBaseUrl` to your final domain when you have one.
 
@@ -82,3 +84,22 @@ Google's reviewers must be able to sign in. The only allowed exception to "no te
 
 ## F. Secrets hygiene
 Rotate `FIREBASE_SERVICE_ACCOUNT_PROD` and `PLAY_SERVICE_ACCOUNT_JSON` when someone with access leaves. If the upload key leaks, Play can reset it (Play Console → App signing → Request upload key reset); the app-signing key stays with Google.
+
+## G. Deleting an account on request (operator tool)
+For privacy requests that arrive by email or WhatsApp (see `/delete-account`). **Staff only**, dry-run by default, writes an `adminLogs` entry. It runs the same `deleteAccountData` as the app's `deleteAccount` callable, so the result is identical.
+
+1. **Verify the requester first.** Confirm they own the account's phone number (for example they message you on WhatsApp from that number, or you call it back). Do not proceed on an email alone.
+2. Open a ticket reference (any short id). Never put the phone number or email in the reason: the tool rejects it, and the audit log must stay free of personal data.
+3. Credentials: Application Default Credentials (`gcloud auth application-default login`) or `GOOGLE_APPLICATION_CREDENTIALS` pointing at a service-account key kept outside git. The operator account (`--operator`) must be an existing Auth user with the `admin` or `moderator` claim (`scripts/set-claims.ts`).
+4. **Dry run** (changes nothing, writes no log; prints what would be deleted):
+   ```bash
+   cd scripts
+   npx tsx delete-account.ts --project kazi-prod --phone +243812345678 \
+       --operator you@example.com --reason "ticket-123"
+   ```
+   Check the plan: the account found, its listings, reviews to anonymise, reports, contacts, Storage file counts.
+5. **Execute**: add `--execute` (and `--confirm-prod` for `kazi-prod`). Output ends with `DELETED` and the counts; an `adminLogs` entry `operator_delete_account` is written (actor = operator, target = the uid, note = your reason; no phone number).
+6. Safe to repeat after a failure: a failed run writes `operator_delete_account_failed`; run it again and it finishes (the account is found by its Auth user, or by its profile if the Auth user is already gone).
+7. Reply to the requester (the page promises a reply within 7 days and deletion within 30 days) and close the ticket.
+
+Options: `--bucket <name>` overrides the default Storage bucket (`<project>.firebasestorage.app`).

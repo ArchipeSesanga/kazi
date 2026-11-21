@@ -1145,4 +1145,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get legalOpenButton => 'Open the page';
+
+  @override
+  String get legalAcceptPrefix => 'By continuing you accept the ';
+
+  @override
+  String get legalLinkTerms => 'Terms';
+
+  @override
+  String get legalAcceptAnd => ' and ';
+
+  @override
+  String get legalLinkPrivacy => 'Privacy Policy';
+
+  @override
+  String get legalAcceptSuffix => '.';
 }

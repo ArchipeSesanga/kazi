@@ -20,7 +20,7 @@
 | Account creation method | **Other** ⚠️ | Phone number + SMS code (Firebase Auth). Play's list has "Username and password", "Username and other authentication", "OAuth", "Other": pick "Other" and describe it as phone-number sign-in. Email/password exists only in dev builds and for staff (not in prod consumer builds). |
 | Can users request that their data be deleted? | **Yes** ✅ | In-app: Profile → Delete my account (typed word + fresh SMS code, callable `deleteAccount`). Web: `https://kazi-prod-d9c00.web.app/delete-account` (replace with the final domain). |
 | Account-deletion URL (App content → Data safety) | `…/delete-account` | The page is FR + EN. |
-| Data deletion: what is deleted / kept | See the privacy policy §4 | Reviews anonymised and kept; reports kept with reporter "deleted"; moderation audit log kept. Declare that some data is kept "for security / fraud prevention / compliance" ⚠️ (Play asks whether you retain any data after deletion requests). |
+| Data deletion: what is deleted / kept | See the privacy policy §4 and `/delete-account` (in the app immediately; on request by email or WhatsApp: reply within 7 days, deleted within 30 days, via the operator tool in the runbook §G) | Reviews anonymised and kept; reports kept with reporter "deleted"; moderation audit log kept. Declare that some data is kept "for security / fraud prevention / compliance" ⚠️ (Play asks whether you retain any data after deletion requests). |
 | Committed to Google Play Families policy? | **No** | Audience 18+. |
 | Independent security review? | **No** | |
 
@@ -37,7 +37,7 @@ Play's definition of **sharing** excludes sending data to a **service provider t
 ### Personal info
 | Type | Collected | Shared | Required / optional | Purposes | Where in the code | Conf. |
 |---|---|---|---|---|---|---|
-| **Name** | Yes | No | Required (display name at profile setup) | App functionality; Account management | `users.displayName`; provider `displayName` (public to signed-in users) | ✅ |
+| **Name** | Yes | No | Required (display name at profile setup) | App functionality; Account management | `users.displayName`; provider `displayName` (visible to signed-in users). The accepted terms version and date are stored with the profile (`termsVersion`, `termsAcceptedAt`) | ✅ |
 | **Email address** | **No** for consumers | — | — | — | Not asked; `users.email` is optional and the profile form has no email field. Staff emails exist only in the admin app. | ✅ |
 | **User IDs** | Yes | No | Required | App functionality; Account management; Fraud prevention, security and compliance | Firebase `uid` in every record, contact, report and block | ✅ |
 | **Phone number** | Yes | No | Required | App functionality; Account management; Fraud prevention, security and compliance | Firebase Auth phone; `users.phone`; provider WhatsApp/call numbers (optional call number) | ✅ |
@@ -56,7 +56,7 @@ Play's definition of **sharing** excludes sending data to a **service provider t
 ### Photos and videos
 | Type | Collected | Shared | Required / optional | Purposes | Code | Conf. |
 |---|---|---|---|---|---|---|
-| **Photos** | Yes | No | Optional (profile picture, provider picture and cover, listing photos) | App functionality | Storage `media/{uid}/…`; permissions `CAMERA`, `READ_MEDIA_IMAGES`/`READ_EXTERNAL_STORAGE` (≤ API 32) | ✅ (see the permission note in §5) |
+| **Photos** | Yes | No | Optional (profile picture, provider picture and cover, listing photos) | App functionality | Storage `media/{uid}/…`. Gallery photos come through the system photo picker (no storage/media permission); only `CAMERA` is declared, for taking a photo | ✅ |
 | Videos | No | | | | | ✅ |
 
 ### Files and docs
@@ -97,7 +97,7 @@ Play's definition of **sharing** excludes sending data to a **service provider t
 | Target audience and content | 18+ | Terms and policy require 18+; there is no age check in the app. |
 | User-generated content | Yes: listings, profile text, photos | Moderation exists: reporting, auto-hide at 3 reports, moderator tools, blocking. Describe these in the content-rating questionnaire. |
 | Financial features | None | |
-| Permissions | `CAMERA`, `READ_MEDIA_IMAGES`, `READ_EXTERNAL_STORAGE` (≤ 32), `INTERNET`, `ACCESS_NETWORK_STATE`, `WAKE_LOCK`, `POST_NOTIFICATIONS`, `RECEIVE` (c2dm), `BIND_GET_INSTALL_REFERRER_SERVICE` | ⚠️ **`READ_MEDIA_IMAGES`** triggers Play's photo/video permissions policy and is probably unnecessary: `image_picker` uses the system photo picker. Recommend removing it (and `READ_EXTERNAL_STORAGE`) and testing the gallery on Android 13+. ⚠️ `POST_NOTIFICATIONS`/`RECEIVE` come from the Firebase Messaging dependency; the app sends no notifications yet and FCM auto-init is disabled in the manifest. The install-referrer permission comes from Analytics (Google Play service), no extra declaration. |
+| Permissions (merged prod manifest) | `CAMERA`, `INTERNET`, `ACCESS_NETWORK_STATE`, `WAKE_LOCK`, `POST_NOTIFICATIONS`, `RECEIVE` (c2dm), `BIND_GET_INSTALL_REFERRER_SERVICE`, `READ_GSERVICES` | ✅ `READ_MEDIA_IMAGES` and `READ_EXTERNAL_STORAGE` were **removed**: the gallery uses the system photo picker (Android 13+) / document picker (older), so the Play photo and video permissions policy does not apply. ⚠️ Verify the gallery and camera on a real Android 13+ device **and** an Android 12 or older device before release (see §7). `POST_NOTIFICATIONS`/`RECEIVE` come from the Firebase Messaging dependency; no notifications are sent yet and FCM auto-init is disabled in the manifest. The install-referrer permission comes from Analytics (a Google Play service), no extra declaration. |
 | App access (login required) | Provide the reviewer test number | See `docs/11-PROD-RUNBOOK.md` §D. The only test number allowed in prod; remove it after review. |
 | Privacy policy URL | `…/fr/privacy` (and `/en/privacy`) | Publish after the placeholders and the lawyer review are final. |
 
@@ -115,5 +115,7 @@ Play's definition of **sharing** excludes sending data to a **service provider t
 2. ⚠️ Whether Play counts Analytics' **IP-derived country/region** as approximate location.
 3. ⚠️ Whether to mark user-visible data (provider profile, listings, numbers) as **shared** (conservative) or not (my reading, §2).
 4. ⚠️ **Analytics "required"** (no opt-out). Consider an opt-out switch or a consent step if you want "optional".
-5. ⚠️ Retention after deletion: moderation audit log, reports (reporter "deleted"), anonymised reviews, Google's own backups. Make sure the "do you retain data" answer matches.
+5. ⚠️ Retention after deletion: moderation audit log, reports (reporter "deleted"; report ids still contain the old uid), anonymised reviews, Google's own backups. The "do you retain data" answer must say yes. A purge is planned as **KZ-109** (before public launch). Analytics/Crashlytics retention equals the console setting (owner to confirm 14 months).
 6. Replace the base URL with the final domain; submit only after the lawyer review.
+7. ⚠️ **Device test of the photo picker** on Android 13+ and on Android 12 or older (not yet exercised on devices by the developer tooling).
+8. ⚠️ Storage bucket region: not yet named on the Privacy page (`{{STORAGE_REGION}}`).

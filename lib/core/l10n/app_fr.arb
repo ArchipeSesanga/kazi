@@ -758,5 +758,15 @@
   "legalOpenHint": "Ce document est publié sur notre site. Il s'ouvre dans votre navigateur.",
   "@legalOpenHint": { "description": "Legal page" },
   "legalOpenButton": "Ouvrir la page",
-  "@legalOpenButton": { "description": "Legal page" }
+  "@legalOpenButton": { "description": "Legal page" },
+  "legalAcceptPrefix": "En continuant, vous acceptez les ",
+  "@legalAcceptPrefix": { "description": "Consent notice on sign-in" },
+  "legalLinkTerms": "Conditions d'utilisation",
+  "@legalLinkTerms": { "description": "Consent notice on sign-in" },
+  "legalAcceptAnd": " et la ",
+  "@legalAcceptAnd": { "description": "Consent notice on sign-in" },
+  "legalLinkPrivacy": "Politique de confidentialité",
+  "@legalLinkPrivacy": { "description": "Consent notice on sign-in" },
+  "legalAcceptSuffix": ".",
+  "@legalAcceptSuffix": { "description": "Consent notice on sign-in" }
 }

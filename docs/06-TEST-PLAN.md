@@ -63,6 +63,10 @@
 - `deleteAccount`: provider with listings, reviews and contacts → everything removed; reports anonymised; Auth user deleted.
 - Admin callables: reject without claim, reject without App Check (in an emulator with enforcement on), log every action.
 
+### 2.4a Operator tooling and legal consent
+- `operatorDelete`: staff-only operator (admin or moderator; ordinary user, unknown email and falsy claims rejected), find by phone (Auth user, else profile, not found, ambiguous), plan counts, dry run changes nothing and writes no log, execute deletes like the app and logs without the phone number, a failed run is logged and a rerun finishes, bad phone/reason rejected first.
+- Legal consent: the phone and profile-setup screens show the notice in FR and EN, the links open the `/fr|en/terms|privacy` pages, saving stores `termsVersion` and a server timestamp. The published pages carry the same version as `AppDefaults.termsVersion` and a last-updated and effective date; `AppDefaults.legalBaseUrl` is the only place the base URL lives.
+
 ### 2.4b Admin web app (`/admin`)
 - `npm test` (Vitest + Testing Library): claims gate (admin and moderator stay, others signed out with a message, fail closed, session restored on reload), report grouping and ordering, error mapping, FR/EN key parity, the Reports page (loading, empty, load error + retry, each action with its confirm dialog, required suspend reason, error kept in the dialog, buttons disabled while working, restore disabled for `over_limit`, deleted target dismiss-only).
 - Rules: the exact queue query (`status == open` ordered by `createdAt`) is allowed for admin and moderator and denied for a phone user and an email-only account.

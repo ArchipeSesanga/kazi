@@ -11,6 +11,7 @@ import '../../../core/theme/kazi_spacing.dart';
 import '../../../core/utils/phone.dart';
 import '../../../core/widgets/kazi_button.dart';
 import '../../../core/widgets/kazi_text_field.dart';
+import '../../legal/presentation/legal_notice.dart';
 import '../application/session_controller.dart';
 import '../domain/user_repository.dart';
 
@@ -169,6 +170,8 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                   ),
                   const SizedBox(height: KaziSpacing.lg),
                 ],
+                const LegalNotice(),
+                const SizedBox(height: KaziSpacing.lg),
                 KaziButton(
                   label: l.authProfileSave,
                   onPressed: _saving ? null : _save,

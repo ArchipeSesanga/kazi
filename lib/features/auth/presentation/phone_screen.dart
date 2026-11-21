@@ -10,6 +10,7 @@ import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
 import '../../../core/widgets/kazi_button.dart';
 import '../../../core/widgets/kazi_text_field.dart';
+import '../../legal/presentation/legal_notice.dart';
 import '../application/phone_auth_controller.dart';
 import 'auth_error_text.dart';
 
@@ -121,6 +122,8 @@ class _PhoneScreenState extends State<PhoneScreen> {
                 onPressed: sending ? null : _submit,
                 isLoading: sending,
               ),
+              const SizedBox(height: KaziSpacing.lg),
+              const LegalNotice(),
               if (_showEmail) ...[
                 const SizedBox(height: KaziSpacing.lg),
                 Center(

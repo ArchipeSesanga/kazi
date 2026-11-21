@@ -1,10 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <!-- image_picker: gallery access (Android 13+) -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <!-- image_picker: gallery access (Android ≤12) -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
+    <!-- Gallery: no storage/media permission. image_picker uses the system
+         photo picker on Android 13+ (and the system document picker on older
+         versions), which hands the app only the photos the user picks. -->
     <!-- image_picker: camera capture -->
     <uses-permission android:name="android.permission.CAMERA" />
 
