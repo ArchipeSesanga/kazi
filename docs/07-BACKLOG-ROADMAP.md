@@ -27,6 +27,90 @@ Story IDs (`KZ-xxx`) are referenced in branch names and commits. **Agents take o
 
 ---
 
+## Status board
+
+_Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.md §5)._
+
+| ID | Story | Status | Note |
+|---|---|---|---|
+| KZ-001 | Project scaffolding | done |  |
+| KZ-002 | Firebase wiring | done |  |
+| KZ-003 | Functions scaffolding | in progress | no emulator CI |
+| KZ-004 | Rules & indexes baseline | done |  |
+| KZ-005 | CI pipeline | todo |  |
+| KZ-006 | Theme & tokens | done |  |
+| KZ-007 | Design-system widgets (part 1) | done |  |
+| KZ-008 | Design-system widgets (part 2) | done |  |
+| KZ-009 | Core utils | done |  |
+| KZ-010 | Models | done |  |
+| KZ-011 | Router & shell | done |  |
+| KZ-012 | Localisation baseline | in progress | no ARB parity CI script |
+| KZ-020 | Welcome & language | done |  |
+| KZ-021 | Email/password sign-in and registration | in progress | email/password added; phone OTP path to be confirmed |
+| KZ-022 | Profile setup | done |  |
+| KZ-023 | Session controller & guards | in progress | guards.dart still a stub |
+| KZ-024 | Account screen (S20) & settings | done |  |
+| KZ-025 | Delete account (client) | in progress | client screen only; callable missing |
+| KZ-026 | Remote Config gates | done |  |
+| KZ-027 | Connectivity | done |  |
+| KZ-030 | Seed scripts | done |  |
+| KZ-031 | CatalogRepository & controller | done |  |
+| KZ-032 | Home screen (S06) | done |  |
+| KZ-033 | SearchRepository | done |  |
+| KZ-034 | Results screen (S08) + filters sheet (S09) | done |  |
+| KZ-035 | Explorer tab (S07) | done |  |
+| KZ-036 | Listing detail (S11) | done |  |
+| KZ-040 | Provider profile (S10) | done |  |
+| KZ-041 | Contact action | done |  |
+| KZ-042 | Messages tab (S19) | done |  |
+| KZ-043 | Share provider | done |  |
+| KZ-044 | Block user | done |  |
+| KZ-050 | Publier hub (S14) | done |  |
+| KZ-051 | Provider onboarding (S15) | done |  |
+| KZ-052 | MediaRepository & ImageService | done |  |
+| KZ-053 | Listing form (S16) | done |  |
+| KZ-054 | My listings & provider dashboard (S17) | done |  |
+| KZ-055 | Portfolio management | todo |  |
+| KZ-060 | Reviews list & summary | in progress | screen only |
+| KZ-061 | Write/edit/delete review (S12) | in progress | screen only |
+| KZ-062 | Favourites | in progress | screen only |
+| KZ-063 | Report sheet (S13) | in progress | repository interface only |
+| KZ-064 | Provider review reply (P2) | todo |  |
+| KZ-070 | Normalise + keywords lib (TS) | todo |  |
+| KZ-071 | `onListingWritten` | done |  |
+| KZ-072 | `onProviderWritten` | done |  |
+| KZ-073 | `onReviewWritten` | todo |  |
+| KZ-074 | `onContactWritten` | todo |  |
+| KZ-075 | `onReportCreated` | todo |  |
+| KZ-076 | Notifications lib | todo |  |
+| KZ-077 | `deleteAccount` callable | todo |  |
+| KZ-078 | Scheduled cleanups | in progress | only cleanupOrphanMedia |
+| KZ-079 | Admin callables | todo |  |
+| KZ-080 | Admin shell & auth | todo |  |
+| KZ-081 | Providers queue & detail | todo |  |
+| KZ-082 | Reports queue | todo |  |
+| KZ-083 | Verification queue | todo |  |
+| KZ-084 | Categories management | todo |  |
+| KZ-085 | Audit log view | todo |  |
+| KZ-086 | Dashboard counts | todo |  |
+| KZ-087 | Hosting deploy target `admin` | todo |  |
+| KZ-090 | Verification flow (S18) | in progress | screen only |
+| KZ-091 | `submitVerification`, `admin_getVerificationFiles`, `admin_decideVerification` | todo |  |
+| KZ-092 | FCM client | todo |  |
+| KZ-093 | Notification triggers | todo |  |
+| KZ-094 | Verified badge everywhere | todo |  |
+| KZ-100 | Analytics events | todo |  |
+| KZ-101 | Legal pages | todo |  |
+| KZ-102 | Share landing page `/p/:id` | todo |  |
+| KZ-103 | App icon, splash, store listing assets | todo |  |
+| KZ-104 | Performance pass | todo |  |
+| KZ-105 | Accessibility pass | todo |  |
+| KZ-106 | App Check enforcement | todo |  |
+| KZ-107 | Release pipeline | todo |  |
+| KZ-108 | Closed beta | todo |  |
+
+---
+
 ## E0 — Foundations
 
 **KZ-001 Project scaffolding.** Flutter app at repo root with `dev`/`prod` flavors, folder structure from TDD §2, `analysis_options.yaml`, `l10n.yaml`, Montserrat bundled.

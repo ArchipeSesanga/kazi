@@ -62,7 +62,8 @@ npx ts-node scripts/seed-demo.ts --emulator
 4. Add or extend tests per the test plan. Run format, analyze, tests and (if touched) the functions/rules tests.
 5. For UI: implement loading, empty, error and offline states, and check FR + EN at 1.3× text scale.
 6. Open a PR with: story ID, summary, screenshots or GIF for UI, test evidence, and any doc changes.
-7. Stop and ask the owner when: acceptance criteria conflict with the TDD, a new package or field seems necessary, a rule needs loosening, or a task needs production access.
+7. **Update the ticket status.** Any change to a ticket (started, partly delivered, finished, blocked) updates its row in the Status board of `docs/07-BACKLOG-ROADMAP.md` (`todo` / `in progress` / `done`, plus a short note) in the same PR.
+8. Stop and ask the owner when: acceptance criteria conflict with the TDD, a new package or field seems necessary, a rule needs loosening, or a task needs production access.
 
 ## 6. Patterns to copy
 
