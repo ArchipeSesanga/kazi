@@ -1,7 +1,8 @@
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
-import { FieldValue, getFirestore } from "firebase-admin/firestore";
+import { getFirestore } from "firebase-admin/firestore";
 import "../lib/firebaseAdmin.js";
 import { REGION } from "../config.js";
+import { approveProviderIfExists } from "../lib/approveProvider.js";
 import { reconcileListing } from "../lib/reconcile.js";
 
 const WATCHED = ["displayName", "photoUrl", "verified", "ratingAvg", "ratingCount", "status"];
@@ -28,10 +29,7 @@ export const onProviderWritten = onDocumentWritten(
     if (justSubmitted) {
       const cfg = await db.collection("config").doc("moderation").get();
       if (cfg.data()?.autoApproveProviders === true) {
-        await change.after.ref.update({
-          status: "approved",
-          approvedAt: FieldValue.serverTimestamp(),
-        });
+        await approveProviderIfExists(change.after.ref);
         return; // the resulting write re-enters here and propagates
       }
     }

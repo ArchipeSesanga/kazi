@@ -7,7 +7,7 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { doc, serverTimestamp, setDoc, updateDoc } from '@firebase/firestore';
+import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from '@firebase/firestore';
 import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
 
 const uid = 'provider-uid';
@@ -102,6 +102,8 @@ describe('listings create — configurable limit (config/limits)', () => {
   it('does not let a client write config/limits', async () => {
     await seed({ listingCount: 0, max: 10 });
     const db = testEnv.authenticatedContext(uid, { phone_number: '+243810000001' }).firestore();
+    // Twin: the same user can read the document, only the write is denied.
+    await assertSucceeds(getDoc(doc(db, 'config', 'limits')));
     await assertFails(
       updateDoc(doc(db, 'config', 'limits'), { maxListingsPerProvider: 1000 }),
     );
