@@ -78,8 +78,10 @@ class AppProviders extends StatelessWidget {
         ProxyProvider<FirebaseAuth, AuthRepository>(
           update: (_, auth, __) => FirebaseAuthRepository(auth),
         ),
-        ProxyProvider2<FirebaseFirestore, FirebaseAuth, UserRepository>(
-          update: (_, db, auth, __) => FirebaseUserRepository(db, auth),
+        ProxyProvider3<FirebaseFirestore, FirebaseAuth, FirebaseFunctions,
+            UserRepository>(
+          update: (_, db, auth, functions, __) =>
+              FirebaseUserRepository(db, auth, functions),
         ),
         ProxyProvider<FirebaseFirestore, BlockRepository>(
           update: (_, db, __) => FirestoreBlockRepository(db),

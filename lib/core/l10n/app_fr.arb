@@ -585,7 +585,7 @@
   "@deleteAccountTitle": { "description": "Delete account title" },
   "deleteAccountWarning": "Cette action supprimera définitivement votre compte et toutes vos données. Elle est irréversible.",
   "@deleteAccountWarning": { "description": "Delete account warning" },
-  "deleteAccountConsequences": "Vos annonces et votre profil prestataire seront supprimés.",
+  "deleteAccountConsequences": "Vos annonces, votre profil prestataire, vos favoris, vos contacts et vos photos seront supprimés. Les avis que vous avez laissés restent visibles, sans votre nom.",
   "@deleteAccountConsequences": { "description": "Delete account consequences" },
   "deleteAccountConfirmLabel": "Tapez SUPPRIMER pour confirmer",
   "@deleteAccountConfirmLabel": { "description": "Delete confirmation input label" },
@@ -722,5 +722,15 @@
   "authOtpResendIn": "Renvoyer dans {seconds} s",
   "@authOtpResendIn": { "description": "Resend countdown", "placeholders": { "seconds": { "type": "int" } } },
   "authOtpSubtitle": "Entrez le code à 6 chiffres envoyé au {phone}.",
-  "@authOtpSubtitle": { "description": "OTP subtitle", "placeholders": { "phone": { "type": "String" } } }
+  "@authOtpSubtitle": { "description": "OTP subtitle", "placeholders": { "phone": { "type": "String" } } },
+  "deleteAccountContinue": "Continuer",
+  "@deleteAccountContinue": {"description": "Delete account: continue to OTP"},
+  "deleteAccountOtpIntro": "Par sécurité, confirmez avec le code envoyé au {phone}.",
+  "@deleteAccountOtpIntro": {"description": "Delete account OTP intro", "placeholders": {"phone": {"type": "String"}}},
+  "deleteAccountRetry": "Réessayer",
+  "@deleteAccountRetry": {"description": "Delete account retry"},
+  "deleteAccountReauthExpired": "La confirmation a expiré. Demandez un nouveau code.",
+  "@deleteAccountReauthExpired": {"description": "Delete account: reauth expired"},
+  "deleteAccountNoPhone": "Votre compte n'a pas de numéro vérifié : suppression impossible depuis l'application.",
+  "@deleteAccountNoPhone": {"description": "Delete account without phone"}
 }

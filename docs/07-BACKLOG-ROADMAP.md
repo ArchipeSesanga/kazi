@@ -50,7 +50,7 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-022 | Profile setup | done |  |
 | KZ-023 | Session controller & guards | done | Three access levels in `guards.dart` (no session / no profile / complete profile + provider doc + admin claim), tests per level. `?from=` return path is not implemented: guests go to phone sign-in and then home |
 | KZ-024 | Account screen (S20) & settings | done |  |
-| KZ-025 | Delete account (client) | in progress | client screen only; callable missing |
+| KZ-025 | Delete account (client) | done | Typed word + fresh OTP re-confirmation, retry-safe; tests. Needs deploying `deleteAccount` to `kazi-dev` and a device test |
 | KZ-026 | Remote Config gates | done |  |
 | KZ-027 | Connectivity | done |  |
 | KZ-030 | Seed scripts | done |  |
@@ -83,7 +83,7 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-074 | `onContactWritten` | todo |  |
 | KZ-075 | `onReportCreated` | todo |  |
 | KZ-076 | Notifications lib | todo |  |
-| KZ-077 | `deleteAccount` callable | todo |  |
+| KZ-077 | `deleteAccount` callable | done | Fresh-login check, idempotent steps, review anonymisation, Storage and Auth removal; emulator tests. Not deployed yet |
 | KZ-078 | Scheduled cleanups | in progress | only cleanupOrphanMedia |
 | KZ-079 | Admin callables | todo |  |
 | KZ-080 | Admin shell & auth | todo |  |
@@ -166,8 +166,8 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 **KZ-024 Account screen (S20) & settings.** Edit name/photo/commune, language, legal pages (bundled Markdown), help, sign out.
 - AC: edits persist; sign-out returns to home as a guest.
 
-**KZ-025 Delete account (client).** S22 confirmation + call to `deleteAccount` (KZ-077).
-- AC: after deletion the app is signed out and the user can't read their old data.
+**KZ-025 Delete account (client).** S22 confirmation, fresh OTP re-confirmation, then call to `deleteAccount` (KZ-077).
+- AC: after deletion the app is signed out and the user can't read their old data; the call needs an OTP confirmed in the last 5 minutes.
 
 **KZ-026 Remote Config gates.** Force update + maintenance screens (S23).
 - AC: setting `min_supported_build` above the current build shows the blocking screen.

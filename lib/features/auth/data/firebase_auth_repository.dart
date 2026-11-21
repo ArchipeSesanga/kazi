@@ -82,13 +82,20 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> confirmCode(String code) async {
+  Future<void> confirmCode(String code, {bool reauthenticate = false}) async {
     final id = _verificationId;
     if (id == null) throw const AuthFailure(AuthFailureReason.codeExpired);
     try {
-      await _auth.signInWithCredential(
-        PhoneAuthProvider.credential(verificationId: id, smsCode: code),
-      );
+      final credential =
+          PhoneAuthProvider.credential(verificationId: id, smsCode: code);
+      final user = _auth.currentUser;
+      if (reauthenticate && user != null) {
+        await user.reauthenticateWithCredential(credential);
+        // New ID token so `auth_time` reflects this OTP.
+        await user.getIdToken(true);
+      } else {
+        await _auth.signInWithCredential(credential);
+      }
     } on FirebaseAuthException catch (e) {
       throw AuthFailure(_reason(e));
     }

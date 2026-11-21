@@ -873,7 +873,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get deleteAccountConsequences =>
-      'Vos annonces et votre profil prestataire seront supprimés.';
+      'Vos annonces, votre profil prestataire, vos favoris, vos contacts et vos photos seront supprimés. Les avis que vous avez laissés restent visibles, sans votre nom.';
 
   @override
   String get deleteAccountConfirmLabel => 'Tapez SUPPRIMER pour confirmer';
@@ -1098,4 +1098,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String authOtpSubtitle(String phone) {
     return 'Entrez le code à 6 chiffres envoyé au $phone.';
   }
+
+  @override
+  String get deleteAccountContinue => 'Continuer';
+
+  @override
+  String deleteAccountOtpIntro(String phone) {
+    return 'Par sécurité, confirmez avec le code envoyé au $phone.';
+  }
+
+  @override
+  String get deleteAccountRetry => 'Réessayer';
+
+  @override
+  String get deleteAccountReauthExpired =>
+      'La confirmation a expiré. Demandez un nouveau code.';
+
+  @override
+  String get deleteAccountNoPhone =>
+      'Votre compte n\'a pas de numéro vérifié : suppression impossible depuis l\'application.';
 }

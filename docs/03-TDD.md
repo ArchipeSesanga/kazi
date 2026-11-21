@@ -485,7 +485,7 @@ All functions use `region: config.REGION` and are 2nd gen. Callables use `enforc
 | Function | Input | Behaviour |
 |---|---|---|
 | `submitVerification` | `{ idDocumentPath, selfiePath }` | Caller must be a provider. Verify both files exist under `private/verification/{uid}/`. Upsert `verificationRequests/{uid}` with `status = pending` |
-| `deleteAccount` | `{}` | See §6.5 |
+| `deleteAccount` | `{}` | Caller must have a verified phone and a sign-in at most **5 minutes old** (`auth_time`): the client re-confirms with a fresh OTP first, otherwise `failed-precondition: recent-login-required`. See §6.5 |
 
 ### 6.3 Callables (admin — require `admin` or `moderator` claim)
 
@@ -508,14 +508,18 @@ All functions use `region: config.REGION` and are 2nd gen. Callables use `enforc
 
 ### 6.5 Account deletion (`deleteAccount`)
 
-1. Set `users/{uid}.status = 'deleting'`.
-2. Delete `users/{uid}/favorites`, `blocks`, `devices`.
-3. Delete reviews written by the user (`collectionGroup('reviews').where('authorUid','==',uid)`). Each delete triggers a rating recompute.
-4. Delete `contacts` where `clientUid == uid`.
-5. If provider: delete all `listings` with `providerId == uid`, `providers/{uid}/reviews/*`, `providers/{uid}`, and `verificationRequests/{uid}`.
-6. Delete Storage prefixes `media/{uid}/` and `private/verification/{uid}/`.
-7. Keep `reports` filed by the user, with `reporterUid` replaced by `"deleted"` (safety record, 12-month retention).
-8. Delete `users/{uid}` and finally the Auth user (`admin.auth().deleteUser`).
+The app asks the user to type the confirmation word, **re-confirms with a fresh OTP** sent to the account's own number (`reauthenticateWithCredential`, then a new ID token so `auth_time` is current), then calls the callable. The callable (`functions/src/callables/deleteAccount.ts`, logic in `lib/deleteAccount.ts`) runs these steps, each **idempotent**, so a call can simply be repeated after a partial failure:
+
+1. Set `users/{uid}.status = 'deleting'` (if the doc exists).
+2. Reviews the user **wrote** (`collectionGroup('reviews').where('authorUid','==',uid)`) are **anonymised, not deleted**: moved to a neutral id (`deleted_<hash>`, never the uid) with `authorUid = 'deleted'`, `authorName = 'Utilisateur supprimé'`, no `authorPhotoUrl`; rating, text and dates are kept so provider ratings do not change. (Set + delete in one batch; the id is deterministic so a retry cannot duplicate.)
+3. `reports` filed by the user are kept (safety record, 12-month retention) with `reporterUid = 'deleted'`.
+4. Delete `contacts` where `clientUid == uid` **and** where `providerId == uid` (those hold this account's phone numbers as a snapshot).
+5. Delete other users' `favorites` that point at this account (`collectionGroup('favorites').where('providerId','==',uid)`).
+6. Delete all `listings` with `providerId == uid`, then `providers/{uid}` with its `reviews` subcollection, then `verificationRequests/{uid}`.
+7. Delete Storage prefixes `media/{uid}/` and `private/verification/{uid}/`.
+8. Delete `users/{uid}` with `favorites`, `blocks`, `devices`, and **last** the Auth user (`admin.auth().deleteUser`, "not found" ignored). Until the Auth user is gone the user can sign in again and retry.
+
+Nothing creates a document: triggers touch `providers/{uid}` with `update()` only after checking it exists (`syncListingSlot`, `releaseSlotOnDelete`, `approveProviderIfExists`), so deleting listings or racing writes cannot recreate a deleted provider. Logs contain counts only. Collection-group queries on `reviews.authorUid` and `favorites.providerId` have field overrides in `firestore.indexes.json`. Known gap: when KZ-073 (`onReviewWritten`) lands it must treat the anonymising move (delete + create, same rating) as net zero.
 
 The app signs out locally after the callable resolves. A public web page (Firebase Hosting `/delete-account`) explains how to request deletion without the app, as Google Play requires.
 

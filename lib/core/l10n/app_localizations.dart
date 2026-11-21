@@ -1673,7 +1673,7 @@ abstract class AppLocalizations {
   /// Delete account consequences
   ///
   /// In fr, this message translates to:
-  /// **'Vos annonces et votre profil prestataire seront supprimés.'**
+  /// **'Vos annonces, votre profil prestataire, vos favoris, vos contacts et vos photos seront supprimés. Les avis que vous avez laissés restent visibles, sans votre nom.'**
   String get deleteAccountConsequences;
 
   /// Delete confirmation input label
@@ -2083,6 +2083,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Entrez le code à 6 chiffres envoyé au {phone}.'**
   String authOtpSubtitle(String phone);
+
+  /// Delete account: continue to OTP
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get deleteAccountContinue;
+
+  /// Delete account OTP intro
+  ///
+  /// In fr, this message translates to:
+  /// **'Par sécurité, confirmez avec le code envoyé au {phone}.'**
+  String deleteAccountOtpIntro(String phone);
+
+  /// Delete account retry
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get deleteAccountRetry;
+
+  /// Delete account: reauth expired
+  ///
+  /// In fr, this message translates to:
+  /// **'La confirmation a expiré. Demandez un nouveau code.'**
+  String get deleteAccountReauthExpired;
+
+  /// Delete account without phone
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre compte n\'a pas de numéro vérifié : suppression impossible depuis l\'application.'**
+  String get deleteAccountNoPhone;
 }
 
 class _AppLocalizationsDelegate

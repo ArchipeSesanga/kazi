@@ -35,8 +35,11 @@ abstract interface class AuthRepository {
   Future<void> verifyPhone(String e164, {bool resend = false});
 
   /// Confirms the code for the number passed to [verifyPhone] and signs in.
-  /// Throws [AuthFailure].
-  Future<void> confirmCode(String code);
+  ///
+  /// With [reauthenticate] the code re-confirms the *current* user instead of
+  /// signing in (used before deleting the account), which refreshes the
+  /// sign-in time that sensitive callables check. Throws [AuthFailure].
+  Future<void> confirmCode(String code, {bool reauthenticate = false});
 
   /// Email/password sign-in: dev/test/emulator builds and the admin app only
   /// (see `Env.emailAuthEnabled`). Returns true if this is a new user.

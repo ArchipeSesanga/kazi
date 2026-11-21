@@ -268,7 +268,7 @@
 
   "deleteAccountTitle": "Delete my account",
   "deleteAccountWarning": "This will permanently delete your account and all your data. This action cannot be undone.",
-  "deleteAccountConsequences": "Your listings and provider profile will be deleted.",
+  "deleteAccountConsequences": "Your listings, provider profile, favourites, contacts and photos will be deleted. Reviews you wrote stay visible, without your name.",
   "deleteAccountConfirmLabel": "Type DELETE to confirm",
   "deleteAccountConfirmWord": "DELETE",
   "deleteAccountButton": "Delete my account",
@@ -383,5 +383,15 @@
   "authOtpResendIn": "Resend in {seconds}s",
   "@authOtpResendIn": { "description": "Resend countdown", "placeholders": { "seconds": { "type": "int" } } },
   "authOtpSubtitle": "Enter the 6-digit code sent to {phone}.",
-  "@authOtpSubtitle": { "description": "OTP subtitle", "placeholders": { "phone": { "type": "String" } } }
+  "@authOtpSubtitle": { "description": "OTP subtitle", "placeholders": { "phone": { "type": "String" } } },
+  "deleteAccountContinue": "Continue",
+  "@deleteAccountContinue": {"description": "Delete account: continue to OTP"},
+  "deleteAccountOtpIntro": "For your security, confirm with the code sent to {phone}.",
+  "@deleteAccountOtpIntro": {"description": "Delete account OTP intro", "placeholders": {"phone": {"type": "String"}}},
+  "deleteAccountRetry": "Try again",
+  "@deleteAccountRetry": {"description": "Delete account retry"},
+  "deleteAccountReauthExpired": "The confirmation expired. Request a new code.",
+  "@deleteAccountReauthExpired": {"description": "Delete account: reauth expired"},
+  "deleteAccountNoPhone": "Your account has no verified number: it cannot be deleted from the app.",
+  "@deleteAccountNoPhone": {"description": "Delete account without phone"}
 }

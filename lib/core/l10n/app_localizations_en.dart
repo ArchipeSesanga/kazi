@@ -865,7 +865,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountConsequences =>
-      'Your listings and provider profile will be deleted.';
+      'Your listings, provider profile, favourites, contacts and photos will be deleted. Reviews you wrote stay visible, without your name.';
 
   @override
   String get deleteAccountConfirmLabel => 'Type DELETE to confirm';
@@ -1085,4 +1085,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String authOtpSubtitle(String phone) {
     return 'Enter the 6-digit code sent to $phone.';
   }
+
+  @override
+  String get deleteAccountContinue => 'Continue';
+
+  @override
+  String deleteAccountOtpIntro(String phone) {
+    return 'For your security, confirm with the code sent to $phone.';
+  }
+
+  @override
+  String get deleteAccountRetry => 'Try again';
+
+  @override
+  String get deleteAccountReauthExpired =>
+      'The confirmation expired. Request a new code.';
+
+  @override
+  String get deleteAccountNoPhone =>
+      'Your account has no verified number: it cannot be deleted from the app.';
 }
