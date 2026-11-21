@@ -35,16 +35,16 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 |---|---|---|---|
 | KZ-001 | Project scaffolding | done |  |
 | KZ-002 | Firebase wiring | done |  |
-| KZ-003 | Functions scaffolding | in progress | Verified in code: TS project, config.ts, build and vitest work. `npm run lint` fails (ESLint 9 with no `eslint.config.js`), there is no emulator test script, and `firebase.json` storage emulator config is invalid (`emulators:exec` with storage fails: missing `target`) |
-| KZ-004 | Rules & indexes baseline | in progress | Rules and indexes exist. Rules tests cover users, listing limit, profile photo and provider create only; reviews, contacts, reports, verification and storage cases (Test plan §2.3) are missing |
-| KZ-005 | CI pipeline | in progress | PR workflow: analyze, test, functions tests. Format check, ARB parity and ESLint not yet wired |
+| KZ-003 | Functions scaffolding | in progress | TS project, config.ts, build and vitest work; storage emulator config fixed. Remaining: `npm run lint` fails (ESLint 9 has no `eslint.config.js`) and there is no emulator test npm script |
+| KZ-004 | Rules & indexes baseline | in progress | Rules tests cover users, signed-in definition, listing limit, profile photo, provider create and Storage (avatar, cover, portfolio, listing photos, verification docs). Missing: reviews, contacts, reports, verificationRequests cases (Test plan §2.3) |
+| KZ-005 | CI pipeline | in progress | PR workflow: ARB parity, analyze, test, functions build + tests under Firestore and Storage emulators. Format check and ESLint not wired |
 | KZ-006 | Theme & tokens | done |  |
-| KZ-007 | Design-system widgets (part 1) | in progress | Widgets and `/dev/components` exist except `KaziTextArea`; no per-variant widget tests; the catalogue route is not restricted to dev |
+| KZ-007 | Design-system widgets (part 1) | in progress | `/dev/components` is now dev-only (tested). Still missing: `KaziTextArea` and per-variant widget tests |
 | KZ-008 | Design-system widgets (part 2) | in progress | All 12 widgets exist; no widget tests and no Figma screenshot comparison |
 | KZ-009 | Core utils | done |  |
 | KZ-010 | Models | done |  |
 | KZ-011 | Router & shell | done |  |
-| KZ-012 | Localisation baseline | in progress | ARB files have identical keys today (verified); no parity check script in CI |
+| KZ-012 | Localisation baseline | in progress | ARB parity check (`tool/check_arb_parity.dart`) runs in CI; keys and placeholders match. Remaining: nothing known; mark done after the first green CI run |
 | KZ-020 | Welcome & language | done |  |
 | KZ-021 | Email/password sign-in and registration | in progress | Phone OTP built (screens, controller, rules, tests); needs Firebase console setup and a real-device test before done |
 | KZ-022 | Profile setup | done |  |

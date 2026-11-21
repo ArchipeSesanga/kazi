@@ -23,6 +23,7 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
+      - run: dart run tool/check_arb_parity.dart
       - run: flutter analyze
       - run: flutter test
 
@@ -46,7 +47,7 @@ jobs:
           java-version: 21
       - run: npm ci
       - run: npm run build
-      # Firestore emulator only: rules + trigger-logic tests. Demo project, no
-      # credentials, no deploy.
-      - run: npx --yes firebase-tools@14 emulators:exec --only firestore --project demo-kazi "npm --prefix functions test"
+      # Firestore + Storage emulators: rules and trigger-logic tests. Demo
+      # project, no credentials, no deploy.
+      - run: npx --yes firebase-tools@14 emulators:exec --only firestore,storage --project demo-kazi "npm --prefix functions test"
         working-directory: .
