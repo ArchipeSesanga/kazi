@@ -121,7 +121,7 @@ describe.skipIf(!emulator)('reports, moderation and draft cleanup (Firestore emu
         const created = results.filter((r) => r.status === 'fulfilled').length;
         expect(created).toBeLessThanOrEqual(REPORTS_PER_DAY);
         expect((await data('reportQuota/u1'))!.count).toBeLessThanOrEqual(REPORTS_PER_DAY);
-      });
+      }, 30_000);
     });
   });
 

@@ -63,6 +63,11 @@
 - `deleteAccount`: provider with listings, reviews and contacts → everything removed; reports anonymised; Auth user deleted.
 - Admin callables: reject without claim, reject without App Check (in an emulator with enforcement on), log every action.
 
+### 2.4b Admin web app (`/admin`)
+- `npm test` (Vitest + Testing Library): claims gate (admin and moderator stay, others signed out with a message, fail closed, session restored on reload), report grouping and ordering, error mapping, FR/EN key parity, the Reports page (loading, empty, load error + retry, each action with its confirm dialog, required suspend reason, error kept in the dialog, buttons disabled while working, restore disabled for `over_limit`, deleted target dismiss-only).
+- Rules: the exact queue query (`status == open` ordered by `createdAt`) is allowed for admin and moderator and denied for a phone user and an email-only account.
+- CI job `admin`: lint, typecheck, test, build.
+
 ### 2.5 Controllers (examples)
 - `PhoneAuthController`: E.164 normalisation (+243 default), invalid number, send failures, wrong/expired/too-many code, resend cooldown (uses a fake repository modelled on Firebase test numbers; no real SMS). Router: `/auth/email` is redirected to `/auth/phone` unless `Env.emailAuthEnabled`.
 - Guards (`guards_test.dart`): the three access levels, provider and staff routes, loop-freedom; staff (moderator/admin claim) without a phone or profile bypass profile setup (twin: the same account without the claim is held at setup).

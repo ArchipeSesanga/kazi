@@ -127,7 +127,9 @@ Priority: **P0** = launch blocker, **P1** = should ship in v1, **P2** = nice to 
 | F-44 | Block a user (hides their content from you) | P1 |
 | F-45 | Basic content rules: no phone numbers in titles, profanity filter (FR/EN word list), image count/size limits | P1 |
 
-### 6.6 Admin web panel (Flutter Web)
+### 6.6 Admin web panel (React web app, separate from the Flutter app)
+
+*The admin panel is a standalone React + TypeScript web app (`/admin`), not part of the Flutter app. v0 ships only the reports queue (F-53); the other features follow.*
 
 | ID | Feature | Priority |
 |---|---|---|

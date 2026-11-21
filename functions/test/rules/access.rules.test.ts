@@ -8,13 +8,18 @@ import {
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
 import {
+  collection,
   collectionGroup,
   deleteDoc,
   doc,
   getDoc,
   getDocs,
+  limit,
+  orderBy,
+  query,
   serverTimestamp,
   setDoc,
+  where,
   type Firestore,
 } from '@firebase/firestore';
 import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
@@ -142,6 +147,14 @@ describe('writes are verified-phone only', () => {
     });
     it('twin: moderators can still read the reports queue', () =>
       assertSucceeds(getDoc(doc(moderator(), 'reports', 'r0'))));
+    it('the admin panel query (open reports, newest first): staff yes, phone user no', async () => {
+      const queue = (db: Firestore) =>
+        getDocs(query(collection(db, 'reports'), where('status', '==', 'open'), orderBy('createdAt', 'desc'), limit(500)));
+      await assertSucceeds(queue(moderator()));
+      await assertSucceeds(queue(admin()));
+      await assertFails(queue(phone()));
+      await assertFails(queue(emailOnly()));
+    });
     it('denies every client access to reportQuota', async () => {
       await assertFails(setDoc(doc(phone(), 'reportQuota', uid), { windowStart: 0, count: 0 }));
       await assertFails(getDoc(doc(phone(), 'reportQuota', uid)));

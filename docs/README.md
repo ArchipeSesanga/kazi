@@ -40,7 +40,7 @@ Kazi is a free, Android-first marketplace where people in the DRC publish and fi
 | Launch city | Kinshasa (24 communes seeded) |
 | Languages | French (default) + English; Lingala/Swahili in v1.1 |
 | Contact | WhatsApp deep link + phone call; in-app chat in v2 |
-| Admin | Flutter Web admin panel in the same repo |
+| Admin | React web app (Vite + TypeScript) in `/admin`, shares `shared/` types with the functions |
 | State management | Provider (`ChangeNotifier`), no other state library |
 | Region | Firebase `africa-south1` (Johannesburg) |
 | Font / colours | Montserrat; `#F25912`, `#5C3E94`, `#412B6B`, `#211832` |

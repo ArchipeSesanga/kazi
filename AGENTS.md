@@ -4,9 +4,9 @@
 
 ## 1. What you're building
 
-Kazi is a free Android-first marketplace app for local services in the DRC (Kinshasa first). Clients find providers and contact them via WhatsApp or a phone call. Providers publish service listings. Admins moderate through a Flutter Web panel.
+Kazi is a free Android-first marketplace app for local services in the DRC (Kinshasa first). Clients find providers and contact them via WhatsApp or a phone call. Providers publish service listings. Staff moderate through a separate React web app in `/admin` (not Flutter).
 
-**Stack (non-negotiable):** Flutter (Dart 3) · Firebase (Auth email/password, Firestore, Storage, Functions 2nd gen in TypeScript, FCM, Remote Config, App Check, Analytics, Crashlytics, Hosting) · **Provider** for state management · go_router · freezed.
+**Stack (non-negotiable):** Flutter (Dart 3) · Firebase (Auth phone OTP, email/password for staff, Firestore, Storage, Functions 2nd gen in TypeScript, FCM, Remote Config, App Check, Analytics, Crashlytics, Hosting) · **Provider** for state management · go_router · freezed.
 
 ## 2. Read before coding (in this order)
 
@@ -42,8 +42,8 @@ dart analyze
 flutter test
 flutter run --flavor dev -t lib/main.dart --dart-define=FLAVOR=dev --dart-define=USE_EMULATORS=true
 
-# Admin web
-flutter run -d chrome -t lib/main_admin.dart --dart-define=FLAVOR=dev --dart-define=USE_EMULATORS=true
+# Admin web app (React, folder /admin)
+cd admin && npm ci && npm run dev      # lint / typecheck / test / build: npm run lint|typecheck|test|build
 
 # Functions + rules tests
 cd functions && npm ci && npm run lint && npm run build

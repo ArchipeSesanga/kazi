@@ -18,9 +18,7 @@ class _NoExitBackButtonDispatcher extends RootBackButtonDispatcher {
 }
 
 class KaziApp extends StatefulWidget {
-  const KaziApp({super.key, this.admin = false});
-
-  final bool admin;
+  const KaziApp({super.key});
 
   @override
   State<KaziApp> createState() => _KaziAppState();

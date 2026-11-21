@@ -3,7 +3,9 @@ import "./firebaseAdmin.js";
 import { AUTO_HIDE_THRESHOLD } from "../config.js";
 import { writeAdminLog } from "./adminLog.js";
 
-export const AUTO_REPORTS_REASON = "auto_reports";
+import { MODERATION_REASON } from "../../../shared/moderation.js";
+
+export const AUTO_REPORTS_REASON = MODERATION_REASON.autoReports;
 
 export interface AutoHideResult {
   openReports: number;

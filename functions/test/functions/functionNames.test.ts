@@ -6,6 +6,16 @@ import { describe, expect, it } from 'vitest';
 // @ts-expect-error plain ESM script outside the TypeScript project
 import { functionNames } from '../../../scripts/function-names.mjs';
 
+import { MODERATOR_CALLABLES } from '../../../shared/moderation';
+
+describe('shared contract', () => {
+  it('every callable name in shared/moderation.ts is an exported function', () => {
+    const src = readFileSync(resolve(process.cwd(), 'src/index.ts'), 'utf8');
+    const names: string[] = functionNames(src);
+    for (const name of Object.values(MODERATOR_CALLABLES)) expect(names).toContain(name);
+  });
+});
+
 describe('scripts/function-names.mjs (used by the release deploy)', () => {
   it('honours "as" aliases and lists every exported function', () => {
     const names: string[] = functionNames(

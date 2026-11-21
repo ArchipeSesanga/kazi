@@ -45,7 +45,7 @@ Kazi never relays messages or calls. It opens WhatsApp or the dialer on the clie
 flowchart TB
   subgraph Devices
     MA[Kazi mobile app\nFlutter · Android]
-    AW[Kazi admin panel\nFlutter Web]
+    AW[Kazi admin panel\nReact web app]
   end
 
   subgraph Firebase["Firebase project (kazi-prod)"]
@@ -86,7 +86,7 @@ flowchart TB
 | Container | Technology | Responsibility |
 |---|---|---|
 | **Mobile app** | Flutter (Dart 3), Provider, go_router | All client and provider features. Reads via Firestore SDK with offline cache; writes allowed by security rules |
-| **Admin panel** | Flutter Web, same repo, separate entrypoint `lib/main_admin.dart` | Moderation queues, categories, audit log. Privileged writes only via callable Functions |
+| **Admin panel** | React + TypeScript (Vite), folder `/admin`, own Hosting target `admin`, shares `shared/` types with the functions | Moderation queues, categories, audit log. Privileged writes only via callable Functions |
 | **Firebase Auth** | Phone provider (users), Email/Password (admins) | Identity. Roles via **custom claims** (`admin`, `moderator`) |
 | **Cloud Firestore** | Native mode, region `africa-south1` (Johannesburg) | Primary database. Offline persistence on mobile |
 | **Cloud Storage** | Default bucket, same region | Profile, cover, listing and portfolio images (public read), ID documents (private, admin-only via signed URLs) |
@@ -246,10 +246,10 @@ ID verification documents go to `private/verification/{uid}/…`. They are never
 - **Decision:** Firebase (Auth, Firestore, Storage, Functions, FCM, Hosting).
 - **Consequences:** Faster MVP, no ops. Weaker search and geo queries (mitigated by §6.3, ADR-006), vendor lock-in (mitigated by repository interfaces), cost tied to reads (mitigated by §9).
 
-### ADR-002 — Flutter for mobile and admin web
-- **Status:** Accepted
-- **Decision:** One Flutter codebase: Android app (`lib/main.dart`) and admin web (`lib/main_admin.dart`), sharing models, repositories and theme.
-- **Consequences:** Code reuse and one language for agents. Flutter Web bundle is heavy, but that's acceptable for an internal admin tool.
+### ADR-002 — Flutter for mobile, React for the admin web
+- **Status:** Accepted (revised: originally "Flutter for mobile and admin web")
+- **Decision:** The Android app is Flutter (`lib/main.dart`). The admin panel is a separate **React + TypeScript web app (Vite)** in `/admin`, deployed to Firebase Hosting target `admin`. It signs in with email/password, accepts only the `admin` / `moderator` claims, reads Firestore and **writes only through the `moderator_*` / `admin_*` callables**. Types and constants that both sides need live once in `/shared` (compiled by the functions and imported by the admin through a Vite alias).
+- **Consequences:** A small, fast, searchable web bundle and the normal web toolchain for a data-table tool; no Flutter Web weight. Costs: a second language toolchain (Node/React) and CI job; no code sharing with the mobile app (models are not shared, only the callable contract in `/shared`).
 
 ### ADR-003 — Provider for state management
 - **Status:** Accepted

@@ -17,9 +17,9 @@
 6. FCM: Android notification channel `kazi_default` created in the app.
 7. Remote Config: create the keys from TDD §3.3 in both projects.
 8. Analytics: data retention 14 months; enable Crashlytics.
-9. Hosting targets: `admin` (admin panel) and `web` (legal pages, `/delete-account`, `/p/:id` share landing + Android App Links `assetlinks.json`).
+9. Hosting targets: `admin` (React admin panel from `admin/dist`; create its own site with `firebase hosting:sites:create <site-id>` and map it with `firebase target:apply hosting admin <site-id>`) and `web` (legal pages, `/delete-account`, `/p/:id` share landing + Android App Links `assetlinks.json`).
 10. Run `scripts/seed-categories.ts` and `scripts/seed-locations.ts` against both projects.
-11. Create the first admin: create an email/password user in the console, then run `scripts/set-claims.ts --project kazi-prod --uid <uid> --role superAdmin` with a service account key stored **only** on your machine (never in git).
+11. Create the first admin: create an email/password user in the console, then run `cd scripts && npx tsx set-claims.ts --project kazi-prod --email <email> --role admin --confirm-prod` with Application Default Credentials / a service account key stored **only** on your machine (never in git). Moderators get `--role moderator`.
 12. `flutterfire configure` for each flavor → `firebase_options_dev.dart` / `firebase_options_prod.dart`.
 
 ## 2. Local development
@@ -31,8 +31,8 @@ cd functions && npm ci && npm run build && cd ..
 firebase emulators:start --import=./.emulator-data --export-on-exit
 npx ts-node scripts/seed-demo.ts --emulator
 flutter run --flavor dev -t lib/main.dart --dart-define=FLAVOR=dev --dart-define=USE_EMULATORS=true
-# Admin panel
-flutter run -d chrome -t lib/main_admin.dart --dart-define=FLAVOR=dev --dart-define=USE_EMULATORS=true
+# Admin panel (React, /admin): set VITE_USE_EMULATORS=true in admin/.env.local to use the emulators
+cd admin && npm ci && npm run dev
 ```
 
 Android emulator → host emulators: use `10.0.2.2`; physical device: use your machine's LAN IP (`--dart-define=EMULATOR_HOST=192.168.x.x`).

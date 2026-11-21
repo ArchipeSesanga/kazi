@@ -78,9 +78,6 @@ class _Env {
 Future<_Env> _env({
   bool signedIn = false,
   bool withProfile = false,
-  bool admin = false,
-  bool moderator = false,
-  bool phone = true,
   bool providerDoc = false,
   bool onboarded = true,
   _Gate? gate,
@@ -92,12 +89,7 @@ Future<_Env> _env({
     _Users(withProfile ? _profile : null),
     FakeAuthRepository(
       signedIn: signedIn
-          ? AuthUser(
-              uid: 'u1',
-              phone: phone ? '+243810000001' : null,
-              isAdmin: admin,
-              isModerator: moderator,
-            )
+          ? const AuthUser(uid: 'u1', phone: '+243810000001')
           : null,
     ),
     providerExists: (uid) async {
@@ -212,60 +204,6 @@ void main() {
       await no.redirect(Routes.providerDashboard);
       expect(no.providerLookups, hasLength(2));
     });
-
-    test('admin routes need a staff claim', () async {
-      final user = await _env(signedIn: true, withProfile: true);
-      expect(await user.settle('/admin'), Routes.home);
-      expect(await user.settle('/admin/providers'), Routes.home);
-      expect(await user.settle('/admin/categories'), Routes.home);
-
-      final admin =
-          await _env(signedIn: true, withProfile: true, admin: true);
-      expect(await admin.settle('/admin/providers'), '/admin/providers');
-      // Lookalike paths are not admin routes.
-      expect(await user.settle('/administrators'), '/administrators');
-    });
-
-    test('staff without a phone or a profile bypass profile setup (twins)',
-        () async {
-      // Twin 1: a plain email-style account with no profile is held at setup.
-      final plain = await _env(signedIn: true, phone: false);
-      expect(await plain.settle('/admin/reports'), Routes.authSetupProfile);
-      expect(await plain.settle(Routes.home), Routes.authSetupProfile);
-
-      // Same account with the moderator claim goes straight in.
-      final mod = await _env(signedIn: true, phone: false, moderator: true);
-      expect(await mod.settle('/admin/reports'), '/admin/reports');
-      expect(await mod.settle(Routes.home), Routes.home);
-
-      // And with the admin claim, including admin-only routes.
-      final admin = await _env(signedIn: true, phone: false, admin: true);
-      expect(await admin.settle('/admin/roles'), '/admin/roles');
-      // A moderator still cannot reach admin-only routes without a phone.
-      expect(await mod.settle('/admin/roles'), Routes.home);
-    });
-
-    test('moderators get moderation routes, not admin-only ones', () async {
-      final mod =
-          await _env(signedIn: true, withProfile: true, moderator: true);
-      for (final r in ['/admin', '/admin/providers', '/admin/reports']) {
-        expect(await mod.settle(r), r, reason: r);
-      }
-      for (final r in [
-        '/admin/categories',
-        '/admin/categories/new',
-        '/admin/roles',
-        '/admin/logs',
-      ]) {
-        expect(await mod.settle(r), Routes.home, reason: r);
-      }
-
-      final admin =
-          await _env(signedIn: true, withProfile: true, admin: true);
-      for (final r in ['/admin/categories', '/admin/roles', '/admin/logs']) {
-        expect(await admin.settle(r), r, reason: r);
-      }
-    });
   });
 
   group('gates and loading', () {
@@ -310,10 +248,6 @@ void main() {
   test('route classification', () {
     expect(isProviderRoute(Routes.providerOnboarding), isFalse);
     expect(isProviderRoute('/provider/listings/new'), isTrue);
-    expect(isAdminRoute('/admin'), isTrue);
-    expect(isAdminRoute('/administrators'), isFalse);
-    expect(isAdminOnlyRoute('/admin/roles'), isTrue);
-    expect(isAdminOnlyRoute('/admin/reports'), isFalse);
   });
 }
 

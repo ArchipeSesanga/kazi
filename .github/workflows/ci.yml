@@ -52,3 +52,23 @@ jobs:
       # project, no credentials, no deploy.
       - run: npx --yes firebase-tools@14 emulators:exec --only firestore,storage --project demo-kazi "npm --prefix functions test"
         working-directory: .
+
+  admin:
+    name: Admin web (lint, typecheck, test, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: admin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: admin/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build

@@ -3,9 +3,11 @@ import { HttpsError } from "firebase-functions/v2/https";
 import "./firebaseAdmin.js";
 import { writeAdminLog } from "./adminLog.js";
 
+import { MODERATION_ERRORS, MODERATION_REASON } from "../../../shared/moderation.js";
+
 /** Hidden reasons the slot logic owns; moderators never override them. */
-const OVER_LIMIT = "over_limit";
-export const ADMIN_HIDE_REASON = "admin";
+const OVER_LIMIT = MODERATION_REASON.overLimit;
+export const ADMIN_HIDE_REASON = MODERATION_REASON.admin;
 
 type Resolution = "dismissed" | "actioned";
 
@@ -37,7 +39,7 @@ export async function resolveOpenReports(
 
 const need = async (ref: FirebaseFirestore.DocumentReference, what: string) => {
   const snap = await ref.get();
-  if (!snap.exists) throw new HttpsError("not-found", `${what}-not-found`);
+  if (!snap.exists) throw new HttpsError("not-found", `${what}-not-found`); // see MODERATION_ERRORS
   return snap.data() as Record<string, unknown>;
 };
 
@@ -75,7 +77,7 @@ export async function restoreListing(
   const ref = db.collection("listings").doc(input.listingId);
   const before = await need(ref, "listing");
   if (before.moderationReason === OVER_LIMIT) {
-    throw new HttpsError("failed-precondition", "over-limit");
+    throw new HttpsError("failed-precondition", MODERATION_ERRORS.overLimit);
   }
   await ref.update({ moderation: "ok", moderationReason: FieldValue.delete() });
   const resolvedReports = await resolveOpenReports(

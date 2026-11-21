@@ -17,25 +17,15 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Stream<AuthUser?> authStateChanges() {
-    return _auth.authStateChanges().asyncMap((user) async {
-      if (user == null) return null;
-      var isAdmin = false;
-      var isModerator = false;
-      try {
-        final token = await user.getIdTokenResult();
-        isAdmin = token.claims?['admin'] == true;
-        isModerator = token.claims?['moderator'] == true;
-      } catch (_) {
-        // Offline: treat as non-admin; claims are re-read on the next sign-in.
-      }
-      return AuthUser(
-        uid: user.uid,
-        phone: user.phoneNumber,
-        email: user.email,
-        isAdmin: isAdmin,
-        isModerator: isModerator,
-      );
-    });
+    return _auth.authStateChanges().map(
+      (user) => user == null
+          ? null
+          : AuthUser(
+              uid: user.uid,
+              phone: user.phoneNumber,
+              email: user.email,
+            ),
+    );
   }
 
   @override

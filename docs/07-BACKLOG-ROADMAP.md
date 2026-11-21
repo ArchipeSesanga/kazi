@@ -85,15 +85,15 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-076 | Notifications lib | todo |  |
 | KZ-077 | `deleteAccount` callable | done | Fresh-login check, idempotent steps, review anonymisation, Storage and Auth removal; emulator tests; deployed to kazi-dev and confirmed on a device |
 | KZ-078 | Scheduled cleanups | in progress | `cleanupOrphanMedia` and `cleanupDraftListings` (nightly, 30 days) done; `cleanupVerificationFiles` waits for the verification flow |
-| KZ-079 | Admin callables | in progress | Moderator callables done (hide/restore listing, suspend provider, dismiss report, with `adminLogs`); `admin_setProviderStatus`, `admin_upsertCategory`, `admin_setRole` remain |
-| KZ-080 | Admin shell & auth | todo |  |
+| KZ-079 | Admin callables | in progress | Moderator callables done (hide/restore listing, suspend provider, dismiss report, with `adminLogs`), `scripts/set-claims.ts` for staff claims; `admin_setProviderStatus`, `admin_upsertCategory`, `admin_setRole` remain |
+| KZ-080 | Admin shell & auth | in progress | React app in `/admin`: email/password, claims check (admin or moderator, others signed out), FR/EN; component tests. Remaining: a manual browser test against `kazi-dev` with a staff user (`scripts/set-claims.ts`), then mark done |
 | KZ-081 | Providers queue & detail | todo |  |
-| KZ-082 | Reports queue | todo |  |
+| KZ-082 | Reports queue | in progress | Groups with count, target title/photo, Hide/Restore/Suspend/Dismiss with confirm dialogs and states; 43 unit/component tests. Needs the deploy of the callables and the `reports(status, createdAt)` index to `kazi-dev` and a manual browser test |
 | KZ-083 | Verification queue | todo |  |
 | KZ-084 | Categories management | todo |  |
 | KZ-085 | Audit log view | todo |  |
 | KZ-086 | Dashboard counts | todo |  |
-| KZ-087 | Hosting deploy target `admin` | todo |  |
+| KZ-087 | Hosting deploy target `admin` | in progress | `admin` target points at `admin/dist` with noindex and security headers; CI builds the app. Still to do: create the Hosting site (`firebase hosting:sites:create`), map it in `.firebaserc`, deploy |
 | KZ-090 | Verification flow (S18) | in progress | screen only |
 | KZ-091 | `submitVerification`, `admin_getVerificationFiles`, `admin_decideVerification` | todo |  |
 | KZ-092 | FCM client | todo |  |
@@ -266,16 +266,16 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 **KZ-079 Admin callables** (`admin_setProviderStatus`, `admin_resolveReport`, `admin_upsertCategory`, `admin_setRole`) + `adminLogs`.
 - AC for all E6 stories: Test plan §2.4 cases pass in the emulator; functions are idempotent; no PII in logs.
 
-## E7 — Admin panel (Flutter Web)
+## E7 — Admin panel (React web app in `/admin`)
 
-**KZ-080 Admin shell & auth.** `main_admin.dart`, login, claim check, navigation rail.
+**KZ-080 Admin shell & auth.** Vite + React + TypeScript app, email/password login, claim check (admin or moderator, else sign-out), FR/EN.
 **KZ-081 Providers queue & detail.** Filter by status; approve/reject with reason; see listings.
-**KZ-082 Reports queue.** Grouped by target; actions per TDD §6.3.
+**KZ-082 Reports queue.** Grouped by target with a count; Hide / Restore / Suspend / Dismiss through the `moderator_*` callables with confirm dialogs.
 **KZ-083 Verification queue.** Signed-URL viewer; approve/deny (with KZ-091).
 **KZ-084 Categories management.**
 **KZ-085 Audit log view.**
 **KZ-086 Dashboard counts** (P2).
-**KZ-087 Hosting deploy target `admin`.**
+**KZ-087 Hosting deploy target `admin`** (noindex, own site).
 - AC: no direct Firestore writes from the admin app (code search check); every action produces an `adminLogs` entry.
 
 ## E8 — Verification & notifications

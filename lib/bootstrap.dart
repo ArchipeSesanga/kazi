@@ -20,7 +20,7 @@ import 'firebase_options_prod.dart' as prod_opts;
 
 const bool _enableCrashlytics = bool.fromEnvironment('CRASHLYTICS');
 
-Future<void> bootstrap({bool admin = false}) async {
+Future<void> bootstrap() async {
   // 1.
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -84,7 +84,7 @@ Future<void> bootstrap({bool admin = false}) async {
   final prefs = await SharedPreferences.getInstance();
 
   // 9. Run the app.
-  runApp(AppProviders(prefs: prefs, child: KaziApp(admin: admin)));
+  runApp(AppProviders(prefs: prefs, child: const KaziApp()));
 }
 
 Future<void> _initRemoteConfig() async {

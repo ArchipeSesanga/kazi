@@ -3,10 +3,16 @@ import { HttpsError } from "firebase-functions/v2/https";
 import "./firebaseAdmin.js";
 import { REPORTS_PER_DAY, REPORT_WINDOW_MS } from "../config.js";
 
-export const REPORT_TARGETS = ["listing", "provider"] as const;
-export type ReportTarget = (typeof REPORT_TARGETS)[number];
-export const REPORT_REASONS = ["scam", "inappropriate", "fake", "wrong_category", "other"] as const;
-export type ReportReasonValue = (typeof REPORT_REASONS)[number];
+import {
+  REPORT_DETAILS_MAX,
+  REPORT_REASONS,
+  REPORT_TARGETS,
+  type ReportReason as ReportReasonValue,
+  type ReportTarget,
+} from "../../../shared/moderation.js";
+
+export { REPORT_REASONS, REPORT_TARGETS };
+export type { ReportReasonValue, ReportTarget };
 
 export interface ReportInput {
   targetType: ReportTarget;
@@ -36,7 +42,7 @@ export async function submitReport(
   now: number = Date.now(),
 ): Promise<SubmitReportResult> {
   const details = (input.details ?? "").trim();
-  if (details.length > 500) throw new HttpsError("invalid-argument", "details-too-long");
+  if (details.length > REPORT_DETAILS_MAX) throw new HttpsError("invalid-argument", "details-too-long");
 
   const id = reportId(uid, input.targetType, input.targetKey);
   const reportRef = db.collection("reports").doc(id);

@@ -6,6 +6,12 @@ import "../lib/firebaseAdmin.js";
 import { REGION } from "../config.js";
 import { canPerform, isVerifiedCaller, type CallerToken, type StaffAction } from "../lib/caller.js";
 import { dismissReport, hideListing, restoreListing, suspendProvider } from "../lib/moderation.js";
+import {
+  NOTE_MAX,
+  REPORT_DETAILS_MAX,
+  SUSPEND_REASON_MAX,
+  SUSPEND_REASON_MIN,
+} from "../../../shared/moderation.js";
 import { REPORT_REASONS, REPORT_TARGETS, submitReport } from "../lib/reports.js";
 
 function parse<T extends z.ZodTypeAny>(schema: T, data: unknown): z.infer<T> {
@@ -18,7 +24,7 @@ const reportSchema = z.object({
   targetType: z.enum(REPORT_TARGETS),
   targetKey: z.string().min(1).max(200),
   reason: z.enum(REPORT_REASONS),
-  details: z.string().max(500).optional(),
+  details: z.string().max(REPORT_DETAILS_MAX).optional(),
 });
 
 /** Report a listing or a provider. Verified users only; rate-limited per user. */
@@ -52,7 +58,7 @@ function moderatorCall<T extends z.ZodTypeAny, R>(
   });
 }
 
-const note = z.string().max(500).optional();
+const note = z.string().max(NOTE_MAX).optional();
 
 export const moderator_hideListing = moderatorCall(
   "hideListing",
@@ -66,7 +72,7 @@ export const moderator_restoreListing = moderatorCall(
 );
 export const moderator_suspendProvider = moderatorCall(
   "suspendProvider",
-  z.object({ providerId: z.string().min(1).max(200), reason: z.string().min(3).max(500) }),
+  z.object({ providerId: z.string().min(1).max(200), reason: z.string().min(SUSPEND_REASON_MIN).max(SUSPEND_REASON_MAX) }),
   (uid, i) => suspendProvider(getFirestore(), uid, i),
 );
 export const moderator_dismissReport = moderatorCall(

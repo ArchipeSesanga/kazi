@@ -67,11 +67,6 @@ class SessionController extends ChangeNotifier {
   /// A signed-in Auth user exists (profile may still be missing).
   bool get hasSession =>
       _authUser != null && _status != SessionStatus.unauthenticated;
-  bool get isAdmin => _authUser?.isAdmin ?? false;
-  bool get isModerator => _authUser?.isModerator ?? false;
-
-  /// Admin or moderator.
-  bool get isStaff => isAdmin || isModerator;
 
   /// Whether the signed-in user has a `providers/{uid}` document.
   ///
@@ -96,20 +91,13 @@ class SessionController extends ChangeNotifier {
   bool get isAuthenticated => _status == SessionStatus.authenticated;
   bool get isProfileIncomplete => _status == SessionStatus.profileIncomplete;
 
-  /// Status when there is no usable `users/{uid}` profile. Staff (admin or
-  /// moderator claim) sign in with email and have no consumer profile, so they
-  /// are not sent to profile setup: the phone-based profile does not apply to
-  /// them.
-  SessionStatus get _missingProfileStatus =>
-      isStaff ? SessionStatus.authenticated : SessionStatus.profileIncomplete;
-
   void _watchUser(String uid) {
     _userSub?.cancel();
     _timeout?.cancel();
 
     _timeout = Timer(const Duration(seconds: 5), () {
       if (_status == SessionStatus.loading) {
-        _status = _missingProfileStatus;
+        _status = SessionStatus.profileIncomplete;
         notifyListeners();
       }
     });
@@ -120,7 +108,7 @@ class SessionController extends ChangeNotifier {
         _retryTimer?.cancel();
         _appUser = appUser;
         _status = (appUser == null || appUser.displayName.trim().isEmpty)
-            ? _missingProfileStatus
+            ? SessionStatus.profileIncomplete
             : SessionStatus.authenticated;
         notifyListeners();
       },
@@ -128,7 +116,7 @@ class SessionController extends ChangeNotifier {
         _timeout?.cancel();
         debugPrint('[Session] watchUser error: $e');
         if (_status == SessionStatus.loading) {
-          _status = _missingProfileStatus;
+          _status = SessionStatus.profileIncomplete;
           notifyListeners();
         }
         // Retry once after a brief delay — the Firestore auth token may not

@@ -20,7 +20,7 @@
 | Flutter | Latest **stable** at project creation (Dart 3.x, null-safe) |
 | Android | `minSdk 23`, `targetSdk` = latest required by Google Play, App Bundle |
 | iOS | Code kept compatible; not released in v1 |
-| Web | Admin panel only (`lib/main_admin.dart`) |
+| Web | Admin panel: separate React + TypeScript app in `/admin` (Vite, Firebase JS SDK), not Flutter |
 | Backend | Firebase (Blaze plan) — Auth, Firestore, Storage, Functions 2nd gen, FCM, Remote Config, App Check, Analytics, Crashlytics, Hosting |
 | Functions runtime | TypeScript, Node.js 22, `firebase-functions` v2 API, `firebase-admin` |
 | Region | `africa-south1` — Firestore, Storage, Functions 2nd gen, and all Firebase products. Confirmed available for all used products. |
@@ -70,7 +70,6 @@ kazi/
 │   └── icon/                     # app icon sources
 ├── lib/
 │   ├── main.dart                 # mobile entry
-│   ├── main_admin.dart           # admin web entry
 │   ├── bootstrap.dart            # Firebase init, App Check, emulators, error handling
 │   ├── firebase_options_dev.dart
 │   ├── firebase_options_prod.dart
@@ -108,7 +107,6 @@ kazi/
 │   │   ├── reports/
 │   │   ├── verification/
 │   │   ├── account/              # settings, language, legal, delete account
-│   │   └── admin/                # ONLY imported from main_admin.dart
 │   └── (each feature) ──┬── data/          # Firebase implementations
 │                        ├── domain/        # repository interfaces, query objects
 │                        └── presentation/  # controllers + screens + widgets
@@ -429,7 +427,7 @@ Readable by all, written by seed/admin only (`config/{docId}` rule). Missing doc
 
 ### 4.11b `config/moderation`
 
-`{ autoApproveProviders: bool }`. v1: `true` (no admin panel yet), so `onProviderWritten` approves a provider as soon as it is created `pending` (or resubmitted from `rejected`). Set to `false` once admin moderation is live.
+`{ autoApproveProviders: bool }`. v1: `true` (the admin panel only has the reports queue so far), so `onProviderWritten` approves a provider as soon as it is created `pending` (or resubmitted from `rejected`). Set to `false` once admin moderation is live.
 
 ### 4.12 `adminLogs/{logId}`
 
@@ -758,7 +756,7 @@ abstract interface class VerificationRepository {
 }
 ```
 
-The admin panel has its own `AdminRepository` (queues + callables) in `features/admin/`.
+The admin panel is not part of the Flutter app: it lives in `/admin` (React). The moderation contract both sides share (callable names, enums, limits, `staffRoleFromClaims`) is in `/shared/moderation.ts`; the functions compile it (`functions/tsconfig.json` has `rootDir: ".."`, output under `lib/functions/src` and `lib/shared`) and the admin imports it as `@shared/moderation`.
 
 ### 9.4 Controllers (`features/*/presentation/`)
 
@@ -886,7 +884,7 @@ In widgets, use `context.select` for fine-grained rebuilds, e.g. `context.select
 
 Guards (in `guards.dart`, one `resolveRedirect`): level 1 no session → only `/welcome` and `/auth/phone` (+ OTP); level 2 session without `users/{uid}` → only `/auth/profile`; level 3 complete profile → the app, with provider-space routes needing `providers/{uid}` and `/admin` routes needing a staff claim (`/admin/categories|roles|logs` admin only). The `?from=` return path is not used in the sign-in-only beta.
 
-**Admin web routes:** `/login`, `/providers?status=pending`, `/providers/:id`, `/verifications`, `/reports`, `/categories`, `/audit`. Every route requires the `admin` or `moderator` claim (`getIdTokenResult(true)`); `/categories` and `/audit` (and role management) are admin-only, moderators get the moderation queues only.
+**Admin web app (React, `/admin`):** v0 has only the sign-in and the reports queue. Planned screens: providers queue/detail, verifications, categories, audit log. Every route requires the `admin` or `moderator` claim (`getIdTokenResult(true)`); `/categories` and `/audit` (and role management) are admin-only, moderators get the moderation queues only.
 
 ### 9.7 Contact action (WhatsApp / call)
 
@@ -927,11 +925,15 @@ Implement events from PRD §9 in `AnalyticsService`. Event names are lower_snake
 
 ## 10. Admin panel
 
-- Entry: `lib/main_admin.dart`, built with `flutter build web -t lib/main_admin.dart --release`, deployed to Firebase Hosting target `admin` (e.g. `admin.<domain>`).
-- Auth: email/password (staff only); a staff claim is enough to be signed in, no phone or consumer profile needed; after sign-in, force-refresh the ID token and require the `admin` or `moderator` claim, otherwise sign out with an error.
-- Layout: left navigation rail + content; data tables with pagination (20 rows).
-- All mutations go through `admin_*` / `moderator_*` callables. The admin panel never writes Firestore directly.
-- First admin bootstrap: `scripts/set-claims.ts --uid <uid> --role superAdmin` run locally with a service account (documented in [Ops](09-DEVOPS-RELEASE.md)).
+A separate **React + TypeScript** web app in `/admin` (Vite, Firebase JS SDK, no UI framework), deployed to Firebase Hosting target `admin` with `noindex` (meta tag, `robots.txt`, `X-Robots-Tag`), `X-Frame-Options: DENY` and `no-referrer`.
+
+- **Auth:** email/password. After every sign-in and on every page load the ID token is force-refreshed and its claims read; only `admin` or `moderator` stay (`staffRoleFromClaims` in `/shared`). Anyone else is signed out at once with a message; if the claims cannot be read the app fails closed. A staff claim is enough to be "signed in" in the rules: no phone and no consumer profile.
+- **Data access:** reads Firestore directly (the rules allow staff reads) and **never writes it**; every change goes through callables (`moderator_*`, later `admin_*`). The check is structural: the Firebase service layer exposes only `listOpenReports`, `loadTarget` and the four callable wrappers.
+- **v0 scope: Reports queue only.** Open reports (`status == open`, newest first, max 500; composite index `reports(status, createdAt desc)`), grouped by target with a count and a reason tally, showing the target (listing title and first photo, or provider name and status). Actions through confirm dialogs with an optional note (a reason of at least 3 characters for suspend) and loading / success / error states: **Hide** / **Restore** a listing, **Suspend** a provider, **Dismiss** (closes every open report on the target). Restore is disabled for a listing hidden for `over_limit`; a deleted target can only be dismissed.
+- **Languages:** French and English (browser language, switchable, remembered).
+- **Config:** Firebase web config per environment in `admin/.env.development` / `.env.production` (public client config, not secrets); `VITE_USE_EMULATORS=true` points the app at the local emulators.
+- **CI:** job `admin` runs lint, typecheck, tests and the build.
+- **Staff accounts:** created in the Firebase console (email/password), then `scripts/set-claims.ts --project <p> --email <e> --role admin|moderator|none` (needs Application Default Credentials; `--confirm-prod` for `kazi-prod`; the user must sign in again).
 
 ## 11. Error codes (Functions → app)
 

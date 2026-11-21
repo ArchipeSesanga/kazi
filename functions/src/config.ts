@@ -1,4 +1,6 @@
-export const REGION = "africa-south1";
+import { FUNCTIONS_REGION } from "../../shared/moderation.js";
+
+export const REGION = FUNCTIONS_REGION;
 /**
  * Cloud Scheduler does not support `africa-south1`, so scheduled functions
  * run in this region instead (the job only touches Storage and Firestore).

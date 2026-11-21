@@ -24,8 +24,9 @@ Rules that never bend: **indexes → rules → functions → hosting → app**; 
 - [ ] Remote Config keys from TDD §3.3 (`min_supported_build`, `maintenance`, `store_url`, …).
 - [ ] Analytics retention 14 months; Crashlytics enabled.
 - [ ] Hosting site `kazi-prod-d9c00` exists (target `web`, mapped in `.firebaserc`).
+- [ ] Admin app: `firebase hosting:sites:create <admin-site-id> --project kazi-prod-d9c00`, then `firebase target:apply hosting admin <admin-site-id> --project kazi-prod-d9c00`; build with `cd admin && npm ci && npm run build` and deploy with `firebase deploy --only hosting:admin --project prod` (not part of `release.yml` yet). Add the admin domain to Auth → Settings → Authorized domains.
 - [ ] Seed reference data once: `cd scripts && npx tsx seed-categories.ts --project kazi-prod` and `npx tsx seed-locations.ts --project kazi-prod` (read each script first; **never** `seed-demo.ts`, it refuses prod anyway).
-- [ ] First admin: create an email/password user in the console, then set the claim from your own machine with a service-account key kept outside git. `scripts/set-claims.ts` does not exist yet (it arrives with `admin_setRole`, KZ-079); until then run once: `node -e "require('firebase-admin').initializeApp();require('firebase-admin').auth().setCustomUserClaims('<uid>',{admin:true}).then(()=>console.log('ok'))"` with `GOOGLE_APPLICATION_CREDENTIALS` pointing at the key. Moderators get `{moderator:true}` only. The user must sign in again for the claim to apply.
+- [ ] First admin: create an email/password user in the console, then `cd scripts && npx tsx set-claims.ts --project kazi-prod --email <email> --role admin --confirm-prod` (Application Default Credentials or a service-account key kept outside git). Moderators: `--role moderator`. The user must sign in again. The admin app only lets `admin` / `moderator` stay signed in.
 
 ### A2. Legal pages
 - [ ] Replace the placeholders in `web/public/**` (`{{LEGAL_ENTITY}}`, `{{SUPPORT_EMAIL}}`, `{{SUPPORT_WHATSAPP}}`). `scripts/check-legal-placeholders.sh` fails the release while any remain.
