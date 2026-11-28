@@ -50,7 +50,11 @@ class ProviderCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _Cover(coverUrl: coverUrl, isFavorite: isFavorite, onFavoriteToggle: onFavoriteToggle),
+            _Cover(
+              coverUrl: coverUrl,
+              isFavorite: isFavorite,
+              onFavoriteToggle: onFavoriteToggle,
+            ),
             Padding(
               padding: const EdgeInsets.all(KaziSpacing.md),
               child: Column(
@@ -103,7 +107,14 @@ class ProviderCard extends StatelessWidget {
                   const SizedBox(height: KaziSpacing.sm),
                   Row(
                     children: [
-                      RatingBadge(rating: rating, reviewCount: reviewCount),
+                      Flexible(
+                        child: RatingSummary(
+                          rating: rating,
+                          count: reviewCount,
+                          starSize: 13,
+                        ),
+                      ),
+                      const SizedBox(width: KaziSpacing.sm),
                       const Spacer(),
                       Text(
                         price,
@@ -127,7 +138,11 @@ class ProviderCard extends StatelessWidget {
 }
 
 class _Cover extends StatelessWidget {
-  const _Cover({this.coverUrl, required this.isFavorite, this.onFavoriteToggle});
+  const _Cover({
+    this.coverUrl,
+    required this.isFavorite,
+    this.onFavoriteToggle,
+  });
 
   final String? coverUrl;
   final bool isFavorite;
@@ -137,11 +152,7 @@ class _Cover extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        KaziNetworkImage(
-          url: coverUrl,
-          height: 112,
-          width: double.infinity,
-        ),
+        KaziNetworkImage(url: coverUrl, height: 112, width: double.infinity),
         if (onFavoriteToggle != null)
           Positioned(
             top: KaziSpacing.sm,

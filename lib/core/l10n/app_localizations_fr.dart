@@ -57,12 +57,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get errorRateLimited => 'Trop de tentatives. Veuillez patienter.';
 
   @override
-  String get errorOtpInvalid => 'Code incorrect. Vérifiez et réessayez.';
-
-  @override
-  String get errorOtpExpired => 'Code expiré. Demandez un nouveau code.';
-
-  @override
   String get errorTooManyRequests => 'Trop de demandes. Réessayez plus tard.';
 
   @override
@@ -131,60 +125,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get welcomeSkip => 'Passer';
 
   @override
-  String get authPhoneTitle => 'Entrez votre numéro';
-
-  @override
-  String get authPhoneSubtitle =>
-      'Nous vous enverrons un code de confirmation.';
-
-  @override
-  String get authPhoneLabel => 'Numéro de téléphone';
-
-  @override
-  String get authPhoneHint => '081 234 5678';
-
-  @override
-  String get authPhoneSend => 'Recevoir le code';
-
-  @override
-  String get authPhoneTermsPrefix => 'En continuant, vous acceptez nos ';
-
-  @override
-  String get authPhoneTermsLink => 'Conditions d\'utilisation';
-
-  @override
-  String get authPhoneTermsAnd => ' et notre ';
-
-  @override
-  String get authPhonePrivacyLink => 'Politique de confidentialité';
-
-  @override
-  String get authPhoneTermsError =>
-      'Veuillez accepter les conditions pour continuer.';
-
-  @override
-  String get authPhoneInvalid => 'Numéro invalide. Vérifiez et réessayez.';
-
-  @override
-  String get authOtpTitle => 'Entrez le code';
-
-  @override
-  String authOtpSubtitle(String phone) {
-    return 'Code envoyé au $phone';
-  }
-
-  @override
-  String authOtpResendIn(int seconds) {
-    return 'Renvoyer dans ${seconds}s';
-  }
-
-  @override
-  String get authOtpResend => 'Renvoyer le code';
-
-  @override
-  String get authOtpChangeNumber => 'Changer de numéro';
-
-  @override
   String get authProfileTitle => 'Créez votre profil';
 
   @override
@@ -204,63 +144,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get authProfileSave => 'Enregistrer mon profil';
-
-  @override
-  String get authEmailTitle => 'Connexion par e-mail';
-
-  @override
-  String get authEmailSubtitle => 'Entrez votre e-mail et mot de passe.';
-
-  @override
-  String get authEmailLabel => 'Adresse e-mail';
-
-  @override
-  String get authEmailHint => 'exemple@email.com';
-
-  @override
-  String get authPasswordLabel => 'Mot de passe';
-
-  @override
-  String get authPasswordHint => 'Au moins 6 caractères';
-
-  @override
-  String get authEmailSignIn => 'Se connecter';
-
-  @override
-  String get authEmailRegister => 'Créer un compte';
-
-  @override
-  String get authEmailCreateAccountPrompt => 'Pas encore de compte ?';
-
-  @override
-  String get authEmailHasAccountPrompt => 'Déjà un compte ?';
-
-  @override
-  String get authEmailForgotPassword => 'Mot de passe oublié ?';
-
-  @override
-  String get authEmailResetSent => 'E-mail de réinitialisation envoyé.';
-
-  @override
-  String get authEmailUsePhone => 'Se connecter par téléphone';
-
-  @override
-  String get authPhoneUseEmail => 'Se connecter par e-mail';
-
-  @override
-  String get authEmailInUse => 'Cet e-mail est déjà utilisé.';
-
-  @override
-  String get authWeakPassword => 'Mot de passe trop court (6 caractères min).';
-
-  @override
-  String get authUserNotFound => 'Aucun compte trouvé pour cet e-mail.';
-
-  @override
-  String get authWrongPassword => 'E-mail ou mot de passe incorrect.';
-
-  @override
-  String get authEmailInvalid => 'Adresse e-mail invalide.';
 
   @override
   String get homeSearchHint => 'Rechercher un service…';
@@ -546,7 +429,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Publiez vos services gratuitement et touchez des milliers de clients.';
 
   @override
-  String get publishHubPending => 'Votre dossier est en cours d\'examen.';
+  String get publishHubPending => 'Activation de votre profil…';
 
   @override
   String get publishHubRejected => 'Votre dossier a été refusé.';
@@ -709,7 +592,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get listingFormAmountHint => '0';
 
   @override
-  String get listingFormCommuneHint => 'Sélectionnez vos zones (max 10)';
+  String get listingFormBaseCommuneLabel => 'Commune principale';
+
+  @override
+  String get listingFormBaseCommuneHint =>
+      'Choisissez votre commune principale';
+
+  @override
+  String get listingFormBaseCommuneError =>
+      'Choisissez votre commune principale';
+
+  @override
+  String get listingFormCommuneHint =>
+      'Sélectionnez des zones supplémentaires (max 10)';
 
   @override
   String get listingFormTitleError => '4 à 80 caractères requis';
@@ -725,6 +620,23 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get listingFormDraftSaved => 'Brouillon enregistré';
+
+  @override
+  String get listingFormDraftDialogTitle => 'Garder le brouillon ?';
+
+  @override
+  String get listingFormDraftDialogBody =>
+      'Vous avez un brouillon non enregistré. Voulez-vous le garder ou le supprimer ?';
+
+  @override
+  String get listingFormDraftKeep => 'Garder';
+
+  @override
+  String get listingFormDraftDiscard => 'Supprimer';
+
+  @override
+  String get listingFormPhotoUploadError =>
+      'L\'envoi de la photo a échoué. Appuyez sur Réessayer.';
 
   @override
   String get dashboardTitle => 'Mon espace';
@@ -910,7 +822,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get deleteAccountConsequences =>
-      'Vos annonces et votre profil prestataire seront supprimés.';
+      'Vos annonces, votre profil prestataire, vos favoris, vos contacts et vos photos seront supprimés. Les avis que vous avez laissés restent visibles, sans votre nom.';
 
   @override
   String get deleteAccountConfirmLabel => 'Tapez SUPPRIMER pour confirmer';
@@ -1018,4 +930,293 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get providerUnblockedSnackbar => 'Débloqué(e)';
+
+  @override
+  String listingLimitUsage(int used, int max) {
+    return '$used/$max annonces';
+  }
+
+  @override
+  String get listingLimitReachedTitle => 'Limite d\'annonces atteinte';
+
+  @override
+  String listingLimitReachedBody(int max) {
+    return 'Vous avez atteint la limite de $max annonces. Supprimez une annonce existante pour en créer une nouvelle.';
+  }
+
+  @override
+  String get listingFormUpdated => 'Annonce mise à jour.';
+
+  @override
+  String get listingActionPaused => 'Annonce mise en pause.';
+
+  @override
+  String get listingActionResumed => 'Annonce réactivée.';
+
+  @override
+  String get listingActionDeleted => 'Annonce supprimée.';
+
+  @override
+  String get listingActionFailed => 'L\'action a échoué. Veuillez réessayer.';
+
+  @override
+  String get listingsLoadFailed => 'Impossible de charger les annonces.';
+
+  @override
+  String get dashboardListingHidden => 'Masquée';
+
+  @override
+  String get dashboardListingOverLimit => 'Limite atteinte';
+
+  @override
+  String get listingOverLimitNote =>
+      'Cette annonce est masquée : vous avez atteint la limite d\'annonces actives ou en pause. Supprimez une annonce, puis enregistrez celle-ci pour la republier.';
+
+  @override
+  String get dashboardViewPublicProfile => 'Voir mon profil public';
+
+  @override
+  String get profilePhotoAdd => 'Ajouter une photo';
+
+  @override
+  String get profilePhotoChange => 'Changer la photo';
+
+  @override
+  String get profilePhotoRemove => 'Supprimer la photo';
+
+  @override
+  String get authPhoneTitle => 'Votre numéro de téléphone';
+
+  @override
+  String get authPhoneSubtitle =>
+      'Nous vous envoyons un code par SMS pour vous connecter.';
+
+  @override
+  String get authPhoneLabel => 'Numéro de téléphone';
+
+  @override
+  String get authPhoneHint => '81 234 5678';
+
+  @override
+  String get authPhoneContinue => 'Recevoir le code';
+
+  @override
+  String get authPhoneInvalid => 'Numéro de téléphone invalide.';
+
+  @override
+  String get authOtpTitle => 'Entrez le code';
+
+  @override
+  String get authOtpCodeLabel => 'Code à 6 chiffres';
+
+  @override
+  String get authOtpVerify => 'Valider';
+
+  @override
+  String get authOtpResend => 'Renvoyer le code';
+
+  @override
+  String get authOtpChangeNumber => 'Modifier le numéro';
+
+  @override
+  String get authOtpWrong => 'Code incorrect. Vérifiez et réessayez.';
+
+  @override
+  String get authOtpExpired => 'Ce code a expiré. Demandez-en un nouveau.';
+
+  @override
+  String get authOtpTooMany =>
+      'Trop de tentatives. Réessayez dans quelques minutes.';
+
+  @override
+  String get authPhoneNetwork => 'Pas de connexion. Vérifiez votre réseau.';
+
+  @override
+  String get authPhoneQuota =>
+      'Service SMS momentanément indisponible. Réessayez plus tard.';
+
+  @override
+  String authOtpResendIn(int seconds) {
+    return 'Renvoyer dans $seconds s';
+  }
+
+  @override
+  String authOtpSubtitle(String phone) {
+    return 'Entrez le code à 6 chiffres envoyé au $phone.';
+  }
+
+  @override
+  String get deleteAccountContinue => 'Continuer';
+
+  @override
+  String deleteAccountOtpIntro(String phone) {
+    return 'Par sécurité, confirmez avec le code envoyé au $phone.';
+  }
+
+  @override
+  String get deleteAccountRetry => 'Réessayer';
+
+  @override
+  String get deleteAccountReauthExpired =>
+      'La confirmation a expiré. Demandez un nouveau code.';
+
+  @override
+  String get deleteAccountNoPhone =>
+      'Votre compte n\'a pas de numéro vérifié : suppression impossible depuis l\'application.';
+
+  @override
+  String get onboardingPhoneInvalid =>
+      'Numéro invalide. Exemple : +243 81 234 5678';
+
+  @override
+  String get reportReasonScam => 'Arnaque';
+
+  @override
+  String get reportReasonInappropriate => 'Contenu inapproprié';
+
+  @override
+  String get reportReasonFake => 'Faux profil ou fausse annonce';
+
+  @override
+  String get reportReasonWrongCategory => 'Mauvaise catégorie';
+
+  @override
+  String get reportReasonOther => 'Autre';
+
+  @override
+  String get reportAlready => 'Déjà signalé';
+
+  @override
+  String get reportRateLimited =>
+      'Trop de signalements aujourd\'hui. Réessayez demain.';
+
+  @override
+  String get reportOwnTarget =>
+      'Vous ne pouvez pas signaler votre propre contenu.';
+
+  @override
+  String get reportNotFound => 'Ce contenu n\'existe plus.';
+
+  @override
+  String get reportNotVerified =>
+      'Connectez-vous avec votre numéro pour signaler.';
+
+  @override
+  String get legalOpenHint =>
+      'Ce document est publié sur notre site. Il s\'ouvre dans votre navigateur.';
+
+  @override
+  String get legalOpenButton => 'Ouvrir la page';
+
+  @override
+  String get legalAcceptPrefix => 'En continuant, vous acceptez les ';
+
+  @override
+  String get legalLinkTerms => 'Conditions d\'utilisation';
+
+  @override
+  String get legalAcceptAnd => ' et la ';
+
+  @override
+  String get legalLinkPrivacy => 'Politique de confidentialité';
+
+  @override
+  String get legalAcceptSuffix => '.';
+
+  @override
+  String get homeCategoriesSeeAll => 'Voir tout';
+
+  @override
+  String categoryEmptyMessage(String category) {
+    return 'Aucun prestataire dans « $category » pour l\'instant.';
+  }
+
+  @override
+  String get categoryEmptyAction => 'Soyez le premier à proposer ce service';
+
+  @override
+  String get categoryUnknown => 'Catégorie introuvable';
+
+  @override
+  String onboardingCategoriesLimit(int count, int max) {
+    return '$count sur $max maximum';
+  }
+
+  @override
+  String get ratingNew => 'Nouveau';
+
+  @override
+  String ratingSummary(String rating, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count avis',
+      one: '1 avis',
+    );
+    return '$rating ($_temp0)';
+  }
+
+  @override
+  String ratingSemantics(String rating, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count avis',
+      one: '1 avis',
+    );
+    return 'Note $rating sur 5, $_temp0';
+  }
+
+  @override
+  String get ratingSemanticsNew => 'Nouveau prestataire, pas encore d\'avis';
+
+  @override
+  String ratingInputStar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count étoiles',
+      one: '1 étoile',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewsContactFirst =>
+      'Contactez ce prestataire pour laisser un avis';
+
+  @override
+  String get reviewsOwnProfile =>
+      'Vous ne pouvez pas noter votre propre profil.';
+
+  @override
+  String get reviewsSignIn => 'Connectez-vous pour laisser un avis.';
+
+  @override
+  String get reviewsEdit => 'Modifier mon avis';
+
+  @override
+  String get reviewsDelete => 'Supprimer mon avis';
+
+  @override
+  String get reviewsDeleteConfirm =>
+      'Supprimer votre avis ? Cette action est définitive.';
+
+  @override
+  String get reviewsPublished => 'Merci pour votre avis !';
+
+  @override
+  String get reviewsUpdated => 'Avis mis à jour.';
+
+  @override
+  String get reviewsDeleted => 'Avis supprimé.';
+
+  @override
+  String get reviewsRatingRequired => 'Choisissez une note de 1 à 5 étoiles.';
+
+  @override
+  String get reviewsReport => 'Signaler cet avis';
+
+  @override
+  String get reviewsMineTag => 'Votre avis';
 }

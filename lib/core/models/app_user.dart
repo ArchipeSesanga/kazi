@@ -14,7 +14,9 @@ abstract class AppUser with _$AppUser {
     required String uid,
     required String displayName,
     String? photoUrl,
+    /// E.164 phone number: the account identity (matches the Auth token).
     @Default('') String phone,
+    String? email,
     @Default('fr') String locale,
     @Default('kinshasa') String city,
     String? commune,
@@ -35,6 +37,7 @@ extension AppUserWrite on AppUser {
   Map<String, dynamic> toCreateMap() => {
         'displayName': displayName,
         'phone': phone,
+        if (email != null && email!.isNotEmpty) 'email': email,
         'locale': locale,
         'city': city,
         if (commune != null) 'commune': commune,
@@ -51,6 +54,7 @@ extension AppUserWrite on AppUser {
   Map<String, dynamic> toUpdateMap() => {
         'displayName': displayName,
         if (photoUrl != null) 'photoUrl': photoUrl,
+        if (phone.isNotEmpty) 'phone': phone,
         'locale': locale,
         'city': city,
         if (commune != null) 'commune': commune,

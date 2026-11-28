@@ -5,7 +5,9 @@
   "scripts": {
     "seed-categories": "tsx seed-categories.ts",
     "seed-locations": "tsx seed-locations.ts",
-    "seed-demo": "tsx seed-demo.ts"
+    "seed-demo": "tsx seed-demo.ts",
+    "set-claims": "tsx set-claims.ts",
+    "delete-account": "tsx delete-account.ts"
   },
   "dependencies": {
     "firebase-admin": "^12.0.0"

@@ -15,7 +15,7 @@ import '../core/services/connectivity_controller.dart';
 import '../core/services/firebase_analytics_service.dart';
 import '../core/services/launcher_service.dart';
 import '../core/services/url_launcher_service.dart';
-import '../features/auth/application/auth_controller.dart';
+import '../features/auth/application/phone_auth_controller.dart';
 import '../features/auth/application/session_controller.dart';
 import '../features/auth/data/firebase_auth_repository.dart';
 import '../features/auth/data/firebase_user_repository.dart';
@@ -40,16 +40,17 @@ import '../features/provider_profile/data/firebase_media_repository.dart';
 import '../features/provider_profile/data/firestore_provider_repository.dart';
 import '../features/provider_profile/domain/media_repository.dart';
 import '../features/provider_profile/domain/provider_repository.dart';
+import '../features/reports/data/firebase_report_repository.dart';
+import '../features/reports/domain/report_repository.dart';
+import '../features/reviews/data/firestore_review_repository.dart';
+import '../features/reviews/domain/review_repository.dart';
 import '../features/search/data/firestore_search_repository.dart';
 import '../features/search/domain/search_repository.dart';
+import '../features/welcome/application/onboarding_controller.dart';
 import 'router/app_router.dart';
 
 class AppProviders extends StatelessWidget {
-  const AppProviders({
-    required this.prefs,
-    required this.child,
-    super.key,
-  });
+  const AppProviders({required this.prefs, required this.child, super.key});
 
   final SharedPreferences prefs;
   final Widget child;
@@ -65,7 +66,9 @@ class AppProviders extends StatelessWidget {
         Provider<FirebaseFunctions>.value(
           value: FirebaseFunctions.instanceFor(region: Env.functionsRegion),
         ),
-        Provider<FirebaseRemoteConfig>.value(value: FirebaseRemoteConfig.instance),
+        Provider<FirebaseRemoteConfig>.value(
+          value: FirebaseRemoteConfig.instance,
+        ),
 
         // Services.
         Provider<AnalyticsService>(create: (_) => FirebaseAnalyticsService()),
@@ -76,8 +79,17 @@ class AppProviders extends StatelessWidget {
         ProxyProvider<FirebaseAuth, AuthRepository>(
           update: (_, auth, __) => FirebaseAuthRepository(auth),
         ),
-        ProxyProvider2<FirebaseFirestore, FirebaseAuth, UserRepository>(
-          update: (_, db, auth, __) => FirebaseUserRepository(db, auth),
+        ProxyProvider3<
+          FirebaseFirestore,
+          FirebaseAuth,
+          FirebaseFunctions,
+          UserRepository
+        >(
+          update: (_, db, auth, functions, __) =>
+              FirebaseUserRepository(db, auth, functions),
+        ),
+        ProxyProvider<FirebaseFunctions, ReportRepository>(
+          update: (_, functions, __) => FirebaseReportRepository(functions),
         ),
         ProxyProvider<FirebaseFirestore, BlockRepository>(
           update: (_, db, __) => FirestoreBlockRepository(db),
@@ -97,6 +109,9 @@ class AppProviders extends StatelessWidget {
         ProxyProvider<FirebaseFirestore, SearchRepository>(
           update: (_, db, __) => FirestoreSearchRepository(db),
         ),
+        ProxyProvider<FirebaseFirestore, ReviewRepository>(
+          update: (_, db, __) => FirestoreReviewRepository(db),
+        ),
         ProxyProvider<FirebaseFirestore, ContactRepository>(
           update: (_, db, __) => FirestoreContactRepository(db),
         ),
@@ -104,42 +119,69 @@ class AppProviders extends StatelessWidget {
         // Global controllers.
         ChangeNotifierProvider(create: (_) => ConnectivityController()),
         ChangeNotifierProvider(create: (_) => LocaleController(prefs)),
+        ChangeNotifierProvider(create: (_) => OnboardingController(prefs)),
         ChangeNotifierProxyProvider<CatalogRepository, CatalogController>(
-          create: (ctx) => CatalogController(ctx.read<CatalogRepository>())..load(),
+          create: (ctx) =>
+              CatalogController(ctx.read<CatalogRepository>())..load(),
           update: (_, repo, prev) => prev ?? (CatalogController(repo)..load()),
         ),
-        ChangeNotifierProxyProvider<ProviderRepository, HomeController>(
-          create: (ctx) => HomeController(ctx.read<ProviderRepository>())..load(),
-          update: (_, repo, prev) => prev ?? (HomeController(repo)..load()),
+        ChangeNotifierProxyProvider2<
+          ProviderRepository,
+          SearchRepository,
+          HomeController
+        >(
+          create: (ctx) => HomeController(
+            ctx.read<ProviderRepository>(),
+            ctx.read<SearchRepository>(),
+          )..load(),
+          update: (_, providers, search, prev) =>
+              prev ?? (HomeController(providers, search)..load()),
         ),
         ChangeNotifierProxyProvider<SharedPreferences, ExploreController>(
           create: (ctx) => ExploreController(ctx.read<SharedPreferences>()),
           update: (_, prefs, prev) => prev ?? ExploreController(prefs),
         ),
-        ChangeNotifierProxyProvider<AuthRepository, AuthController>(
-          create: (ctx) => AuthController(ctx.read<AuthRepository>()),
-          update: (_, repo, prev) => prev ?? AuthController(repo),
+        ChangeNotifierProxyProvider<AuthRepository, PhoneAuthController>(
+          create: (ctx) => PhoneAuthController(ctx.read<AuthRepository>()),
+          update: (_, repo, prev) => prev ?? PhoneAuthController(repo),
         ),
-        ChangeNotifierProxyProvider2<AuthRepository, UserRepository, SessionController>(
+        ChangeNotifierProxyProvider2<
+          AuthRepository,
+          UserRepository,
+          SessionController
+        >(
           create: (ctx) => SessionController(
-            ctx.read<AuthRepository>(),
             ctx.read<UserRepository>(),
+            ctx.read<AuthRepository>(),
+            providerExists: (uid) async =>
+                await ctx.read<ProviderRepository>().getProvider(uid) != null,
           ),
           update: (_, authRepo, userRepo, prev) =>
-              prev ?? SessionController(authRepo, userRepo),
+              prev ?? SessionController(userRepo, authRepo),
         ),
         // MediaRepository depends on SessionController.uid — must come after it.
         ProxyProvider2<FirebaseStorage, SessionController, MediaRepository>(
           update: (_, storage, session, __) =>
               FirebaseMediaRepository(storage, session.uid),
         ),
-        ChangeNotifierProxyProvider2<BlockRepository, SessionController, BlockController>(
-          create: (ctx) => BlockController(ctx.read<BlockRepository>())
-              ..init(ctx.read<SessionController>().uid),
+        ChangeNotifierProxyProvider2<
+          BlockRepository,
+          SessionController,
+          BlockController
+        >(
+          create: (ctx) =>
+              BlockController(ctx.read<BlockRepository>())
+                ..init(ctx.read<SessionController>().uid),
           update: (_, repo, session, prev) =>
               (prev ?? BlockController(repo))..init(session.uid),
         ),
-        ChangeNotifierProxyProvider4<LauncherService, AnalyticsService, ContactRepository, SessionController, ContactController>(
+        ChangeNotifierProxyProvider4<
+          LauncherService,
+          AnalyticsService,
+          ContactRepository,
+          SessionController,
+          ContactController
+        >(
           create: (ctx) => ContactController(
             ctx.read<LauncherService>(),
             ctx.read<AnalyticsService>(),
@@ -154,14 +196,20 @@ class AppProviders extends StatelessWidget {
           update: (_, service, prev) => prev ?? GateController(service),
         ),
 
-        // Router — created once, refreshes on SessionController + GateController.
-        ProxyProvider2<SessionController, GateController, GoRouter>(
+        // Router — created once, refreshes on session, gate, and onboarding.
+        ProxyProvider3<
+          SessionController,
+          GateController,
+          OnboardingController,
+          GoRouter
+        >(
           create: (ctx) => createAppRouter(
             ctx.read<SessionController>(),
             ctx.read<GateController>(),
+            ctx.read<OnboardingController>(),
           ),
-          update: (_, session, gate, prev) =>
-              prev ?? createAppRouter(session, gate),
+          update: (_, session, gate, onboarding, prev) =>
+              prev ?? createAppRouter(session, gate, onboarding),
           dispose: (_, router) => router.dispose(),
         ),
 

@@ -2,8 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/config/env.dart';
 import '../../features/auth/application/session_controller.dart';
-import '../../features/auth/presentation/email_screen.dart';
 import '../../features/auth/presentation/otp_screen.dart';
 import '../../features/auth/presentation/phone_screen.dart';
 import '../../features/auth/presentation/setup_profile_screen.dart';
@@ -35,71 +35,26 @@ import '../../features/settings/presentation/language_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 import '../../features/verification/presentation/verification_screen.dart';
+import '../../features/welcome/application/onboarding_controller.dart';
 import '../../features/welcome/presentation/welcome_screen.dart';
 import '../shell/app_shell.dart';
+import 'guards.dart';
 import 'routes.dart';
 
-// Routes that unauthenticated users may visit freely.
-const _publicRoutes = {
-  Routes.splash,
-  Routes.welcome,
-  Routes.authPhone,
-  Routes.authOtp,
-  Routes.authEmail,
-  Routes.authSetupProfile,
-  Routes.legalTerms,
-  Routes.legalPrivacy,
-  Routes.updateRequired,
-  Routes.maintenance,
-};
-
-GoRouter createAppRouter(SessionController session, GateController gate) =>
-    GoRouter(
+GoRouter createAppRouter(
+  SessionController session,
+  GateController gate,
+  OnboardingController onboarding, {
+  bool? devToolsEnabled,
+}) => GoRouter(
   initialLocation: Routes.splash,
-  refreshListenable: Listenable.merge([session, gate]),
-  redirect: (context, state) {
-    final location = state.matchedLocation;
-
-    // Stay on splash until both session and gate checks resolve.
-    if (session.isLoading || gate.isChecking) return Routes.splash;
-
-    // Gate checks are highest priority and un-escapable.
-    if (gate.isMaintenanceMode) {
-      return location == Routes.maintenance ? null : Routes.maintenance;
-    }
-    if (gate.isUpdateRequired) {
-      return location == Routes.updateRequired ? null : Routes.updateRequired;
-    }
-
-    // If sitting on a gate screen but gates are open, redirect away.
-    if (location == Routes.maintenance || location == Routes.updateRequired) {
-      return Routes.welcome;
-    }
-
-    final authed = session.isAuthenticated;
-    final incomplete = session.isProfileIncomplete;
-
-    // Always leave the splash screen once session is resolved.
-    if (location == Routes.splash) {
-      if (authed) return Routes.home;
-      if (incomplete) return Routes.authSetupProfile;
-      return Routes.welcome;
-    }
-
-    final isPublic = _publicRoutes.any((r) => location.startsWith(r));
-
-    if (!authed && !incomplete && !isPublic) return Routes.welcome;
-    if (incomplete && location != Routes.authSetupProfile) {
-      return Routes.authSetupProfile;
-    }
-    if (authed && (location == Routes.welcome ||
-        location.startsWith('/auth/phone') ||
-        location.startsWith('/auth/otp') ||
-        location.startsWith('/auth/email'))) {
-      return Routes.home;
-    }
-    return null;
-  },
+  refreshListenable: Listenable.merge([session, gate, onboarding]),
+  redirect: (context, state) => resolveRedirect(
+    location: state.matchedLocation,
+    session: session,
+    gate: gate,
+    onboarding: onboarding,
+  ),
   routes: [
     // ── Splash & Welcome ────────────────────────────────────────────────────
     GoRoute(
@@ -121,66 +76,72 @@ GoRouter createAppRouter(SessionController session, GateController gate) =>
       builder: (context, state) => const OtpScreen(),
     ),
     GoRoute(
-      path: Routes.authEmail,
-      builder: (context, state) => const EmailScreen(),
-    ),
-    GoRoute(
       path: Routes.authSetupProfile,
       builder: (context, state) => const SetupProfileScreen(),
+    ),
+    GoRoute(
+      path: Routes.myLanguage,
+      builder: (context, state) => const LanguageScreen(),
     ),
 
     // ── 5-tab shell ──────────────────────────────────────────────────────────
     StatefulShellRoute.indexedStack(
       builder: (context, state, shell) => AppShell(navigationShell: shell),
       branches: [
-        StatefulShellBranch(routes: [
-          GoRoute(
-            path: Routes.home,
-            builder: (context, state) => const HomeScreen(),
-          ),
-        ]),
-        StatefulShellBranch(routes: [
-          GoRoute(
-            path: Routes.explore,
-            builder: (context, state) => const ExploreScreen(),
-          ),
-        ]),
-        StatefulShellBranch(routes: [
-          GoRoute(
-            path: Routes.publish,
-            builder: (context, state) => const PublishScreen(),
-          ),
-        ]),
-        StatefulShellBranch(routes: [
-          GoRoute(
-            path: Routes.messages,
-            builder: (context, state) => const MessagesScreen(),
-          ),
-        ]),
-        StatefulShellBranch(routes: [
-          GoRoute(
-            path: Routes.profile,
-            builder: (context, state) => const ProfileScreen(),
-            routes: [
-              GoRoute(
-                path: 'favorites',
-                builder: (context, state) => const FavoritesScreen(),
-              ),
-              GoRoute(
-                path: 'settings',
-                builder: (context, state) => const SettingsScreen(),
-              ),
-              GoRoute(
-                path: 'language',
-                builder: (context, state) => const LanguageScreen(),
-              ),
-              GoRoute(
-                path: 'delete',
-                builder: (context, state) => const DeleteAccountScreen(),
-              ),
-            ],
-          ),
-        ]),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.home,
+              builder: (context, state) => const HomeScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.explore,
+              builder: (context, state) => const ExploreScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.publish,
+              builder: (context, state) => const PublishScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.messages,
+              builder: (context, state) => const MessagesScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.profile,
+              builder: (context, state) => const ProfileScreen(),
+              routes: [
+                GoRoute(
+                  path: 'favorites',
+                  builder: (context, state) => const FavoritesScreen(),
+                ),
+                GoRoute(
+                  path: 'settings',
+                  builder: (context, state) => const SettingsScreen(),
+                ),
+                GoRoute(
+                  path: 'delete',
+                  builder: (context, state) => const DeleteAccountScreen(),
+                ),
+              ],
+            ),
+          ],
+        ),
       ],
     ),
 
@@ -192,9 +153,8 @@ GoRouter createAppRouter(SessionController session, GateController gate) =>
     ),
     GoRoute(
       path: '/category/:categoryId',
-      builder: (context, state) => CategoryScreen(
-        categoryId: state.pathParameters['categoryId']!,
-      ),
+      builder: (context, state) =>
+          CategoryScreen(categoryId: state.pathParameters['categoryId']!),
     ),
 
     // ── Provider profile ─────────────────────────────────────────────────────
@@ -222,9 +182,8 @@ GoRouter createAppRouter(SessionController session, GateController gate) =>
     // ── Listing ──────────────────────────────────────────────────────────────
     GoRoute(
       path: '/l/:listingId',
-      builder: (context, state) => ListingDetailScreen(
-        listingId: state.pathParameters['listingId']!,
-      ),
+      builder: (context, state) =>
+          ListingDetailScreen(listingId: state.pathParameters['listingId']!),
     ),
 
     // ── Provider space ───────────────────────────────────────────────────────
@@ -243,6 +202,7 @@ GoRouter createAppRouter(SessionController session, GateController gate) =>
           c.read(),
           c.read(),
           c.read(),
+          initialCategoryId: state.uri.queryParameters['cat'],
         )..init(),
         child: const ListingFormScreen(),
       ),
@@ -274,10 +234,7 @@ GoRouter createAppRouter(SessionController session, GateController gate) =>
       builder: (context, state) =>
           const LegalScreen(kind: LegalPageKind.privacy),
     ),
-    GoRoute(
-      path: Routes.help,
-      builder: (context, state) => const HelpScreen(),
-    ),
+    GoRoute(path: Routes.help, builder: (context, state) => const HelpScreen()),
     GoRoute(
       path: Routes.updateRequired,
       builder: (context, state) => const UpdateRequiredScreen(),
@@ -288,9 +245,11 @@ GoRouter createAppRouter(SessionController session, GateController gate) =>
     ),
 
     // ── Dev only ─────────────────────────────────────────────────────────────
-    GoRoute(
-      path: Routes.devComponents,
-      builder: (context, state) => const DevComponentsScreen(),
-    ),
+    // Not registered at all in prod builds.
+    if (devToolsEnabled ?? Env.isDev)
+      GoRoute(
+        path: Routes.devComponents,
+        builder: (context, state) => const DevComponentsScreen(),
+      ),
   ],
 );

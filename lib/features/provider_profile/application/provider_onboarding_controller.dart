@@ -1,16 +1,36 @@
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/constants/limits.dart';
+import '../../../core/errors/app_exception.dart';
+import '../../../core/utils/phone.dart';
 import '../../auth/application/session_controller.dart';
+import '../../auth/domain/user_repository.dart';
 import '../domain/media_repository.dart';
 import '../domain/provider_repository.dart';
 
 class OnboardingController extends ChangeNotifier {
-  OnboardingController(this._repo, this._session, this._mediaRepo);
+  OnboardingController(
+    this._repo,
+    this._session,
+    this._mediaRepo,
+    this._users,
+  ) {
+    // The account already has a profile picture: show it in the picker and
+    // use it for the provider profile, no new upload needed.
+    photoUrl = _accountPhotoUrl;
+  }
 
   final ProviderRepository _repo;
   final SessionController _session;
   final MediaRepository _mediaRepo;
+  final UserRepository _users;
+
+  /// The signed-in account's current picture (`users/{uid}.photoUrl`).
+  String? get _accountPhotoUrl {
+    final url = _session.appUser?.photoUrl;
+    return url == null || url.isEmpty ? null : url;
+  }
 
   int step = 1;
   static const totalSteps = 3;
@@ -23,23 +43,44 @@ class OnboardingController extends ChangeNotifier {
   int yearsExperience = 0;
   bool hasConsent = false;
 
-  // Photos
+  // Photos — local until submit
+  XFile? avatarFile;
+  XFile? coverFile;
   String? photoUrl;
   String? coverUrl;
   double? avatarUploadProgress;
   double? coverUploadProgress;
-  bool avatarUploadError = false;
-  bool coverUploadError = false;
 
   // Step 2
   List<String> categoryIds = [];
   String? baseCommune;
   List<String> communes = [];
 
+  // Resubmit (entry found an existing `rejected` doc)
+  bool isResubmitting = false;
+
   // Submit
   bool isSubmitting = false;
   bool isDone = false;
-  bool hasError = false;
+  AppException? error;
+
+  /// Prefills the form from a previously-rejected profile so the user can
+  /// edit and resubmit rather than create a duplicate doc.
+  void prefillForResubmit(ProviderProfile profile) {
+    isResubmitting = true;
+    displayName = profile.displayName;
+    bio = profile.bio;
+    photoUrl = profile.photoUrl ?? _accountPhotoUrl;
+    coverUrl = profile.coverUrl;
+    whatsappNumber = profile.whatsappNumber;
+    callNumber = profile.callNumber ?? '';
+    yearsExperience = profile.yearsExperience;
+    categoryIds = List.of(profile.categoryIds);
+    baseCommune = profile.baseCommune;
+    communes = List.of(profile.communes);
+    hasConsent = true;
+    notifyListeners();
+  }
 
   void goToStep(int s) {
     step = s;
@@ -68,7 +109,7 @@ class OnboardingController extends ChangeNotifier {
   void toggleCategory(String id) {
     if (categoryIds.contains(id)) {
       categoryIds = categoryIds.where((c) => c != id).toList();
-    } else if (categoryIds.length < 3) {
+    } else if (categoryIds.length < Limits.maxCategoriesPerProvider) {
       categoryIds = [...categoryIds, id];
     }
     notifyListeners();
@@ -92,81 +133,122 @@ class OnboardingController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> uploadAvatar(XFile file) async {
-    avatarUploadProgress = 0;
-    avatarUploadError = false;
+  void pickAvatar(XFile file) {
+    avatarFile = file;
+    photoUrl = null;
     notifyListeners();
-    try {
-      final result = await _mediaRepo.upload(
-        file,
-        MediaKind.avatar,
-        onProgress: (p) {
-          avatarUploadProgress = p;
-          notifyListeners();
-        },
-      );
-      photoUrl = result.url;
-    } catch (_) {
-      avatarUploadError = true;
-    } finally {
-      avatarUploadProgress = null;
-      notifyListeners();
-    }
   }
 
-  Future<void> uploadCover(XFile file) async {
-    coverUploadProgress = 0;
-    coverUploadError = false;
+  void pickCover(XFile file) {
+    coverFile = file;
+    coverUrl = null;
     notifyListeners();
-    try {
-      final result = await _mediaRepo.upload(
-        file,
-        MediaKind.cover,
-        onProgress: (p) {
-          coverUploadProgress = p;
-          notifyListeners();
-        },
-      );
-      coverUrl = result.url;
-    } catch (_) {
-      coverUploadError = true;
-    } finally {
-      coverUploadProgress = null;
-      notifyListeners();
-    }
   }
 
   void clearError() {
-    hasError = false;
+    error = null;
     notifyListeners();
+  }
+
+  /// The provider's picture is also the account's: a picture picked here
+  /// becomes the profile picture when the account has none, and replaces it
+  /// when the user chose a different one. Unchanged → nothing to do.
+  /// Best-effort: the provider profile is already saved at this point.
+  Future<void> _syncAccountPhoto(String uid) async {
+    final url = photoUrl;
+    final old = _accountPhotoUrl;
+    if (url == null || url == old) return;
+    try {
+      await _users.updateUser(uid, {'photoUrl': url});
+      if (old != null) {
+        await _mediaRepo.deleteAvatarByUrl(old).catchError((_) {});
+      }
+    } catch (e) {
+      debugPrint('[Onboarding] account photo sync failed: $e');
+    }
   }
 
   Future<void> submit() async {
     final uid = _session.uid;
     if (uid == null || isSubmitting) return;
     isSubmitting = true;
-    hasError = false;
+    error = null;
     isDone = false;
     notifyListeners();
     try {
+      // Upload avatar if picked and not yet uploaded.
+      if (avatarFile != null && photoUrl == null) {
+        avatarUploadProgress = 0;
+        notifyListeners();
+        final result = await _mediaRepo.upload(
+          avatarFile!,
+          MediaKind.avatar,
+          onProgress: (p) {
+            avatarUploadProgress = p;
+            notifyListeners();
+          },
+        );
+        photoUrl = result.url;
+        avatarFile = null;
+        avatarUploadProgress = null;
+        notifyListeners();
+      }
+
+      // Upload cover if picked and not yet uploaded.
+      if (coverFile != null && coverUrl == null) {
+        coverUploadProgress = 0;
+        notifyListeners();
+        final result = await _mediaRepo.upload(
+          coverFile!,
+          MediaKind.cover,
+          onProgress: (p) {
+            coverUploadProgress = p;
+            notifyListeners();
+          },
+        );
+        coverUrl = result.url;
+        coverFile = null;
+        coverUploadProgress = null;
+        notifyListeners();
+      }
+
       final profile = ProviderProfile(
         uid: uid,
         displayName: displayName.trim(),
         bio: bio.trim(),
         photoUrl: photoUrl,
         coverUrl: coverUrl,
-        whatsappNumber: whatsappNumber.trim(),
-        callNumber: callNumber.trim().isEmpty ? null : callNumber.trim(),
+        // Normalised to E.164 (the form already rejected invalid numbers).
+        whatsappNumber:
+            PhoneUtils.normalise(whatsappNumber) ?? whatsappNumber.trim(),
+        callNumber: callNumber.trim().isEmpty
+            ? null
+            : (PhoneUtils.normalise(callNumber) ?? callNumber.trim()),
         yearsExperience: yearsExperience,
         categoryIds: categoryIds,
         baseCommune: baseCommune!,
         communes: communes,
       );
-      await _repo.createProvider(profile);
+      if (isResubmitting) {
+        // rejected → pending is the only status transition the rules allow
+        // a client to make; everything else is a normal field update.
+        await _repo.updateProvider(uid, {
+          ...profile.toUpdateMap(),
+          'status': 'pending',
+        });
+      } else {
+        await _repo.createProvider(profile);
+      }
+      await _syncAccountPhoto(uid);
       isDone = true;
-    } catch (_) {
-      hasError = true;
+    } on AppException catch (e) {
+      error = e;
+    } catch (e, s) {
+      debugPrint('[Onboarding] submit failed: $e\n$s');
+      error = const UnknownException('submit');
     } finally {
+      avatarUploadProgress = null;
+      coverUploadProgress = null;
       isSubmitting = false;
       notifyListeners();
     }

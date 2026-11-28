@@ -33,7 +33,7 @@ flowchart LR
   Admin([Admin\nweb browser]) -->|approve, moderate| Kazi
   Kazi -->|deep link| WhatsApp[WhatsApp]
   Kazi -->|tel: link| Phone[Phone dialer]
-  Kazi -->|SMS OTP| SMS[Firebase Phone Auth / SMS carriers]
+  Kazi -->|Phone OTP| AUTH[Firebase Authentication]
   Kazi -->|push| FCM[Firebase Cloud Messaging]
 ```
 
@@ -45,11 +45,11 @@ Kazi never relays messages or calls. It opens WhatsApp or the dialer on the clie
 flowchart TB
   subgraph Devices
     MA[Kazi mobile app\nFlutter · Android]
-    AW[Kazi admin panel\nFlutter Web]
+    AW[Kazi admin panel\nReact web app]
   end
 
   subgraph Firebase["Firebase project (kazi-prod)"]
-    AUTH[Firebase Auth\nphone OTP + admin email]
+    AUTH[Firebase Auth\nphone OTP; email for admins]
     FS[(Cloud Firestore\nafrica-south1)]
     ST[(Cloud Storage\nimages, private ID docs)]
     CF[Cloud Functions 2nd gen\nTypeScript]
@@ -86,15 +86,15 @@ flowchart TB
 | Container | Technology | Responsibility |
 |---|---|---|
 | **Mobile app** | Flutter (Dart 3), Provider, go_router | All client and provider features. Reads via Firestore SDK with offline cache; writes allowed by security rules |
-| **Admin panel** | Flutter Web, same repo, separate entrypoint `lib/main_admin.dart` | Moderation queues, categories, audit log. Privileged writes only via callable Functions |
-| **Firebase Auth** | Phone provider (users), Email/Password (admins) | Identity. Roles via **custom claims** (`admin`, `moderator`) |
+| **Admin panel** | React + TypeScript (Vite), folder `/admin`, own Hosting target `admin`, shares `shared/` types with the functions | Moderation queues, categories, audit log. Privileged writes only via callable Functions |
+| **Firebase Auth** | Phone provider (users), Email/Password (staff, used only by the React admin app) | Identity. Roles via **custom claims** (`admin`, `moderator`) |
 | **Cloud Firestore** | Native mode, region `africa-south1` (Johannesburg) | Primary database. Offline persistence on mobile |
 | **Cloud Storage** | Default bucket, same region | Profile, cover, listing and portfolio images (public read), ID documents (private, admin-only via signed URLs) |
 | **Cloud Functions** | 2nd gen, TypeScript, Node 22, same region where supported | Derived data (ratings, denormalisation, search keywords), moderation, notifications, account deletion, admin actions |
 | **Resize Images extension** | `storage-resize-images` | Generates `200x200` and `800x800` WebP versions of uploaded images |
 | **FCM** | Firebase Cloud Messaging | Status notifications to providers |
 | **Remote Config** | | Feature flags, minimum supported version, maintenance banner |
-| **App Check** | Play Integrity (Android), reCAPTCHA Enterprise (web), debug provider (dev) | Blocks non-genuine clients from Firestore, Storage, Functions and Phone Auth abuse |
+| **App Check** | Play Integrity (Android), reCAPTCHA Enterprise (web), debug provider (dev) | Blocks non-genuine clients from Firestore, Storage and Functions |
 | **Analytics / Crashlytics** | | Product metrics, crash reporting |
 | **Hosting** | Firebase Hosting | Admin panel, Terms/Privacy pages, share-link landing page |
 
@@ -122,10 +122,10 @@ flowchart TB
 
 ### 5.2 State management with Provider
 
-- **App-scoped providers** (created once in `AppProviders`): Firebase instances, repositories (`Provider<…>`), `AuthController`, `SessionController` (current user and provider profile), `LocaleController`, `ConnectivityController`, `RemoteConfigController`.
+- **App-scoped providers** (created once in `AppProviders`): Firebase instances, repositories (`Provider<…>`), `PhoneAuthController`, `SessionController` (current user and provider profile), `LocaleController`, `ConnectivityController`, `RemoteConfigController`.
 - **Screen-scoped providers**: `ChangeNotifierProvider(create: …)` wrapping each route that needs a controller, so state is disposed when the route is popped.
 - **Dependency wiring**: `ProxyProvider` / `ChangeNotifierProxyProvider` where a controller depends on the session (e.g. `FavoritesController` depends on `uid`).
-- **Router integration**: `go_router` with `refreshListenable: authController` for redirects (guest → sign-in gate, admin guard on the web).
+- **Router integration**: `go_router` with `refreshListenable` on session/gate/onboarding with the three-level guards in `guards.dart` (no session → phone sign-in, no profile → setup, complete → app; provider and staff guards).
 - **No other state libraries** (no Riverpod/Bloc/GetX). See ADR-003.
 
 ### 5.3 Navigation
@@ -207,8 +207,8 @@ ID verification documents go to `private/verification/{uid}/…`. They are never
 
 | Layer | Control |
 |---|---|
-| **Identity** | Phone OTP for users; email/password + custom claim for admins. Claims are set only via a CLI script/callable restricted to `superAdmin` |
-| **Device integrity** | App Check enforced on Firestore, Storage, Functions; Play Integrity on Android; Phone Auth abuse protection via App Check / SMS region policy (allow `CD`, `ZA`, other selected regions) |
+| **Identity** | Phone OTP for users (the verified E.164 number is the identity); email/password for staff only (the React admin app; the Flutter app has no email sign-in). Staff access requires a custom claim (`admin` or `moderator`); a staff claim counts as signed in without a phone. Claims are set only via a CLI script/callable restricted to `superAdmin` |
+| **Device integrity** | App Check enforced on Firestore, Storage, Functions; Play Integrity on Android |
 | **Data access** | Firestore and Storage rules, **deny by default**, field-level validation (types, lengths, enums, immutable fields), ownership checks, role checks via `request.auth.token.admin` |
 | **Privileged operations** | Only via callable Functions that verify claims and write `adminLogs` |
 | **PII minimisation** | Phone number stored once in `users` (private); providers choose which **WhatsApp/public phone** number to expose; ID documents ephemeral |
@@ -246,10 +246,10 @@ ID verification documents go to `private/verification/{uid}/…`. They are never
 - **Decision:** Firebase (Auth, Firestore, Storage, Functions, FCM, Hosting).
 - **Consequences:** Faster MVP, no ops. Weaker search and geo queries (mitigated by §6.3, ADR-006), vendor lock-in (mitigated by repository interfaces), cost tied to reads (mitigated by §9).
 
-### ADR-002 — Flutter for mobile and admin web
-- **Status:** Accepted
-- **Decision:** One Flutter codebase: Android app (`lib/main.dart`) and admin web (`lib/main_admin.dart`), sharing models, repositories and theme.
-- **Consequences:** Code reuse and one language for agents. Flutter Web bundle is heavy, but that's acceptable for an internal admin tool.
+### ADR-002 — Flutter for mobile, React for the admin web
+- **Status:** Accepted (revised: originally "Flutter for mobile and admin web")
+- **Decision:** The Android app is Flutter (`lib/main.dart`). The admin panel is a separate **React + TypeScript web app (Vite)** in `/admin`, deployed to Firebase Hosting target `admin`. It signs in with email/password, accepts only the `admin` / `moderator` claims, reads Firestore and **writes only through the `moderator_*` / `admin_*` callables**. Types and constants that both sides need live once in `/shared` (compiled by the functions and imported by the admin through a Vite alias).
+- **Consequences:** A small, fast, searchable web bundle and the normal web toolchain for a data-table tool; no Flutter Web weight. Costs: a second language toolchain (Node/React) and CI job; no code sharing with the mobile app (models are not shared, only the callable contract in `/shared`).
 
 ### ADR-003 — Provider for state management
 - **Status:** Accepted

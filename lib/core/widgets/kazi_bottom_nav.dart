@@ -139,7 +139,6 @@ class _PublishButton extends StatelessWidget {
             Container(
               width: 44,
               height: 44,
-              margin: const EdgeInsets.only(bottom: 2),
               decoration: BoxDecoration(
                 gradient: KaziColors.brandGradient,
                 borderRadius: BorderRadius.circular(KaziRadius.button),

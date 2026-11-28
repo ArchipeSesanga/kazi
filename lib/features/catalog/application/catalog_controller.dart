@@ -19,6 +19,14 @@ class CatalogController extends ChangeNotifier {
   bool get isLoading => _isLoading;
   Object? get error => _error;
 
+  /// Home shows only these (the 8 `featured` ones), in order; everything else
+  /// is behind "Voir tout".
+  List<Category> get featured =>
+      _categories.where((c) => c.featured && c.active).toList();
+
+  /// Categories a provider or listing can pick: active ones, in order.
+  List<Category> get selectable => _categories.where((c) => c.active).toList();
+
   Future<void> load() async {
     _isLoading = true;
     _error = null;
@@ -29,7 +37,7 @@ class CatalogController extends ChangeNotifier {
         _repo.getLocations(),
       ]);
       _categories = results[0] as List<Category>;
-      _cities     = results[1] as List<City>;
+      _cities = results[1] as List<City>;
     } catch (e) {
       _error = e;
     } finally {

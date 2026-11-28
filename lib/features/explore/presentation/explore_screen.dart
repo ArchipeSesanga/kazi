@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../core/l10n/app_localizations.dart';
-import '../../../core/models/localized_text.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
 import '../../../core/utils/category_icon.dart';
@@ -45,13 +44,17 @@ class _ExploreScreenState extends State<ExploreScreen> {
     if (keyword.isEmpty) return;
     await context.read<ExploreController>().addSearch(keyword);
     if (!mounted) return;
-    unawaited(context.push('${Routes.search}?q=${Uri.encodeComponent(keyword)}'));
+    unawaited(
+      context.push('${Routes.search}?q=${Uri.encodeComponent(keyword)}'),
+    );
     _textCtrl.clear();
   }
 
   void _tapRecentSearch(String keyword) {
     context.read<ExploreController>().addSearch(keyword);
-    unawaited(context.push('${Routes.search}?q=${Uri.encodeComponent(keyword)}'));
+    unawaited(
+      context.push('${Routes.search}?q=${Uri.encodeComponent(keyword)}'),
+    );
   }
 
   void _tapCategory(String id) {
@@ -109,7 +112,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     // Recent searches
                     Consumer<ExploreController>(
                       builder: (_, ctrl, __) {
-                        if (ctrl.searches.isEmpty) return const SizedBox.shrink();
+                        if (ctrl.searches.isEmpty)
+                          return const SizedBox.shrink();
                         return _RecentSearches(
                           searches: ctrl.searches,
                           onTap: _tapRecentSearch,
@@ -122,7 +126,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     // Categories
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: KaziSpacing.screenPadding),
+                        horizontal: KaziSpacing.screenPadding,
+                      ),
                       child: SectionHeader(title: l.exploreCategories),
                     ),
                     const SizedBox(height: KaziSpacing.md),
@@ -134,23 +139,24 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         }
                         return Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: KaziSpacing.screenPadding),
+                            horizontal: KaziSpacing.screenPadding,
+                          ),
                           child: GridView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 4,
-                              childAspectRatio: 0.8,
-                              mainAxisSpacing: KaziSpacing.md,
-                              crossAxisSpacing: KaziSpacing.sm,
-                            ),
+                                  crossAxisCount: 4,
+                                  childAspectRatio: 0.8,
+                                  mainAxisSpacing: KaziSpacing.md,
+                                  crossAxisSpacing: KaziSpacing.sm,
+                                ),
                             itemCount: catalog.categories.length,
                             itemBuilder: (_, i) {
                               final cat = catalog.categories[i];
                               return CategoryCircle(
-                                label: cat.name.resolve(locale),
-                                icon: categoryIconForName(cat.icon),
+                                label: cat.label(locale),
+                                icon: categoryIconFor(cat.iconKey),
                                 onTap: () => _tapCategory(cat.id),
                               );
                             },
@@ -194,7 +200,8 @@ class _RecentSearches extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(
-              horizontal: KaziSpacing.screenPadding),
+            horizontal: KaziSpacing.screenPadding,
+          ),
           child: Row(
             children: [
               Expanded(
@@ -227,7 +234,8 @@ class _RecentSearches extends StatelessWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(
-              horizontal: KaziSpacing.screenPadding),
+            horizontal: KaziSpacing.screenPadding,
+          ),
           itemCount: searches.length,
           itemBuilder: (_, i) {
             final keyword = searches[i];
@@ -238,8 +246,11 @@ class _RecentSearches extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: KaziSpacing.sm),
                 child: Row(
                   children: [
-                    const Icon(LucideIcons.clock,
-                        size: 16, color: KaziColors.muted),
+                    const Icon(
+                      LucideIcons.clock,
+                      size: 16,
+                      color: KaziColors.muted,
+                    ),
                     const SizedBox(width: KaziSpacing.md),
                     Expanded(
                       child: Text(
@@ -253,8 +264,11 @@ class _RecentSearches extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: () => onRemove(keyword),
-                      child: const Icon(LucideIcons.x,
-                          size: 16, color: KaziColors.muted),
+                      child: const Icon(
+                        LucideIcons.x,
+                        size: 16,
+                        color: KaziColors.muted,
+                      ),
                     ),
                   ],
                 ),

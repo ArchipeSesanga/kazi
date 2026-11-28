@@ -25,17 +25,14 @@ AppException _mapAuthException(FirebaseAuthException e) {
   return switch (e.code) {
     'network-request-failed' => const NetworkException(),
     'too-many-requests' => const TooManyRequestsException(),
-    'invalid-verification-code' ||
-    'invalid-sms-code' =>
-      const OtpInvalidException(),
-    'session-expired' || 'code-expired' => const OtpExpiredException(),
     'user-not-found' ||
     'user-disabled' ||
-    'account-exists-with-different-credential' =>
-      PermissionDeniedException(e.message),
+    'account-exists-with-different-credential' => PermissionDeniedException(
+      e.message,
+    ),
     'requires-recent-login' => const UnauthenticatedException(),
-    'operation-not-allowed' || 'web-storage-unsupported' =>
-      PermissionDeniedException(e.message),
+    'operation-not-allowed' ||
+    'web-storage-unsupported' => PermissionDeniedException(e.message),
     _ => UnknownException('auth/${e.code}'),
   };
 }
@@ -44,8 +41,8 @@ AppException _mapFunctionsException(FirebaseFunctionsException e) {
   return switch (e.code) {
     'unauthenticated' => const UnauthenticatedException(),
     'permission-denied' => const PermissionDeniedException(),
-    'invalid-argument' || 'failed-precondition' =>
-      InvalidInputException(e.message),
+    'invalid-argument' ||
+    'failed-precondition' => InvalidInputException(e.message),
     'resource-exhausted' => const RateLimitedException(),
     'not-found' => const NotFoundException(),
     'unavailable' || 'deadline-exceeded' => const NetworkException(),
@@ -56,10 +53,11 @@ AppException _mapFunctionsException(FirebaseFunctionsException e) {
 
 AppException _mapFirebaseException(FirebaseException e) {
   return switch (e.code) {
-    'permission-denied' => const PermissionDeniedException(),
+    'permission-denied' || 'unauthorized' => const PermissionDeniedException(),
     'not-found' => const NotFoundException(),
-    'unavailable' || 'deadline-exceeded' || 'cancelled' =>
-      const NetworkException(),
+    'unavailable' ||
+    'deadline-exceeded' ||
+    'cancelled' => const NetworkException(),
     'unauthenticated' => const UnauthenticatedException(),
     'resource-exhausted' => const QuotaExceededException(),
     'already-exists' => InvalidInputException(e.message),

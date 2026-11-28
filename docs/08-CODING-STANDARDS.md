@@ -55,7 +55,7 @@
 
 ## 3. Git workflow
 
-- Trunk-based: `main` is always releasable. Short-lived branches: `feat/KZ-123-provider-onboarding`, `fix/KZ-140-otp-resend`, `chore/…`, `docs/…`.
+- Trunk-based: `main` is always releasable. Short-lived branches: `feat/KZ-123-provider-onboarding`, `fix/KZ-140-auth`, `chore/…`, `docs/…`.
 - **Conventional Commits**: `feat(search): add commune filter`, `fix(rules): deny verified write`, `test(functions): review delta cases`.
 - PR template checklist: linked story, screenshots for UI, tests added, ARB keys in both languages, rules tests if data changed, docs updated if a contract changed.
 - Squash merge; PR title = conventional commit.

@@ -11,13 +11,16 @@ import '../../../core/models/enums.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/kazi_network_image.dart';
 import '../../../core/widgets/offline_banner.dart';
+import '../../../core/widgets/rating_stars.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../../core/widgets/stat_tile.dart';
 import '../../auth/application/session_controller.dart';
 import '../../listings/domain/listing_repository.dart';
+import '../../listings/presentation/listing_status_chip.dart';
 import '../application/dashboard_controller.dart';
 import '../domain/provider_repository.dart';
 
@@ -53,23 +56,31 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
 
-    return Scaffold(
-      backgroundColor: KaziColors.surfaceAlt,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            const OfflineBanner(),
-            _AppBar(l: l),
-            Expanded(
-              child: ChangeNotifierProvider.value(
-                value: _ctrl,
-                child: Consumer<DashboardController>(
-                  builder: (_, ctrl, __) => _Body(ctrl: ctrl, l: l),
+    // This screen is outside the tab shell and is sometimes entered with
+    // `go` (empty back stack): never strand the user, fall back to Home.
+    return PopScope(
+      canPop: context.canPop(),
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) context.go(Routes.home);
+      },
+      child: Scaffold(
+        backgroundColor: KaziColors.surfaceAlt,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              const OfflineBanner(),
+              _AppBar(l: l),
+              Expanded(
+                child: ChangeNotifierProvider.value(
+                  value: _ctrl,
+                  child: Consumer<DashboardController>(
+                    builder: (_, ctrl, __) => _Body(ctrl: ctrl, l: l),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -84,15 +95,23 @@ class _AppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final uid = context.read<SessionController>().uid;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        KaziSpacing.screenPadding,
+        KaziSpacing.sm,
         KaziSpacing.lg,
         KaziSpacing.sm,
         KaziSpacing.md,
       ),
       child: Row(
         children: [
+          IconButton(
+            icon: const Icon(LucideIcons.arrowLeft, size: 22),
+            color: KaziColors.ink,
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go(Routes.home),
+          ),
           Expanded(
             child: Text(
               l.dashboardTitle,
@@ -104,12 +123,13 @@ class _AppBar extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(
-            icon: const Icon(LucideIcons.settings, size: 20),
-            color: KaziColors.muted,
-            tooltip: l.publishHubGoToDashboard,
-            onPressed: () => context.push(Routes.providerOnboarding),
-          ),
+          if (uid != null)
+            IconButton(
+              icon: const Icon(LucideIcons.user, size: 20),
+              color: KaziColors.muted,
+              tooltip: l.dashboardViewPublicProfile,
+              onPressed: () => context.push(Routes.providerProfile(uid)),
+            ),
         ],
       ),
     );
@@ -130,7 +150,10 @@ class _Body extends StatelessWidget {
       return Center(
         child: Text(
           l.errorUnknown,
-          style: const TextStyle(fontFamily: 'Montserrat', color: KaziColors.muted),
+          style: const TextStyle(
+            fontFamily: 'Montserrat',
+            color: KaziColors.muted,
+          ),
         ),
       );
     }
@@ -143,23 +166,48 @@ class _Body extends StatelessWidget {
         // Status card
         if (profile != null) ...[
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: KaziSpacing.screenPadding),
+            padding: const EdgeInsets.symmetric(
+              horizontal: KaziSpacing.screenPadding,
+            ),
             child: _StatusCard(profile: profile, l: l),
           ),
           const SizedBox(height: KaziSpacing.lg),
           // Stats strip
-          _StatsRow(profile: profile, listingCount: ctrl.listings.length, l: l),
+          _StatsRow(profile: profile, listingCount: ctrl.usedListings, l: l),
           const SizedBox(height: KaziSpacing.xl),
         ],
         // My listings section
         SectionHeader(
           title: l.dashboardMyListings,
           actionLabel: l.dashboardNewListing,
-          onAction: () => context.push(Routes.providerNewListing),
+          onAction: () => _newListing(context),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: KaziSpacing.screenPadding,
+          ),
+          child: Text(
+            l.listingLimitUsage(ctrl.usedListings, ctrl.maxListings),
+            style: TextStyle(
+              fontFamily: 'Montserrat',
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: ctrl.limitReached ? KaziColors.error : KaziColors.muted,
+            ),
+          ),
         ),
         const SizedBox(height: KaziSpacing.sm),
         if (ctrl.isLoadingListings)
           ..._listingSkeletons
+        else if (ctrl.listingsError != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: KaziSpacing.xl),
+            child: ErrorView(
+              message: l.listingsLoadFailed,
+              onRetry: ctrl.retryListings,
+              retryLabel: l.buttonRetry,
+            ),
+          )
         else if (ctrl.listings.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(
@@ -170,7 +218,7 @@ class _Body extends StatelessWidget {
               icon: LucideIcons.clipboardList,
               message: l.dashboardListingsEmpty,
               actionLabel: l.dashboardNewListing,
-              onAction: () => context.push(Routes.providerNewListing),
+              onAction: () => _newListing(context),
             ),
           )
         else
@@ -181,16 +229,37 @@ class _Body extends StatelessWidget {
     );
   }
 
-  List<Widget> get _listingSkeletons => List.generate(
-        3,
-        (_) => Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: KaziSpacing.screenPadding,
-            vertical: KaziSpacing.xs,
+  /// At the limit, explain it instead of opening a form that would fail.
+  void _newListing(BuildContext context) {
+    if (!ctrl.limitReached) {
+      context.push(Routes.providerNewListing);
+      return;
+    }
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.listingLimitReachedTitle),
+        content: Text(l.listingLimitReachedBody(ctrl.maxListings)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l.buttonClose),
           ),
-          child: SkeletonBox(width: null, height: 80),
-        ),
-      );
+        ],
+      ),
+    );
+  }
+
+  List<Widget> get _listingSkeletons => List.generate(
+    3,
+    (_) => const Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: KaziSpacing.screenPadding,
+        vertical: KaziSpacing.xs,
+      ),
+      child: SkeletonBox(width: null, height: 80),
+    ),
+  );
 }
 
 // ── Status card ───────────────────────────────────────────────────────────────
@@ -204,29 +273,29 @@ class _StatusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg, icon, label) = switch (profile.status) {
       ProviderStatus.pending => (
-          KaziColors.star.withValues(alpha: 0.1),
-          KaziColors.star,
-          LucideIcons.clock,
-          l.dashboardStatusPending,
-        ),
+        KaziColors.star.withValues(alpha: 0.1),
+        KaziColors.star,
+        LucideIcons.clock,
+        l.dashboardStatusPending,
+      ),
       ProviderStatus.approved => (
-          KaziColors.success.withValues(alpha: 0.1),
-          KaziColors.success,
-          LucideIcons.circleCheck,
-          l.dashboardStatusApproved,
-        ),
+        KaziColors.success.withValues(alpha: 0.1),
+        KaziColors.success,
+        LucideIcons.circleCheck,
+        l.dashboardStatusApproved,
+      ),
       ProviderStatus.rejected => (
-          KaziColors.error.withValues(alpha: 0.1),
-          KaziColors.error,
-          LucideIcons.circleX,
-          l.dashboardStatusRejected,
-        ),
+        KaziColors.error.withValues(alpha: 0.1),
+        KaziColors.error,
+        LucideIcons.circleX,
+        l.dashboardStatusRejected,
+      ),
       ProviderStatus.suspended => (
-          KaziColors.error.withValues(alpha: 0.1),
-          KaziColors.error,
-          LucideIcons.ban,
-          l.dashboardStatusSuspended,
-        ),
+        KaziColors.error.withValues(alpha: 0.1),
+        KaziColors.error,
+        LucideIcons.ban,
+        l.dashboardStatusSuspended,
+      ),
     };
 
     return Container(
@@ -308,10 +377,12 @@ class _StatsRow extends StatelessWidget {
     final rating = profile.ratingAvg;
 
     return SizedBox(
-      height: 80,
+      height: 116,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: KaziSpacing.screenPadding),
+        padding: const EdgeInsets.symmetric(
+          horizontal: KaziSpacing.screenPadding,
+        ),
         children: [
           StatTile(
             value: contactsMonth.toString(),
@@ -326,7 +397,7 @@ class _StatsRow extends StatelessWidget {
           ),
           const SizedBox(width: KaziSpacing.sm),
           StatTile(
-            value: rating > 0 ? rating.toStringAsFixed(1) : '—',
+            value: rating > 0 ? formatRating(context, rating) : '—',
             label: l.dashboardStatRating,
             icon: LucideIcons.star,
           ),
@@ -392,11 +463,22 @@ class _ListingCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: KaziSpacing.xs),
-                      _StatusChip(listing: listing, l: l),
+                      ListingStatusChip(listing: listing),
+                      ListingStatusNote(listing: listing),
                     ],
                   ),
                 ),
-                _ActionMenu(listing: listing, ctrl: ctrl, l: l),
+                if (ctrl.isBusy(listing.id))
+                  const Padding(
+                    padding: EdgeInsets.all(KaziSpacing.sm),
+                    child: SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                else
+                  _ActionMenu(listing: listing, ctrl: ctrl, l: l),
               ],
             ),
           ),
@@ -416,7 +498,7 @@ class _Thumbnail extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: url != null
-          ? KaziNetworkImage(url: url, width: 56, height: 56, fit: BoxFit.cover)
+          ? KaziNetworkImage(url: url, width: 56, height: 56)
           : Container(
               width: 56,
               height: 56,
@@ -427,55 +509,6 @@ class _Thumbnail extends StatelessWidget {
                 color: KaziColors.muted,
               ),
             ),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.listing, required this.l});
-  final Listing listing;
-  final AppLocalizations l;
-
-  @override
-  Widget build(BuildContext context) {
-    // Active but not visible yet = publishing
-    if (listing.status == ListingStatus.active && !listing.visible) {
-      return _Chip(
-        label: l.dashboardListingPublishing,
-        color: KaziColors.star,
-      );
-    }
-    final (label, color) = switch (listing.status) {
-      ListingStatus.draft => (l.dashboardListingStatusDraft, KaziColors.muted),
-      ListingStatus.active => (l.dashboardListingStatusActive, KaziColors.success),
-      ListingStatus.paused => (l.dashboardListingStatusPaused, KaziColors.star),
-    };
-    return _Chip(label: label, color: color);
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip({required this.label, required this.color});
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontFamily: 'Montserrat',
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
-      ),
     );
   }
 }
@@ -493,14 +526,15 @@ class _ActionMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<_Action>(
-      icon: const Icon(LucideIcons.ellipsisVertical, size: 18, color: KaziColors.muted),
+      icon: const Icon(
+        LucideIcons.ellipsisVertical,
+        size: 18,
+        color: KaziColors.muted,
+      ),
       onSelected: (action) => _handle(context, action),
       itemBuilder: (_) => [
-        PopupMenuItem(
-          value: _Action.edit,
-          child: Text(l.dashboardListingEdit),
-        ),
-        if (listing.status == ListingStatus.active && listing.visible)
+        PopupMenuItem(value: _Action.edit, child: Text(l.dashboardListingEdit)),
+        if (listing.status == ListingStatus.active)
           PopupMenuItem(
             value: _Action.pause,
             child: Text(l.dashboardListingPause),
@@ -522,17 +556,33 @@ class _ActionMenu extends StatelessWidget {
   }
 
   Future<void> _handle(BuildContext context, _Action action) async {
-    switch (action) {
-      case _Action.edit:
-        unawaited(context.push(Routes.editListing(listing.id)));
-      case _Action.pause:
-        await ctrl.pauseListing(listing.id);
-      case _Action.resume:
-        await ctrl.resumeListing(listing.id);
-      case _Action.delete:
-        final confirmed = await _confirmDelete(context);
-        if (confirmed == true) await ctrl.deleteListing(listing.id);
+    final messenger = ScaffoldMessenger.of(context);
+    if (action == _Action.edit) {
+      unawaited(context.push(Routes.editListing(listing.id)));
+      return;
     }
+    if (action == _Action.delete && await _confirmDelete(context) != true) {
+      return;
+    }
+    final result = switch (action) {
+      _Action.pause => await ctrl.pauseListing(listing.id),
+      _Action.resume => await ctrl.resumeListing(listing.id),
+      _ => await ctrl.deleteListing(listing.id),
+    };
+    final message = result.isSuccess
+        ? switch (result.action) {
+            ListingAction.pause => l.listingActionPaused,
+            ListingAction.resume => l.listingActionResumed,
+            ListingAction.delete => l.listingActionDeleted,
+          }
+        : switch (result.error!.code) {
+            'network' => l.errorNetwork,
+            'permissionDenied' => l.errorPermissionDenied,
+            _ => l.listingActionFailed,
+          };
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<bool?> _confirmDelete(BuildContext context) {
@@ -569,26 +619,28 @@ class _LoadingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: KaziSpacing.screenPadding),
+      padding: const EdgeInsets.symmetric(
+        horizontal: KaziSpacing.screenPadding,
+      ),
       children: [
-        SkeletonBox(width: null, height: 64),
+        const SkeletonBox(width: null, height: 64),
         const SizedBox(height: KaziSpacing.lg),
-        Row(
+        const Row(
           children: [
             Expanded(child: SkeletonBox(width: null, height: 72)),
-            const SizedBox(width: KaziSpacing.sm),
+            SizedBox(width: KaziSpacing.sm),
             Expanded(child: SkeletonBox(width: null, height: 72)),
-            const SizedBox(width: KaziSpacing.sm),
+            SizedBox(width: KaziSpacing.sm),
             Expanded(child: SkeletonBox(width: null, height: 72)),
-            const SizedBox(width: KaziSpacing.sm),
+            SizedBox(width: KaziSpacing.sm),
             Expanded(child: SkeletonBox(width: null, height: 72)),
           ],
         ),
         const SizedBox(height: KaziSpacing.xl),
         ...List.generate(
           3,
-          (_) => Padding(
-            padding: const EdgeInsets.only(bottom: KaziSpacing.sm),
+          (_) => const Padding(
+            padding: EdgeInsets.only(bottom: KaziSpacing.sm),
             child: SkeletonBox(width: null, height: 80),
           ),
         ),

@@ -23,6 +23,7 @@ class PublishScreen extends StatefulWidget {
 
 class _PublishScreenState extends State<PublishScreen> {
   late final PublishHubController _ctrl;
+  ProviderStatus? _lastStatus;
 
   @override
   void initState() {
@@ -30,6 +31,28 @@ class _PublishScreenState extends State<PublishScreen> {
     _ctrl = PublishHubController(context.read<ProviderRepository>());
     final uid = context.read<SessionController>().uid;
     if (uid != null) _ctrl.init(uid);
+  }
+
+  void _onProfileChanged(ProviderProfile? profile) {
+    final status = profile?.status;
+    // Auto-approval (v1) resolves almost instantly — jump straight to the
+    // dashboard the moment we see pending flip to approved, instead of
+    // making the user tap through the hub again.
+    if (_lastStatus == ProviderStatus.pending &&
+        status == ProviderStatus.approved) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Only when this hub is the visible screen: if onboarding just
+        // finished it already opened the dashboard on top of us.
+        if (!mounted) return;
+        final location = GoRouter.of(context)
+            .routerDelegate
+            .currentConfiguration
+            .uri
+            .path;
+        if (location == Routes.publish) context.push(Routes.providerDashboard);
+      });
+    }
+    _lastStatus = status;
   }
 
   @override
@@ -86,6 +109,7 @@ class _PublishScreenState extends State<PublishScreen> {
                             return _ErrorView(l: l);
                           }
                           final profile = ctrl.profile;
+                          _onProfileChanged(profile);
                           if (profile == null) {
                             return _NonProviderView(l: l);
                           }

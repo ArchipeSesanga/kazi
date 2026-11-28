@@ -22,7 +22,6 @@ class CategoryCircle extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
@@ -40,16 +39,18 @@ class CategoryCircle extends StatelessWidget {
             ),
           ),
           const SizedBox(height: KaziSpacing.xs),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: 'Montserrat',
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: isSelected ? KaziColors.primary : KaziColors.body,
+          Expanded(
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: 'Montserrat',
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: isSelected ? KaziColors.primary : KaziColors.body,
+              ),
             ),
           ),
         ],

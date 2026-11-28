@@ -14,7 +14,10 @@ class FirestoreSearchRepository implements SearchRepository {
   final FirebaseFirestore _db;
 
   @override
-  Future<PageResult<Listing>> search(SearchQuery query, {Object? cursor}) async {
+  Future<PageResult<Listing>> search(
+    SearchQuery query, {
+    Object? cursor,
+  }) async {
     final token = _extractToken(query.keyword);
     final useKeyword = token != null;
     final useCommune = !useKeyword && query.commune != null;
@@ -29,13 +32,13 @@ class FirestoreSearchRepository implements SearchRepository {
       if (query.categoryId != null) {
         baseQ = baseQ.where('categoryId', isEqualTo: query.categoryId);
       }
-      baseQ = baseQ.orderBy('ratingAvg', descending: true);
+      baseQ = baseQ.orderBy('ratingScore', descending: true);
     } else if (useCommune) {
       baseQ = baseQ.where('communes', arrayContains: query.commune!);
       if (query.categoryId != null) {
         baseQ = baseQ.where('categoryId', isEqualTo: query.categoryId);
       }
-      baseQ = baseQ.orderBy('ratingAvg', descending: true);
+      baseQ = baseQ.orderBy('ratingScore', descending: true);
     } else {
       if (query.categoryId != null) {
         baseQ = baseQ.where('categoryId', isEqualTo: query.categoryId);
@@ -45,7 +48,7 @@ class FirestoreSearchRepository implements SearchRepository {
       }
       baseQ = query.sort == SearchSort.recent
           ? baseQ.orderBy('publishedAt', descending: true)
-          : baseQ.orderBy('ratingAvg', descending: true);
+          : baseQ.orderBy('ratingScore', descending: true);
     }
 
     final results = <Listing>[];
@@ -70,7 +73,9 @@ class FirestoreSearchRepository implements SearchRepository {
 
       lastDoc = snap.docs.isNotEmpty ? snap.docs.last : lastDoc;
 
-      if (results.length >= _kMinClientResults || !hasMore || extraPagesLeft == 0) {
+      if (results.length >= _kMinClientResults ||
+          !hasMore ||
+          extraPagesLeft == 0) {
         break;
       }
       extraPagesLeft--;
@@ -85,11 +90,17 @@ class FirestoreSearchRepository implements SearchRepository {
     bool useKeyword,
     bool useCommune,
   ) {
-    if (useKeyword && query.commune != null && !listing.communes.contains(query.commune)) {
+    if (useKeyword &&
+        query.commune != null &&
+        !listing.communes.contains(query.commune)) {
       return false;
     }
-    if (query.minRating != null && listing.ratingAvg < query.minRating!) return false;
-    if ((useKeyword || useCommune) && query.verifiedOnly && !listing.providerVerified) return false;
+    if (query.minRating != null && listing.ratingAvg < query.minRating!)
+      return false;
+    if ((useKeyword || useCommune) &&
+        query.verifiedOnly &&
+        !listing.providerVerified)
+      return false;
     return true;
   }
 
@@ -103,8 +114,27 @@ class FirestoreSearchRepository implements SearchRepository {
 
   List<String> _tokenize(String text) {
     const stopWords = {
-      'de', 'du', 'des', 'la', 'le', 'les', 'et', 'en', 'a', 'au', 'aux',
-      'un', 'une', 'pour', 'sur', 'avec', 'the', 'and', 'of', 'for', 'in',
+      'de',
+      'du',
+      'des',
+      'la',
+      'le',
+      'les',
+      'et',
+      'en',
+      'a',
+      'au',
+      'aux',
+      'un',
+      'une',
+      'pour',
+      'sur',
+      'avec',
+      'the',
+      'and',
+      'of',
+      'for',
+      'in',
     };
     return _normalize(text)
         .split(RegExp(r'\s+'))

@@ -74,15 +74,29 @@ extension ListingWrite on Listing {
       };
 
   Map<String, dynamic> toUpdateMap() => {
-        'title': title,
-        'description': description,
-        'categoryId': categoryId,
-        'priceType': priceType.name,
-        if (priceAmount != null) 'priceAmount': priceAmount,
-        'currency': currency == Currency.usd ? 'USD' : 'CDF',
-        'photos': photos.map((p) => p.toJson()).toList(),
-        'communes': communes,
-        'status': status.name,
-        'updatedAt': FieldValue.serverTimestamp(),
-      };
+    'title': title,
+    'description': description,
+    'categoryId': categoryId,
+    'priceType': priceType.name,
+    if (priceAmount != null) 'priceAmount': priceAmount,
+    'currency': currency == Currency.usd ? 'USD' : 'CDF',
+    'photos': photos.map((p) => p.toJson()).toList(),
+    'communes': communes,
+    'status': status.name,
+    'updatedAt': FieldValue.serverTimestamp(),
+  };
+}
+
+/// Moderation reason written by `onListingWritten` when a provider is over
+/// `config/limits.maxListingsPerProvider` (TDD §4.6).
+const kOverLimitReason = 'over_limit';
+
+extension ListingOverLimit on Listing {
+  bool get isOverLimit =>
+      moderation == Moderation.hidden && moderationReason == kOverLimitReason;
+
+  /// Counts toward the limit: active or paused, and not hidden for the limit.
+  bool get countsTowardLimit =>
+      (status == ListingStatus.active || status == ListingStatus.paused) &&
+      !isOverLimit;
 }

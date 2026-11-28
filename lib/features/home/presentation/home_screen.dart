@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../../../app/router/routes.dart';
+import '../../../core/errors/app_exception.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
@@ -11,6 +12,8 @@ import '../../../core/utils/category_icon.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/category_circle.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/error_view.dart';
+import '../../../core/widgets/kazi_logo.dart';
 import '../../../core/widgets/kazi_search_bar.dart';
 import '../../../core/widgets/offline_banner.dart';
 import '../../../core/widgets/promo_banner.dart';
@@ -19,6 +22,7 @@ import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../block/application/block_controller.dart';
 import '../../catalog/application/catalog_controller.dart';
+import '../../listings/presentation/listing_result_tile.dart';
 import '../application/home_controller.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -83,7 +87,7 @@ class _HomeBody extends StatelessWidget {
         ),
 
         // Category row
-        if (catalog.categories.isNotEmpty)
+        if (catalog.featured.isNotEmpty)
           SliverPadding(
             padding: const EdgeInsets.only(top: KaziSpacing.lg),
             sliver: SliverToBoxAdapter(
@@ -142,24 +146,89 @@ class _HomeBody extends StatelessWidget {
           ),
         ),
 
-        // Recent listings — stubbed empty (KZ-033 will wire fetchRecent)
+        // Recent listings (visible, publishedAt desc)
+        ..._buildRecentSliver(context, home, blocked, locale, l),
+
+        const SliverPadding(padding: EdgeInsets.only(bottom: KaziSpacing.xxxl)),
+      ],
+    );
+  }
+
+  List<Widget> _buildRecentSliver(
+    BuildContext context,
+    HomeController home,
+    BlockController blocked,
+    String locale,
+    AppLocalizations l,
+  ) {
+    const padding = EdgeInsets.symmetric(horizontal: KaziSpacing.screenPadding);
+
+    if (home.isLoadingRecent && home.recentListings.isEmpty) {
+      return [
+        SliverPadding(
+          padding: padding,
+          sliver: SliverList.separated(
+            itemCount: 3,
+            separatorBuilder: (_, __) => const SizedBox(height: KaziSpacing.md),
+            itemBuilder: (_, __) =>
+                const SkeletonBox(width: double.infinity, height: 84),
+          ),
+        ),
+      ];
+    }
+
+    if (home.recentError != null) {
+      return [
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: KaziSpacing.screenPadding,
+            padding: padding,
+            child: ErrorView(
+              message: home.recentError is NetworkException
+                  ? l.errorNetwork
+                  : l.listingsLoadFailed,
+              onRetry: home.refresh,
+              retryLabel: l.buttonRetry,
             ),
+          ),
+        ),
+      ];
+    }
+
+    final listings = home.recentListings
+        .where((x) => !blocked.isBlocked(x.providerId))
+        .toList();
+
+    if (listings.isEmpty) {
+      return [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: padding,
             child: EmptyState(
               icon: LucideIcons.packageOpen,
               message: l.homeEmptyRecent,
             ),
           ),
         ),
+      ];
+    }
 
-        const SliverPadding(
-          padding: EdgeInsets.only(bottom: KaziSpacing.xxxl),
+    return [
+      SliverPadding(
+        padding: padding,
+        sliver: SliverList.separated(
+          itemCount: listings.length,
+          separatorBuilder: (_, __) => const SizedBox(height: KaziSpacing.md),
+          itemBuilder: (ctx, i) {
+            final listing = listings[i];
+            return ListingResultTile(
+              listing: listing,
+              locale: locale,
+              onTap: () => ctx.push(Routes.listingDetail(listing.id)),
+            );
+          },
         ),
-      ],
-    );
+      ),
+    ];
   }
 
   List<Widget> _buildProviderSliver(
@@ -216,18 +285,15 @@ class _HomeBody extends StatelessWidget {
         padding: padding,
         sliver: SliverGrid(
           gridDelegate: gridDelegate,
-          delegate: SliverChildBuilderDelegate(
-            (ctx, i) {
-              final p = providers[i];
-              return _ProviderCardAdapter(
-                provider: p,
-                catalog: catalog,
-                locale: locale,
-                onTap: () => ctx.push(Routes.providerProfile(p.uid)),
-              );
-            },
-            childCount: providers.length,
-          ),
+          delegate: SliverChildBuilderDelegate((ctx, i) {
+            final p = providers[i];
+            return _ProviderCardAdapter(
+              provider: p,
+              catalog: catalog,
+              locale: locale,
+              onTap: () => ctx.push(Routes.providerProfile(p.uid)),
+            );
+          }, childCount: providers.length),
         ),
       ),
     ];
@@ -259,15 +325,7 @@ class _AppBar extends StatelessWidget {
       titleSpacing: KaziSpacing.screenPadding,
       title: Row(
         children: [
-          const Text(
-            'Kazi',
-            style: TextStyle(
-              fontFamily: 'Montserrat',
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              color: KaziColors.primary,
-            ),
-          ),
+          const KaziLogo(height: 26),
           const SizedBox(width: KaziSpacing.sm),
           GestureDetector(
             onTap: () => _showCommunePicker(context),
@@ -409,8 +467,9 @@ class _AppBar extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: 'Montserrat',
                         color: selected ? KaziColors.primary : KaziColors.ink,
-                        fontWeight:
-                            selected ? FontWeight.w600 : FontWeight.w400,
+                        fontWeight: selected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
                       ),
                     ),
                     trailing: selected
@@ -444,6 +503,9 @@ class _CategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    // Home shows only the featured categories, then "Voir tout" (Explorer).
+    final featured = catalog.featured;
     return SizedBox(
       height: 90,
       child: ListView.builder(
@@ -451,24 +513,33 @@ class _CategoryRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
           horizontal: KaziSpacing.screenPadding,
         ),
-        itemCount: catalog.categories.length,
+        itemCount: featured.length + 1,
         itemBuilder: (_, i) {
-          final cat = catalog.categories[i];
-          final label =
-              locale.startsWith('fr') ? cat.name.fr : cat.name.en;
+          final Widget circle;
+          if (i == featured.length) {
+            circle = CategoryCircle(
+              key: const ValueKey('home-categories-see-all'),
+              label: l.homeCategoriesSeeAll,
+              icon: Icons.grid_view_rounded,
+              onTap: () => context.go(Routes.explore),
+            );
+          } else {
+            final cat = featured[i];
+            circle = CategoryCircle(
+              key: ValueKey('home-category-${cat.id}'),
+              label: cat.label(locale),
+              icon: categoryIconFor(cat.iconKey),
+              onTap: () => context.push(Routes.category(cat.id)),
+            );
+          }
           return Padding(
             padding: const EdgeInsets.only(right: KaziSpacing.md),
-            child: CategoryCircle(
-              label: label,
-              icon: categoryIconForName(cat.icon),
-              onTap: () => context.push(Routes.category(cat.id)),
-            ),
+            child: circle,
           );
         },
       ),
     );
   }
-
 }
 
 // ── Provider card adapter ─────────────────────────────────────────────────────
@@ -489,11 +560,10 @@ class _ProviderCardAdapter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final firstCatId = provider.categoryIds.firstOrNull;
-    final category =
-        firstCatId != null ? catalog.categoryById(firstCatId) : null;
-    final serviceLabel = category == null
-        ? ''
-        : (locale.startsWith('fr') ? category.name.fr : category.name.en);
+    final category = firstCatId != null
+        ? catalog.categoryById(firstCatId)
+        : null;
+    final serviceLabel = category == null ? '' : category.label(locale);
 
     final headline = provider.headline;
     final price = headline != null
@@ -536,11 +606,7 @@ class _ProviderCardSkeleton extends StatelessWidget {
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SkeletonBox(
-            width: double.infinity,
-            height: 112,
-            borderRadius: 0,
-          ),
+          SkeletonBox(width: double.infinity, height: 112, borderRadius: 0),
           Padding(
             padding: EdgeInsets.all(KaziSpacing.md),
             child: Column(
@@ -554,10 +620,7 @@ class _ProviderCardSkeleton extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SkeletonBox(
-                            width: double.infinity,
-                            height: 11,
-                          ),
+                          SkeletonBox(width: double.infinity, height: 11),
                           SizedBox(height: KaziSpacing.xs),
                           SkeletonBox(width: 60, height: 10),
                         ],

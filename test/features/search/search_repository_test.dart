@@ -30,6 +30,8 @@ void main() {
       'categoryId': categoryId,
       'providerVerified': providerVerified,
       'ratingAvg': ratingAvg,
+      // The server-only smoothed score is what "best rated" sorts on.
+      'ratingScore': ratingAvg,
       'communes': communes,
       'searchKeywords': searchKeywords,
       'publishedAt':
@@ -58,7 +60,7 @@ void main() {
       expect(ids, isNot(contains('l3')));
     });
 
-    test('orders by ratingAvg descending by default', () async {
+    test('orders by ratingScore (best rated) descending by default', () async {
       await seedListing(id: 'low', ratingAvg: 2.0);
       await seedListing(id: 'high', ratingAvg: 4.5);
 

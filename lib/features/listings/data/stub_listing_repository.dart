@@ -18,6 +18,13 @@ class StubListingRepository implements ListingRepository {
 
   @override
   Stream<List<Listing>> watchMine(String uid) => const Stream.empty();
+  @override
+  Future<int> fetchMaxListings() async => 10;
+
+  @override
+  Future<ListingQuota> getQuota(String uid) async =>
+      const ListingQuota(used: 0, max: 10);
+
 
   @override
   Future<String> createDraft(Listing draft) async => '';

@@ -20,7 +20,8 @@ abstract final class KaziColors {
 
   // Semantic
   static const Color whatsapp = Color(0xFF25D366);
-  static const Color star = Color(0xFFF5B700);
+  // Rating stars: the brand orange (same as accent).
+  static const Color star = Color(0xFFF25912);
   static const Color error = Color(0xFFD92D20);
   static const Color success = Color(0xFF12B76A);
 
@@ -34,17 +35,9 @@ abstract final class KaziColors {
 
   // Shadows
   static const List<BoxShadow> cardShadow = [
-    BoxShadow(
-      color: Color(0x1F121820),
-      blurRadius: 8,
-      offset: Offset(0, 2),
-    ),
+    BoxShadow(color: Color(0x1F121820), blurRadius: 8, offset: Offset(0, 2)),
   ];
   static const List<BoxShadow> accentButtonShadow = [
-    BoxShadow(
-      color: Color(0x66F25912),
-      blurRadius: 10,
-      offset: Offset(0, 4),
-    ),
+    BoxShadow(color: Color(0x66F25912), blurRadius: 10, offset: Offset(0, 4)),
   ];
 }

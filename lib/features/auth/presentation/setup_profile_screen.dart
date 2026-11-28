@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -9,8 +8,10 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/models/app_user.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
+import '../../../core/utils/phone.dart';
 import '../../../core/widgets/kazi_button.dart';
 import '../../../core/widgets/kazi_text_field.dart';
+import '../../legal/presentation/legal_notice.dart';
 import '../application/session_controller.dart';
 import '../domain/user_repository.dart';
 
@@ -26,6 +27,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
   final _lastNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _saving = false;
+  bool _hasError = false;
 
   @override
   void dispose() {
@@ -43,34 +45,46 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
 
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    setState(() => _saving = true);
-
-    final uid = context.read<SessionController>().uid;
+    final session = context.read<SessionController>();
+    final uid = session.uid;
     if (uid == null) return;
 
-    final phone = FirebaseAuth.instance.currentUser?.phoneNumber ?? '';
+    setState(() {
+      _saving = true;
+      _hasError = false;
+    });
+
     final displayName =
         '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
-
     final user = AppUser(
       uid: uid,
       displayName: displayName,
-      phone: phone,
+      phone: session.authUser?.phone ?? '',
+      email: session.authUser?.email,
       termsVersion: AppDefaults.termsVersion,
     );
 
     try {
       await context.read<UserRepository>().createUser(user);
       if (mounted) context.go(Routes.home);
-    } catch (_) {
-      if (mounted) setState(() => _saving = false);
+    } catch (e) {
+      debugPrint('[SetupProfile] save failed: $e');
+      if (mounted) {
+        setState(() {
+          _saving = false;
+          _hasError = true;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final phone = FirebaseAuth.instance.currentUser?.phoneNumber ?? '';
+    final authUser = context.watch<SessionController>().authUser;
+    final identity = (authUser?.phone?.isNotEmpty ?? false)
+        ? PhoneUtils.formatDisplay(authUser!.phone!)
+        : (authUser?.email ?? '');
 
     return Scaffold(
       backgroundColor: KaziColors.surface,
@@ -83,7 +97,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: KaziSpacing.xxxl),
-                const _Avatar(),
+                const Center(child: _Avatar()),
                 const SizedBox(height: KaziSpacing.xxxl),
                 Text(
                   l.authProfileTitle,
@@ -94,10 +108,10 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                     color: KaziColors.ink,
                   ),
                 ),
-                if (phone.isNotEmpty) ...[
+                if (identity.isNotEmpty) ...[
                   const SizedBox(height: KaziSpacing.xs),
                   Text(
-                    phone,
+                    identity,
                     style: const TextStyle(
                       fontFamily: 'Montserrat',
                       fontSize: 14,
@@ -126,6 +140,38 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                   validator: _validateRequired,
                 ),
                 const SizedBox(height: KaziSpacing.xxxl),
+                if (_hasError) ...[
+                  Container(
+                    padding: const EdgeInsets.all(KaziSpacing.md),
+                    decoration: BoxDecoration(
+                      color: KaziColors.error.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          color: KaziColors.error,
+                          size: 18,
+                        ),
+                        const SizedBox(width: KaziSpacing.sm),
+                        Expanded(
+                          child: Text(
+                            l.errorSaveFailed,
+                            style: const TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 13,
+                              color: KaziColors.error,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: KaziSpacing.lg),
+                ],
+                const LegalNotice(),
+                const SizedBox(height: KaziSpacing.lg),
                 KaziButton(
                   label: l.authProfileSave,
                   onPressed: _saving ? null : _save,
@@ -144,17 +190,13 @@ class _Avatar extends StatelessWidget {
   const _Avatar();
 
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 88,
-        height: 88,
-        decoration: const BoxDecoration(
-          gradient: KaziColors.brandGradient,
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(Icons.person_rounded, size: 44, color: Colors.white),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Container(
+    width: 88,
+    height: 88,
+    decoration: const BoxDecoration(
+      gradient: KaziColors.brandGradient,
+      shape: BoxShape.circle,
+    ),
+    child: const Icon(Icons.person_rounded, size: 44, color: Colors.white),
+  );
 }

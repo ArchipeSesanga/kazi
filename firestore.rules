@@ -8,10 +8,20 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ---------- helpers ----------
-    function signedIn() { return request.auth != null; }
+    // "Signed in" means a verified phone number (the account identity) or a
+    // staff claim (admin / moderator). An email/password account with none of
+    // these is treated like a guest, and guests can read nothing (sign-in only).
+    function isStaffClaim() {
+      return request.auth != null
+        && (request.auth.token.get('admin', false) == true || request.auth.token.get('moderator', false) == true);
+    }
+    function signedIn() {
+      return request.auth != null && ('phone_number' in request.auth.token || isStaffClaim());
+    }
     function uid() { return request.auth.uid; }
-    function isAdmin() { return signedIn() && request.auth.token.admin == true; }
-    function isModerator() { return signedIn() && (request.auth.token.moderator == true || isAdmin()); }
+    function isAdmin() { return signedIn() && request.auth.token.get('admin', false) == true; }
+    // Moderators and admins: moderation actions. Admin-only: roles, categories, audit log.
+    function isModerator() { return signedIn() && (request.auth.token.get('moderator', false) == true || isAdmin()); }
 
     function data() { return request.resource.data; }
     function prev() { return resource.data; }
@@ -32,7 +42,7 @@ service cloud.firestore {
     match /users/{userId} {
       function isOwner() { return signedIn() && uid() == userId; }
       function userClientKeys() {
-        return ['displayName', 'photoUrl', 'phone', 'locale', 'city', 'commune',
+        return ['displayName', 'photoUrl', 'phone', 'email', 'locale', 'city', 'commune',
                 'termsVersion', 'termsAcceptedAt', 'status', 'createdAt', 'updatedAt'];
       }
       function validUser() {
@@ -41,6 +51,7 @@ service cloud.firestore {
           && str(data().city, 2, 40)
           && optStr('commune', 2, 40)
           && optStr('photoUrl', 10, 2048)
+          && optStr('email', 3, 254)
           && str(data().termsVersion, 1, 20);
       }
 
@@ -49,16 +60,20 @@ service cloud.firestore {
       allow create: if isOwner()
         && onlyKeys(userClientKeys())
         && hasKeys(['displayName', 'phone', 'locale', 'city', 'termsVersion', 'termsAcceptedAt', 'status', 'createdAt', 'updatedAt'])
-        && ('phone_number' in request.auth.token
-            ? data().phone == request.auth.token.phone_number
-            : data().phone == '')
+        // The verified phone number is the account identity (E.164).
+        && 'phone_number' in request.auth.token
+        && data().phone == request.auth.token.phone_number
         && data().status == 'active'
         && isNow('createdAt') && isNow('updatedAt') && isNow('termsAcceptedAt')
         && validUser();
 
       allow update: if isOwner()
         && prev().status == 'active'
-        && changedOnly(['displayName', 'photoUrl', 'locale', 'city', 'commune', 'termsVersion', 'termsAcceptedAt', 'updatedAt'])
+        && changedOnly(['displayName', 'photoUrl', 'phone', 'email', 'locale', 'city', 'commune', 'termsVersion', 'termsAcceptedAt', 'updatedAt'])
+        && (!('phone' in data().diff(prev()).affectedKeys()) || (
+              'phone_number' in request.auth.token
+              && data().phone == request.auth.token.phone_number
+            ))
         && isNow('updatedAt')
         && validUser();
 
@@ -112,7 +127,7 @@ service cloud.firestore {
           && (!('portfolio' in data()) || (data().portfolio is list && data().portfolio.size() <= 12));
       }
 
-      allow read: if isOwner() || isModerator() || resource.data.status == 'approved';
+      allow read: if signedIn() && (isOwner() || isModerator() || resource.data.status == 'approved');
 
       allow create: if isOwner()
         && userActive()
@@ -137,16 +152,21 @@ service cloud.firestore {
       allow delete: if false; // deleteAccount callable
 
       // ----- reviews -----
+      // One review per user and provider (the document id is the author's uid).
+      // Creating one needs a prior contact of that user with that provider
+      // (`contacts/{uid}_{providerId}`, written by the client on WhatsApp / call)
+      // and never your own profile. `rating*` on the provider are server-only
+      // (see providerClientKeys): `onReviewWritten` recomputes them.
       match /reviews/{reviewerId} {
         function isAuthor() { return signedIn() && uid() == reviewerId; }
         function validReview() {
           return data().rating is int && data().rating >= 1 && data().rating <= 5
-            && optStr('text', 0, 500)
+            && optStr('text', 0, 300)
             && str(data().authorName, 1, 60)
             && optStr('authorPhotoUrl', 10, 2048);
         }
 
-        allow read: if true;
+        allow read: if signedIn();
 
         allow create: if isAuthor()
           && reviewerId != providerId
@@ -194,16 +214,22 @@ service cloud.firestore {
           && data().status in ['draft', 'active', 'paused'];
       }
       function ownerProvider() { return providerDoc(uid()).data; }
+      // Single source: config/limits.maxListingsPerProvider (TDD §12). The
+      // fallback only applies while the document does not exist yet.
+      function maxListings() {
+        return exists(/databases/$(database)/documents/config/limits)
+          ? get(/databases/$(database)/documents/config/limits).data.maxListingsPerProvider
+          : 10;
+      }
 
-      allow read: if resource.data.visible == true
-        || (signedIn() && resource.data.providerId == uid())
-        || isModerator();
+      allow read: if signedIn()
+        && (resource.data.visible == true || resource.data.providerId == uid() || isModerator());
 
       allow create: if signedIn()
         && data().providerId == uid()
         && onlyKeys(listingClientKeys())
         && ownerProvider().status in ['pending', 'approved', 'rejected']
-        && ownerProvider().listingCount < 10
+        && ownerProvider().listingCount < maxListings()
         && isNow('createdAt') && isNow('updatedAt')
         && validListing();
 
@@ -225,7 +251,7 @@ service cloud.firestore {
           && str(data().providerName, 1, 60)
           && optStr('providerPhotoUrl', 10, 2048)
           && optStr('listingId', 1, 64)
-          && bool(data().providerVerified)
+          && data().providerVerified is bool
           && str(data().whatsappNumber, 5, 20)
           && optStr('callNumber', 5, 20);
       }
@@ -254,18 +280,9 @@ service cloud.firestore {
     match /reports/{reportId} {
       allow read: if isModerator();
 
-      allow create: if signedIn()
-        && reportId == uid() + '_' + data().targetType + '_' + data().targetKey
-        && data().reporterUid == uid()
-        && onlyKeys(['reporterUid', 'targetType', 'targetKey', 'reason', 'details', 'status', 'createdAt'])
-        && data().targetType in ['listing', 'provider', 'review']
-        && str(data().targetKey, 1, 200)
-        && data().reason in ['scam', 'inappropriate', 'fake', 'wrong_category', 'other']
-        && optStr('details', 0, 500)
-        && data().status == 'open'
-        && isNow('createdAt');
-
-      allow update, delete: if false;
+      // Reports are created by the `submitReport` callable only (per-user rate
+      // limit, target checks, anonymisation on account deletion).
+      allow create, update, delete: if false;
     }
 
     // ---------- verification requests (callable-only writes) ----------
@@ -274,13 +291,13 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // ---------- public reference data ----------
+    // ---------- reference data (sign-in only) ----------
     match /categories/{categoryId} {
-      allow read: if true;
+      allow read: if signedIn();
       allow write: if false;
     }
     match /config/{docId} {
-      allow read: if true;
+      allow read: if signedIn();
       allow write: if false;
     }
 
@@ -290,9 +307,9 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Collection-group read for reviews (provider profile pages, account deletion uses Admin SDK)
+    // Collection-group read for reviews (signed-in only) (provider profile pages, account deletion uses Admin SDK)
     match /{path=**}/reviews/{reviewerId} {
-      allow read: if true;
+      allow read: if signedIn();
     }
   }
 }

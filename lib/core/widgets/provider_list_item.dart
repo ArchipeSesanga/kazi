@@ -87,7 +87,13 @@ class ProviderListItem extends StatelessWidget {
                   const SizedBox(height: KaziSpacing.xs),
                   Row(
                     children: [
-                      RatingBadge(rating: rating, reviewCount: reviewCount),
+                      Flexible(
+                        child: RatingSummary(
+                          rating: rating,
+                          count: reviewCount,
+                        ),
+                      ),
+                      const SizedBox(width: KaziSpacing.sm),
                       const Spacer(),
                       Text(
                         price,

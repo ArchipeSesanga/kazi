@@ -16,7 +16,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Category {
 
- String get id; LocalizedText get name; String get icon; int get order; bool get active; int get listingCount;
+ String get id; LocalizedText get names; String get iconKey; int get order; bool get featured; bool get active;/// Search synonyms per language (`fr`, `en`, `ln`, `sw`). Used by the
+/// server to build `searchKeywords`; the app only carries them.
+ Map<String, List<String>> get synonyms; int get listingCount;
 /// Create a copy of Category
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +32,20 @@ $CategoryCopyWith<Category> get copyWith => _$CategoryCopyWithImpl<Category>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as Category;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Category&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.icon, _this.icon) || other.icon == _this.icon)&&(identical(other.order, _this.order) || other.order == _this.order)&&(identical(other.active, _this.active) || other.active == _this.active)&&(identical(other.listingCount, _this.listingCount) || other.listingCount == _this.listingCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Category&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.names, _this.names) || other.names == _this.names)&&(identical(other.iconKey, _this.iconKey) || other.iconKey == _this.iconKey)&&(identical(other.order, _this.order) || other.order == _this.order)&&(identical(other.featured, _this.featured) || other.featured == _this.featured)&&(identical(other.active, _this.active) || other.active == _this.active)&&const DeepCollectionEquality().equals(other.synonyms, _this.synonyms)&&(identical(other.listingCount, _this.listingCount) || other.listingCount == _this.listingCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Category;
-  return Object.hash(runtimeType,_this.id,_this.name,_this.icon,_this.order,_this.active,_this.listingCount);
+  return Object.hash(runtimeType,_this.id,_this.names,_this.iconKey,_this.order,_this.featured,_this.active,const DeepCollectionEquality().hash(_this.synonyms),_this.listingCount);
 }
 
 @override
 String toString() {
   final _this = this as Category;
-  return 'Category(id: ${_this.id}, name: ${_this.name}, icon: ${_this.icon}, order: ${_this.order}, active: ${_this.active}, listingCount: ${_this.listingCount})';
+  return 'Category(id: ${_this.id}, names: ${_this.names}, iconKey: ${_this.iconKey}, order: ${_this.order}, featured: ${_this.featured}, active: ${_this.active}, synonyms: ${_this.synonyms}, listingCount: ${_this.listingCount})';
 }
 
 
@@ -54,11 +56,11 @@ abstract mixin class $CategoryCopyWith<$Res>  {
   factory $CategoryCopyWith(Category value, $Res Function(Category) _then) = _$CategoryCopyWithImpl;
 @useResult
 $Res call({
- String id, LocalizedText name, String icon, int order, bool active, int listingCount
+ String id, LocalizedText names, String iconKey, int order, bool featured, bool active, Map<String, List<String>> synonyms, int listingCount
 });
 
 
-$LocalizedTextCopyWith<$Res> get name;
+$LocalizedTextCopyWith<$Res> get names;
 
 }
 /// @nodoc
@@ -71,14 +73,16 @@ class _$CategoryCopyWithImpl<$Res>
 
 /// Create a copy of Category
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? icon = null,Object? order = null,Object? active = null,Object? listingCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? names = null,Object? iconKey = null,Object? order = null,Object? featured = null,Object? active = null,Object? synonyms = null,Object? listingCount = null,}) {
   return _then(Category(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as LocalizedText,icon: null == icon ? _self.icon : icon // ignore: cast_nullable_to_non_nullable
+as String,names: null == names ? _self.names : names // ignore: cast_nullable_to_non_nullable
+as LocalizedText,iconKey: null == iconKey ? _self.iconKey : iconKey // ignore: cast_nullable_to_non_nullable
 as String,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
-as int,active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
-as bool,listingCount: null == listingCount ? _self.listingCount : listingCount // ignore: cast_nullable_to_non_nullable
+as int,featured: null == featured ? _self.featured : featured // ignore: cast_nullable_to_non_nullable
+as bool,active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
+as bool,synonyms: null == synonyms ? _self.synonyms : synonyms // ignore: cast_nullable_to_non_nullable
+as Map<String, List<String>>,listingCount: null == listingCount ? _self.listingCount : listingCount // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -86,10 +90,10 @@ as int,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$LocalizedTextCopyWith<$Res> get name {
+$LocalizedTextCopyWith<$Res> get names {
   
-  return $LocalizedTextCopyWith<$Res>(_self.name, (value) {
-    return _then(_self.copyWith(name: value));
+  return $LocalizedTextCopyWith<$Res>(_self.names, (value) {
+    return _then(_self.copyWith(names: value));
   });
 }
 }
@@ -173,10 +177,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  LocalizedText name,  String icon,  int order,  bool active,  int listingCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  LocalizedText names,  String iconKey,  int order,  bool featured,  bool active,  Map<String, List<String>> synonyms,  int listingCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Category() when $default != null:
-return $default(_that.id,_that.name,_that.icon,_that.order,_that.active,_that.listingCount);case _:
+return $default(_that.id,_that.names,_that.iconKey,_that.order,_that.featured,_that.active,_that.synonyms,_that.listingCount);case _:
   return orElse();
 
 }
@@ -194,10 +198,10 @@ return $default(_that.id,_that.name,_that.icon,_that.order,_that.active,_that.li
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  LocalizedText name,  String icon,  int order,  bool active,  int listingCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  LocalizedText names,  String iconKey,  int order,  bool featured,  bool active,  Map<String, List<String>> synonyms,  int listingCount)  $default,) {final _that = this;
 switch (_that) {
 case _Category():
-return $default(_that.id,_that.name,_that.icon,_that.order,_that.active,_that.listingCount);case _:
+return $default(_that.id,_that.names,_that.iconKey,_that.order,_that.featured,_that.active,_that.synonyms,_that.listingCount);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -214,10 +218,10 @@ return $default(_that.id,_that.name,_that.icon,_that.order,_that.active,_that.li
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  LocalizedText name,  String icon,  int order,  bool active,  int listingCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  LocalizedText names,  String iconKey,  int order,  bool featured,  bool active,  Map<String, List<String>> synonyms,  int listingCount)?  $default,) {final _that = this;
 switch (_that) {
 case _Category() when $default != null:
-return $default(_that.id,_that.name,_that.icon,_that.order,_that.active,_that.listingCount);case _:
+return $default(_that.id,_that.names,_that.iconKey,_that.order,_that.featured,_that.active,_that.synonyms,_that.listingCount);case _:
   return null;
 
 }
@@ -228,15 +232,27 @@ return $default(_that.id,_that.name,_that.icon,_that.order,_that.active,_that.li
 /// @nodoc
 @JsonSerializable()
 
-class _Category implements Category {
-  const _Category({required this.id, required this.name, required this.icon, required this.order, this.active = true, this.listingCount = 0});
+class _Category extends Category {
+  const _Category({required this.id, required this.names, this.iconKey = '', this.order = 0, this.featured = false, this.active = true,  Map<String, List<String>> synonyms = const {}, this.listingCount = 0}): _synonyms = synonyms,super._();
   factory _Category.fromJson(Map<String, dynamic> json) => _$CategoryFromJson(json);
 
 @override final  String id;
-@override final  LocalizedText name;
-@override final  String icon;
-@override final  int order;
+@override final  LocalizedText names;
+@override@JsonKey() final  String iconKey;
+@override@JsonKey() final  int order;
+@override@JsonKey() final  bool featured;
 @override@JsonKey() final  bool active;
+/// Search synonyms per language (`fr`, `en`, `ln`, `sw`). Used by the
+/// server to build `searchKeywords`; the app only carries them.
+ final  Map<String, List<String>> _synonyms;
+/// Search synonyms per language (`fr`, `en`, `ln`, `sw`). Used by the
+/// server to build `searchKeywords`; the app only carries them.
+@override@JsonKey() Map<String, List<String>> get synonyms {
+  if (_synonyms is EqualUnmodifiableMapView) return _synonyms;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_synonyms);
+}
+
 @override@JsonKey() final  int listingCount;
 
 /// Create a copy of Category
@@ -252,18 +268,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Category&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.icon, icon) || other.icon == icon)&&(identical(other.order, order) || other.order == order)&&(identical(other.active, active) || other.active == active)&&(identical(other.listingCount, listingCount) || other.listingCount == listingCount));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Category&&(identical(other.id, id) || other.id == id)&&(identical(other.names, names) || other.names == names)&&(identical(other.iconKey, iconKey) || other.iconKey == iconKey)&&(identical(other.order, order) || other.order == order)&&(identical(other.featured, featured) || other.featured == featured)&&(identical(other.active, active) || other.active == active)&&const DeepCollectionEquality().equals(other.synonyms, _synonyms)&&(identical(other.listingCount, listingCount) || other.listingCount == listingCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,name,icon,order,active,listingCount);
+    return Object.hash(runtimeType,id,names,iconKey,order,featured,active,const DeepCollectionEquality().hash(_synonyms),listingCount);
 }
 
 @override
 String toString() {
-    return 'Category(id: $id, name: $name, icon: $icon, order: $order, active: $active, listingCount: $listingCount)';
+    return 'Category(id: $id, names: $names, iconKey: $iconKey, order: $order, featured: $featured, active: $active, synonyms: $synonyms, listingCount: $listingCount)';
 }
 
 
@@ -274,11 +290,11 @@ abstract mixin class _$CategoryCopyWith<$Res> implements $CategoryCopyWith<$Res>
   factory _$CategoryCopyWith(_Category value, $Res Function(_Category) _then) = __$CategoryCopyWithImpl;
 @override @useResult
 $Res call({
- String id, LocalizedText name, String icon, int order, bool active, int listingCount
+ String id, LocalizedText names, String iconKey, int order, bool featured, bool active, Map<String, List<String>> synonyms, int listingCount
 });
 
 
-@override $LocalizedTextCopyWith<$Res> get name;
+@override $LocalizedTextCopyWith<$Res> get names;
 
 }
 /// @nodoc
@@ -291,14 +307,16 @@ class __$CategoryCopyWithImpl<$Res>
 
 /// Create a copy of Category
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? icon = null,Object? order = null,Object? active = null,Object? listingCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? names = null,Object? iconKey = null,Object? order = null,Object? featured = null,Object? active = null,Object? synonyms = null,Object? listingCount = null,}) {
   return _then(_Category(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as LocalizedText,icon: null == icon ? _self.icon : icon // ignore: cast_nullable_to_non_nullable
+as String,names: null == names ? _self.names : names // ignore: cast_nullable_to_non_nullable
+as LocalizedText,iconKey: null == iconKey ? _self.iconKey : iconKey // ignore: cast_nullable_to_non_nullable
 as String,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
-as int,active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
-as bool,listingCount: null == listingCount ? _self.listingCount : listingCount // ignore: cast_nullable_to_non_nullable
+as int,featured: null == featured ? _self.featured : featured // ignore: cast_nullable_to_non_nullable
+as bool,active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
+as bool,synonyms: null == synonyms ? _self._synonyms : synonyms // ignore: cast_nullable_to_non_nullable
+as Map<String, List<String>>,listingCount: null == listingCount ? _self.listingCount : listingCount // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -307,10 +325,10 @@ as int,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$LocalizedTextCopyWith<$Res> get name {
+$LocalizedTextCopyWith<$Res> get names {
   
-  return $LocalizedTextCopyWith<$Res>(_self.name, (value) {
-    return _then(_self.copyWith(name: value));
+  return $LocalizedTextCopyWith<$Res>(_self.names, (value) {
+    return _then(_self.copyWith(names: value));
   });
 }
 }

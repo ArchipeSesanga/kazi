@@ -56,12 +56,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorRateLimited => 'Too many attempts. Please wait.';
 
   @override
-  String get errorOtpInvalid => 'Incorrect code. Check and try again.';
-
-  @override
-  String get errorOtpExpired => 'Code expired. Request a new code.';
-
-  @override
   String get errorTooManyRequests => 'Too many requests. Try again later.';
 
   @override
@@ -128,58 +122,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeSkip => 'Skip';
 
   @override
-  String get authPhoneTitle => 'Enter your number';
-
-  @override
-  String get authPhoneSubtitle => 'We\'ll send you a confirmation code.';
-
-  @override
-  String get authPhoneLabel => 'Phone number';
-
-  @override
-  String get authPhoneHint => '081 234 5678';
-
-  @override
-  String get authPhoneSend => 'Send code';
-
-  @override
-  String get authPhoneTermsPrefix => 'By continuing, you agree to our ';
-
-  @override
-  String get authPhoneTermsLink => 'Terms of Use';
-
-  @override
-  String get authPhoneTermsAnd => ' and our ';
-
-  @override
-  String get authPhonePrivacyLink => 'Privacy Policy';
-
-  @override
-  String get authPhoneTermsError => 'Please accept the terms to continue.';
-
-  @override
-  String get authPhoneInvalid => 'Invalid number. Check and try again.';
-
-  @override
-  String get authOtpTitle => 'Enter the code';
-
-  @override
-  String authOtpSubtitle(String phone) {
-    return 'Code sent to $phone';
-  }
-
-  @override
-  String authOtpResendIn(int seconds) {
-    return 'Resend in ${seconds}s';
-  }
-
-  @override
-  String get authOtpResend => 'Resend code';
-
-  @override
-  String get authOtpChangeNumber => 'Change number';
-
-  @override
   String get authProfileTitle => 'Create your profile';
 
   @override
@@ -199,63 +141,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authProfileSave => 'Save my profile';
-
-  @override
-  String get authEmailTitle => 'Sign in with email';
-
-  @override
-  String get authEmailSubtitle => 'Enter your email and password.';
-
-  @override
-  String get authEmailLabel => 'Email address';
-
-  @override
-  String get authEmailHint => 'example@email.com';
-
-  @override
-  String get authPasswordLabel => 'Password';
-
-  @override
-  String get authPasswordHint => 'At least 6 characters';
-
-  @override
-  String get authEmailSignIn => 'Sign in';
-
-  @override
-  String get authEmailRegister => 'Create account';
-
-  @override
-  String get authEmailCreateAccountPrompt => 'No account yet?';
-
-  @override
-  String get authEmailHasAccountPrompt => 'Already have an account?';
-
-  @override
-  String get authEmailForgotPassword => 'Forgot password?';
-
-  @override
-  String get authEmailResetSent => 'Password reset email sent.';
-
-  @override
-  String get authEmailUsePhone => 'Sign in with phone';
-
-  @override
-  String get authPhoneUseEmail => 'Sign in with email';
-
-  @override
-  String get authEmailInUse => 'This email is already in use.';
-
-  @override
-  String get authWeakPassword => 'Password too short (6+ characters).';
-
-  @override
-  String get authUserNotFound => 'No account found for this email.';
-
-  @override
-  String get authWrongPassword => 'Incorrect email or password.';
-
-  @override
-  String get authEmailInvalid => 'Invalid email address.';
 
   @override
   String get homeSearchHint => 'Search for a service…';
@@ -540,7 +425,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Post your services for free and reach thousands of clients.';
 
   @override
-  String get publishHubPending => 'Your application is under review.';
+  String get publishHubPending => 'Activating your profile…';
 
   @override
   String get publishHubRejected => 'Your application was rejected.';
@@ -702,7 +587,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingFormAmountHint => '0';
 
   @override
-  String get listingFormCommuneHint => 'Select service zones (max 10)';
+  String get listingFormBaseCommuneLabel => 'Main commune';
+
+  @override
+  String get listingFormBaseCommuneHint => 'Choose your main commune';
+
+  @override
+  String get listingFormBaseCommuneError => 'Choose your main commune';
+
+  @override
+  String get listingFormCommuneHint =>
+      'Select additional service zones (max 10)';
 
   @override
   String get listingFormTitleError => '4–80 characters required';
@@ -718,6 +613,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get listingFormDraftSaved => 'Draft saved';
+
+  @override
+  String get listingFormDraftDialogTitle => 'Keep draft?';
+
+  @override
+  String get listingFormDraftDialogBody =>
+      'You have an unsaved draft. Do you want to keep it or discard it?';
+
+  @override
+  String get listingFormDraftKeep => 'Keep';
+
+  @override
+  String get listingFormDraftDiscard => 'Discard';
+
+  @override
+  String get listingFormPhotoUploadError =>
+      'Photo upload failed. Tap Retry to resume.';
 
   @override
   String get dashboardTitle => 'My space';
@@ -902,7 +814,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountConsequences =>
-      'Your listings and provider profile will be deleted.';
+      'Your listings, provider profile, favourites, contacts and photos will be deleted. Reviews you wrote stay visible, without your name.';
 
   @override
   String get deleteAccountConfirmLabel => 'Type DELETE to confirm';
@@ -1007,4 +919,286 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get providerUnblockedSnackbar => 'Unblocked';
+
+  @override
+  String listingLimitUsage(int used, int max) {
+    return '$used/$max listings';
+  }
+
+  @override
+  String get listingLimitReachedTitle => 'Listing limit reached';
+
+  @override
+  String listingLimitReachedBody(int max) {
+    return 'You have reached the limit of $max listings. Delete an existing listing to create a new one.';
+  }
+
+  @override
+  String get listingFormUpdated => 'Listing updated.';
+
+  @override
+  String get listingActionPaused => 'Listing paused.';
+
+  @override
+  String get listingActionResumed => 'Listing resumed.';
+
+  @override
+  String get listingActionDeleted => 'Listing deleted.';
+
+  @override
+  String get listingActionFailed => 'The action failed. Please try again.';
+
+  @override
+  String get listingsLoadFailed => 'Couldn\'t load listings.';
+
+  @override
+  String get dashboardListingHidden => 'Hidden';
+
+  @override
+  String get dashboardListingOverLimit => 'Limit reached';
+
+  @override
+  String get listingOverLimitNote =>
+      'This listing is hidden: you have reached the limit of active or paused listings. Delete a listing, then save this one to republish it.';
+
+  @override
+  String get dashboardViewPublicProfile => 'View my public profile';
+
+  @override
+  String get profilePhotoAdd => 'Add a photo';
+
+  @override
+  String get profilePhotoChange => 'Change photo';
+
+  @override
+  String get profilePhotoRemove => 'Remove photo';
+
+  @override
+  String get authPhoneTitle => 'Your phone number';
+
+  @override
+  String get authPhoneSubtitle => 'We\'ll text you a code to sign in.';
+
+  @override
+  String get authPhoneLabel => 'Phone number';
+
+  @override
+  String get authPhoneHint => '81 234 5678';
+
+  @override
+  String get authPhoneContinue => 'Send code';
+
+  @override
+  String get authPhoneInvalid => 'Invalid phone number.';
+
+  @override
+  String get authOtpTitle => 'Enter the code';
+
+  @override
+  String get authOtpCodeLabel => '6-digit code';
+
+  @override
+  String get authOtpVerify => 'Verify';
+
+  @override
+  String get authOtpResend => 'Resend code';
+
+  @override
+  String get authOtpChangeNumber => 'Change number';
+
+  @override
+  String get authOtpWrong => 'Wrong code. Check it and try again.';
+
+  @override
+  String get authOtpExpired => 'This code has expired. Request a new one.';
+
+  @override
+  String get authOtpTooMany => 'Too many attempts. Try again in a few minutes.';
+
+  @override
+  String get authPhoneNetwork => 'No connection. Check your network.';
+
+  @override
+  String get authPhoneQuota =>
+      'SMS service temporarily unavailable. Try again later.';
+
+  @override
+  String authOtpResendIn(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
+  String authOtpSubtitle(String phone) {
+    return 'Enter the 6-digit code sent to $phone.';
+  }
+
+  @override
+  String get deleteAccountContinue => 'Continue';
+
+  @override
+  String deleteAccountOtpIntro(String phone) {
+    return 'For your security, confirm with the code sent to $phone.';
+  }
+
+  @override
+  String get deleteAccountRetry => 'Try again';
+
+  @override
+  String get deleteAccountReauthExpired =>
+      'The confirmation expired. Request a new code.';
+
+  @override
+  String get deleteAccountNoPhone =>
+      'Your account has no verified number: it cannot be deleted from the app.';
+
+  @override
+  String get onboardingPhoneInvalid =>
+      'Invalid number. Example: +243 81 234 5678';
+
+  @override
+  String get reportReasonScam => 'Scam';
+
+  @override
+  String get reportReasonInappropriate => 'Inappropriate content';
+
+  @override
+  String get reportReasonFake => 'Fake profile or listing';
+
+  @override
+  String get reportReasonWrongCategory => 'Wrong category';
+
+  @override
+  String get reportReasonOther => 'Other';
+
+  @override
+  String get reportAlready => 'Already reported';
+
+  @override
+  String get reportRateLimited => 'Too many reports today. Try again tomorrow.';
+
+  @override
+  String get reportOwnTarget => 'You can\'t report your own content.';
+
+  @override
+  String get reportNotFound => 'This content no longer exists.';
+
+  @override
+  String get reportNotVerified => 'Sign in with your phone number to report.';
+
+  @override
+  String get legalOpenHint =>
+      'This document is published on our website. It opens in your browser.';
+
+  @override
+  String get legalOpenButton => 'Open the page';
+
+  @override
+  String get legalAcceptPrefix => 'By continuing you accept the ';
+
+  @override
+  String get legalLinkTerms => 'Terms';
+
+  @override
+  String get legalAcceptAnd => ' and ';
+
+  @override
+  String get legalLinkPrivacy => 'Privacy Policy';
+
+  @override
+  String get legalAcceptSuffix => '.';
+
+  @override
+  String get homeCategoriesSeeAll => 'See all';
+
+  @override
+  String categoryEmptyMessage(String category) {
+    return 'No provider in “$category” yet.';
+  }
+
+  @override
+  String get categoryEmptyAction => 'Be the first to offer this service';
+
+  @override
+  String get categoryUnknown => 'Category not found';
+
+  @override
+  String onboardingCategoriesLimit(int count, int max) {
+    return '$count of $max max';
+  }
+
+  @override
+  String get ratingNew => 'New';
+
+  @override
+  String ratingSummary(String rating, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reviews',
+      one: '1 review',
+    );
+    return '$rating ($_temp0)';
+  }
+
+  @override
+  String ratingSemantics(String rating, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reviews',
+      one: '1 review',
+    );
+    return 'Rated $rating out of 5, $_temp0';
+  }
+
+  @override
+  String get ratingSemanticsNew => 'New provider, no reviews yet';
+
+  @override
+  String ratingInputStar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stars',
+      one: '1 star',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewsContactFirst => 'Contact this provider to leave a review';
+
+  @override
+  String get reviewsOwnProfile => 'You can\'t review your own profile.';
+
+  @override
+  String get reviewsSignIn => 'Sign in to leave a review.';
+
+  @override
+  String get reviewsEdit => 'Edit my review';
+
+  @override
+  String get reviewsDelete => 'Delete my review';
+
+  @override
+  String get reviewsDeleteConfirm =>
+      'Delete your review? This cannot be undone.';
+
+  @override
+  String get reviewsPublished => 'Thanks for your review!';
+
+  @override
+  String get reviewsUpdated => 'Review updated.';
+
+  @override
+  String get reviewsDeleted => 'Review deleted.';
+
+  @override
+  String get reviewsRatingRequired => 'Choose a rating from 1 to 5 stars.';
+
+  @override
+  String get reviewsReport => 'Report this review';
+
+  @override
+  String get reviewsMineTag => 'Your review';
 }

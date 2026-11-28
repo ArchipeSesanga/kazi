@@ -1,12 +1,28 @@
 {
   "indexes": [
     {
+      "collectionGroup": "reports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "listings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "listings",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "visible", "order": "ASCENDING" },
         { "fieldPath": "city", "order": "ASCENDING" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -25,7 +41,7 @@
         { "fieldPath": "visible", "order": "ASCENDING" },
         { "fieldPath": "city", "order": "ASCENDING" },
         { "fieldPath": "categoryId", "order": "ASCENDING" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -46,7 +62,7 @@
         { "fieldPath": "city", "order": "ASCENDING" },
         { "fieldPath": "categoryId", "order": "ASCENDING" },
         { "fieldPath": "providerVerified", "order": "ASCENDING" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -56,7 +72,7 @@
         { "fieldPath": "visible", "order": "ASCENDING" },
         { "fieldPath": "city", "order": "ASCENDING" },
         { "fieldPath": "providerVerified", "order": "ASCENDING" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -66,7 +82,7 @@
         { "fieldPath": "visible", "order": "ASCENDING" },
         { "fieldPath": "city", "order": "ASCENDING" },
         { "fieldPath": "communes", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -77,7 +93,7 @@
         { "fieldPath": "city", "order": "ASCENDING" },
         { "fieldPath": "categoryId", "order": "ASCENDING" },
         { "fieldPath": "communes", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -87,7 +103,7 @@
         { "fieldPath": "visible", "order": "ASCENDING" },
         { "fieldPath": "city", "order": "ASCENDING" },
         { "fieldPath": "searchKeywords", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -98,7 +114,7 @@
         { "fieldPath": "city", "order": "ASCENDING" },
         { "fieldPath": "categoryId", "order": "ASCENDING" },
         { "fieldPath": "searchKeywords", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -124,7 +140,7 @@
       "fields": [
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "city", "order": "ASCENDING" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" },
+        { "fieldPath": "ratingScore", "order": "DESCENDING" },
         { "fieldPath": "ratingCount", "order": "DESCENDING" }
       ]
     },
@@ -211,6 +227,22 @@
       "collectionGroup": "providers",
       "fieldPath": "bio",
       "indexes": []
+    },
+    {
+      "collectionGroup": "reviews",
+      "fieldPath": "authorUid",
+      "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION" },
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }
+      ]
+    },
+    {
+      "collectionGroup": "favorites",
+      "fieldPath": "providerId",
+      "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION" },
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }
+      ]
     }
   ]
 }

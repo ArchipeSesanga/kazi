@@ -1,14 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../core/config/env.dart';
 import '../../../core/models/app_user.dart';
 import '../domain/user_repository.dart';
 
 class FirebaseUserRepository implements UserRepository {
-  FirebaseUserRepository(this._db, this._auth);
+  FirebaseUserRepository(this._db, this._auth, [FirebaseFunctions? functions])
+      : _functionsOverride = functions;
 
   final FirebaseFirestore _db;
   final FirebaseAuth _auth;
+  final FirebaseFunctions? _functionsOverride;
+
+  // Resolved lazily so tests that never delete an account need no Firebase app.
+  FirebaseFunctions get _functions =>
+      _functionsOverride ??
+      FirebaseFunctions.instanceFor(region: Env.functionsRegion);
 
   CollectionReference<Map<String, dynamic>> get _users =>
       _db.collection('users');
@@ -36,10 +45,18 @@ class FirebaseUserRepository implements UserRepository {
 
   @override
   Future<void> deleteAccount() async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) return;
-    await _users.doc(uid).delete();
-    await _auth.currentUser?.delete();
+    if (_auth.currentUser == null) return;
+    try {
+      await _functions.httpsCallable('deleteAccount').call<void>();
+    } on FirebaseFunctionsException catch (e) {
+      throw DeleteAccountFailure(switch (e.code) {
+        'failed-precondition' => DeleteAccountFailureReason.recentLoginRequired,
+        'permission-denied' => DeleteAccountFailureReason.notVerified,
+        _ => DeleteAccountFailureReason.failed,
+      });
+    }
+    // The Auth user no longer exists on the server; clear the local session.
+    await _auth.signOut();
   }
 
   @override
