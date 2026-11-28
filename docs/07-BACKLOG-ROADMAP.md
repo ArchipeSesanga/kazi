@@ -53,9 +53,9 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-025 | Delete account (client) | done | Typed word + fresh OTP re-confirmation, retry-safe; tests; confirmed on a device against kazi-dev |
 | KZ-026 | Remote Config gates | done |  |
 | KZ-027 | Connectivity | done |  |
-| KZ-030 | Seed scripts | done |  |
-| KZ-031 | CatalogRepository & controller | done |  |
-| KZ-032 | Home screen (S06) | done |  |
+| KZ-030 | Seed scripts | done | `seed-categories.ts` now seeds the real 23-category taxonomy from `assets/data/categories.json` (idempotent, dev only, dev wipe of placeholder data); prod seeding of categories still to decide (see runbook) |
+| KZ-031 | CatalogRepository & controller | done | New doc shape (`names`, `iconKey`, `featured`, `synonyms`); offline fallback is the bundled `assets/data/categories.json`; `featured` (Home) and `selectable` (pickers) lists |
+| KZ-032 | Home screen (S06) | done | Category row shows the 8 featured categories + "Voir tout"; every provider/listing card shows the star rating ("Nouveau" when none) |
 | KZ-033 | SearchRepository | done |  |
 | KZ-034 | Results screen (S08) + filters sheet (S09) | done |  |
 | KZ-035 | Explorer tab (S07) | done |  |
@@ -66,29 +66,29 @@ _Last audited 2026-11-21. Update the row whenever a ticket changes (see AGENTS.m
 | KZ-043 | Share provider | done |  |
 | KZ-044 | Block user | done |  |
 | KZ-050 | Publier hub (S14) | done |  |
-| KZ-051 | Provider onboarding (S15) | done |  |
+| KZ-051 | Provider onboarding (S15) | done | Category picker lists the real taxonomy, max 3 with a counter |
 | KZ-052 | MediaRepository & ImageService | done |  |
-| KZ-053 | Listing form (S16) | done |  |
+| KZ-053 | Listing form (S16) | done | Category picker lists the real taxonomy; the `autres` placeholder fallback is gone; opens with a category pre-selected from `?cat=` |
 | KZ-054 | My listings & provider dashboard (S17) | done |  |
 | KZ-055 | Portfolio management | todo |  |
 | KZ-060 | Reviews list & summary | in progress | screen only |
 | KZ-061 | Write/edit/delete review (S12) | in progress | screen only |
 | KZ-062 | Favourites | in progress | screen only |
-| KZ-063 | Report sheet (S13) | done | `submitReport` callable (rate-limited), report sheet for listings and providers, "Déjà signalé"; reviews not reportable yet. Needs deploy to kazi-dev and a device test |
+| KZ-063 | Report sheet (S13) | done | `submitReport` callable (rate-limited), report sheet for listings, providers and reviews (`{providerId}__{reviewerUid}`), "Déjà signalé". Deployed to kazi-dev; device test pending |
 | KZ-064 | Provider review reply (P2) | todo |  |
 | KZ-070 | Normalise + keywords lib (TS) | todo |  |
 | KZ-071 | `onListingWritten` | done |  |
 | KZ-072 | `onProviderWritten` | done |  |
 | KZ-073 | `onReviewWritten` | todo |  |
 | KZ-074 | `onContactWritten` | todo |  |
-| KZ-075 | `onReportCreated` | done | 3 open reports hide a listing or all of a provider's listings (`auto_reports`); emulator tests. Needs deploy |
+| KZ-075 | `onReportCreated` | done | 3 open reports hide a listing or all of a provider's listings (`auto_reports`); emulator tests. Deployed to kazi-dev |
 | KZ-076 | Notifications lib | todo |  |
 | KZ-077 | `deleteAccount` callable | done | Fresh-login check, idempotent steps, review anonymisation, Storage and Auth removal; emulator tests; deployed to kazi-dev and confirmed on a device |
 | KZ-078 | Scheduled cleanups | in progress | `cleanupOrphanMedia` and `cleanupDraftListings` (nightly, 30 days) done; `cleanupVerificationFiles` waits for the verification flow |
 | KZ-079 | Admin callables | in progress | Moderator callables done (hide/restore listing, suspend provider, dismiss report, with `adminLogs`), `scripts/set-claims.ts` for staff claims; `admin_setProviderStatus`, `admin_upsertCategory`, `admin_setRole` remain |
 | KZ-080 | Admin shell & auth | in progress | React app in `/admin`: email/password, claims check (admin or moderator, others signed out), FR/EN; component tests. Remaining: a manual browser test against `kazi-dev` with a staff user (`scripts/set-claims.ts`), then mark done |
 | KZ-081 | Providers queue & detail | todo |  |
-| KZ-082 | Reports queue | in progress | Groups with count, target title/photo, Hide/Restore/Suspend/Dismiss with confirm dialogs and states; 43 unit/component tests. Needs the deploy of the callables and the `reports(status, createdAt)` index to `kazi-dev` and a manual browser test |
+| KZ-082 | Reports queue | in progress | Groups with count, target title/photo, Hide/Restore/Suspend/Dismiss with confirm dialogs and states; 43 unit/component tests. Callables and the `reports(status, createdAt)` index deployed to `kazi-dev`; still needs a manual browser test. Review reports show in the queue (dismiss only; a moderator removes an abusive review in Firestore, no callable yet) |
 | KZ-083 | Verification queue | todo |  |
 | KZ-084 | Categories management | todo |  |
 | KZ-085 | Audit log view | todo |  |

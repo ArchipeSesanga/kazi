@@ -11,6 +11,7 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
+import '../../../core/utils/category_icon.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/kazi_button.dart';
 import '../../../core/widgets/kazi_chip.dart';
@@ -61,8 +62,7 @@ class _ListingFormScreenState extends State<ListingFormScreen> {
       _descCtrl.value = _descCtrl.value.copyWith(text: ctrl.description);
     }
     if (_priceCtrl.text != ctrl.priceAmountText) {
-      _priceCtrl.value =
-          _priceCtrl.value.copyWith(text: ctrl.priceAmountText);
+      _priceCtrl.value = _priceCtrl.value.copyWith(text: ctrl.priceAmountText);
     }
 
     final status = ctrl.savedStatus;
@@ -78,9 +78,8 @@ class _ListingFormScreenState extends State<ListingFormScreen> {
             .showSnackBar(SnackBar(content: Text(l.listingFormPublished)));
         Navigator.of(context).pop();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l.listingFormDraftSaved)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l.listingFormDraftSaved)));
         _handledSave = false;
       }
     }
@@ -173,17 +172,31 @@ class _ListingFormScreenState extends State<ListingFormScreen> {
     if (ctrl.isLoading) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(ctrl.isEditing ? l.listingFormEditTitle : l.listingFormTitle),
+          title: Text(
+            ctrl.isEditing ? l.listingFormEditTitle : l.listingFormTitle,
+          ),
         ),
         body: const Padding(
           padding: EdgeInsets.all(KaziSpacing.lg),
           child: Column(
             children: [
-              SkeletonBox(width: null, height: 160, borderRadius: KaziRadius.card),
+              SkeletonBox(
+                width: null,
+                height: 160,
+                borderRadius: KaziRadius.card,
+              ),
               SizedBox(height: KaziSpacing.md),
-              SkeletonBox(width: null, height: 48, borderRadius: KaziRadius.input),
+              SkeletonBox(
+                width: null,
+                height: 48,
+                borderRadius: KaziRadius.input,
+              ),
               SizedBox(height: KaziSpacing.md),
-              SkeletonBox(width: null, height: 48, borderRadius: KaziRadius.input),
+              SkeletonBox(
+                width: null,
+                height: 48,
+                borderRadius: KaziRadius.input,
+              ),
             ],
           ),
         ),
@@ -382,9 +395,7 @@ class _PhotoSection extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           l.listingFormAddPhoto,
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelSmall
+                          style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(color: KaziColors.muted),
                         ),
                       ],
@@ -496,7 +507,7 @@ class _CategoryPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final cats = context.watch<CatalogController>().categories;
+    final cats = context.watch<CatalogController>().selectable;
     final locale = Localizations.localeOf(context).languageCode;
     final selected = cats.where((c) => c.id == selectedId).firstOrNull;
 
@@ -509,12 +520,10 @@ class _CategoryPicker extends StatelessWidget {
           suffixIcon: const Icon(LucideIcons.chevronsUpDown, size: 18),
         ),
         child: Text(
-          selected != null
-              ? (locale == 'fr' ? selected.name.fr : selected.name.en)
-              : l.listingFormCategoryHint,
+          selected != null ? selected.label(locale) : l.listingFormCategoryHint,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: selected != null ? KaziColors.ink : KaziColors.muted,
-              ),
+            color: selected != null ? KaziColors.ink : KaziColors.muted,
+          ),
         ),
       ),
     );
@@ -522,7 +531,7 @@ class _CategoryPicker extends StatelessWidget {
 
   Future<void> _showSheet(
     BuildContext context,
-    List<dynamic> cats,
+    List<Category> cats,
     String locale,
   ) async {
     final id = await showModalBottomSheet<String>(
@@ -536,12 +545,16 @@ class _CategoryPicker extends StatelessWidget {
           itemCount: cats.length,
           itemBuilder: (_, i) {
             final cat = cats[i];
-            final name = locale == 'fr' ? cat.name.fr : cat.name.en;
             return ListTile(
-              title: Text(name as String),
+              key: ValueKey('listing-category-${cat.id}'),
+              leading: Icon(
+                categoryIconFor(cat.iconKey),
+                color: KaziColors.primary,
+              ),
+              title: Text(cat.label(locale)),
               selected: cat.id == selectedId,
               selectedColor: KaziColors.accent,
-              onTap: () => Navigator.pop(ctx, cat.id as String),
+              onTap: () => Navigator.pop(ctx, cat.id),
             );
           },
         ),
@@ -605,8 +618,9 @@ class _PriceSection extends StatelessWidget {
                   label: l.listingFormPriceLabel,
                   hint: l.listingFormAmountHint,
                   controller: priceCtrl,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
                   ],
@@ -687,9 +701,9 @@ class _CurrencyBtn extends StatelessWidget {
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: selected ? Colors.white : KaziColors.muted,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              ),
+            color: selected ? Colors.white : KaziColors.muted,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          ),
         ),
       ),
     );
@@ -725,18 +739,14 @@ class _CommuneSection extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           l.listingFormCommuneHint,
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall
+          style: Theme.of(context).textTheme.bodySmall
               ?.copyWith(color: KaziColors.muted),
         ),
         if (errorText != null) ...[
           const SizedBox(height: 4),
           Text(
             errorText!,
-            style: Theme.of(context)
-                .textTheme
-                .labelSmall
+            style: Theme.of(context).textTheme.labelSmall
                 ?.copyWith(color: KaziColors.error),
           ),
         ],

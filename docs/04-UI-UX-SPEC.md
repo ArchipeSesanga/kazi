@@ -36,7 +36,7 @@
 | `border` | `#D9D9D9` | Input borders, dividers |
 | `surface` | `#FFFFFF` | Backgrounds, cards |
 | `whatsapp` | `#25D366` | WhatsApp button only |
-| `star` | `#F5B700` | Rating stars only |
+| `star` | `#F25912` | Rating stars only (same orange as `accent`; empty stars use `border`) |
 | `error` | `#D92D20` | Errors, destructive actions |
 | `success` | `#12B76A` | Success snackbars |
 

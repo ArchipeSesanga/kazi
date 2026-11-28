@@ -3,15 +3,17 @@ import { getFirestore } from "firebase-admin/firestore";
 import "../lib/firebaseAdmin.js";
 import { REGION } from "../config.js";
 import { approveProviderIfExists } from "../lib/approveProvider.js";
+import { ratingScoreOf } from "../lib/ratings.js";
 import { reconcileListing } from "../lib/reconcile.js";
 
-const WATCHED = ["displayName", "photoUrl", "verified", "ratingAvg", "ratingCount", "status"];
+const WATCHED = ["displayName", "photoUrl", "verified", "ratingAvg", "ratingCount", "ratingScore", "status"];
 
 /**
  * TDD §6.1 (subset):
  *  - v1 auto-approval: a provider that is `pending` on create (or resubmitted
  *    from `rejected`) becomes `approved` when
  *    `config/moderation.autoApproveProviders == true`;
+ *  - keeps the server-only `ratingScore` present (new providers start at the prior);
  *  - when a denormalised field changes, recompute the provider's listings.
  */
 export const onProviderWritten = onDocumentWritten(
@@ -32,6 +34,14 @@ export const onProviderWritten = onDocumentWritten(
         await approveProviderIfExists(change.after.ref);
         return; // the resulting write re-enters here and propagates
       }
+    }
+
+    // `ratingScore` is server-only and clients cannot create it, so a new
+    // (or pre-existing) provider gets it here; the write re-enters this trigger.
+    const score = ratingScoreOf(after.ratingSum ?? 0, after.ratingCount ?? 0);
+    if (after.ratingScore !== score) {
+      await change.after.ref.update({ ratingScore: score });
+      return;
     }
 
     if (!before) return; // brand-new provider has no listings

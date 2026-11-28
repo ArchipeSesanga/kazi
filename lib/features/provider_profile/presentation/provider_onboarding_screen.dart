@@ -8,6 +8,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../../../app/router/routes.dart';
+import '../../../core/constants/limits.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/models/enums.dart';
@@ -268,7 +269,6 @@ class _Step1 extends StatelessWidget {
   final TextEditingController whatsappCtrl;
   final TextEditingController callCtrl;
   final bool consentError;
-
 
   @override
   Widget build(BuildContext context) {
@@ -549,16 +549,27 @@ class _Step2 extends StatelessWidget {
         Wrap(
           spacing: KaziSpacing.sm,
           runSpacing: KaziSpacing.sm,
-          children: catalog.categories.map((cat) {
-            final label = locale.startsWith('fr') ? cat.name.fr : cat.name.en;
+          children: catalog.selectable.map((cat) {
+            final label = cat.label(locale);
             final isSelected = ctrl.categoryIds.contains(cat.id);
-            final atLimit = ctrl.categoryIds.length >= 3 && !isSelected;
+            final atLimit =
+                ctrl.categoryIds.length >= Limits.maxCategoriesPerProvider &&
+                !isSelected;
             return KaziChip(
               label: label,
               isSelected: isSelected,
               onTap: atLimit ? null : () => ctrl.toggleCategory(cat.id),
             );
           }).toList(),
+        ),
+        const SizedBox(height: KaziSpacing.xs),
+        Text(
+          l.onboardingCategoriesLimit(
+            ctrl.categoryIds.length,
+            Limits.maxCategoriesPerProvider,
+          ),
+          key: const ValueKey('onboarding-categories-counter'),
+          style: Theme.of(context).textTheme.bodySmall,
         ),
         if (error == 'category') ...[
           const SizedBox(height: KaziSpacing.xs),
@@ -765,7 +776,7 @@ class _Step3 extends StatelessWidget {
     final categoryNames = ctrl.categoryIds
         .map((id) => catalog.categoryById(id))
         .whereType<Category>()
-        .map((c) => locale.startsWith('fr') ? c.name.fr : c.name.en)
+        .map((c) => c.label(locale))
         .join(', ');
 
     final baseCommuneName = ctrl.baseCommune != null

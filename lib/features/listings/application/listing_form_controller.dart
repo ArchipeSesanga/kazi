@@ -41,15 +41,14 @@ class PhotoEntry {
     bool? hasError,
     bool clearProgress = false,
     bool clearLocal = false,
-  }) =>
-      PhotoEntry(
-        id: id,
-        localFile: clearLocal ? null : (localFile ?? this.localFile),
-        storagePath: storagePath ?? this.storagePath,
-        url: url ?? this.url,
-        progress: clearProgress ? null : (progress ?? this.progress),
-        hasError: hasError ?? this.hasError,
-      );
+  }) => PhotoEntry(
+    id: id,
+    localFile: clearLocal ? null : (localFile ?? this.localFile),
+    storagePath: storagePath ?? this.storagePath,
+    url: url ?? this.url,
+    progress: clearProgress ? null : (progress ?? this.progress),
+    hasError: hasError ?? this.hasError,
+  );
 }
 
 class ListingFormController extends ChangeNotifier {
@@ -58,9 +57,17 @@ class ListingFormController extends ChangeNotifier {
     this._mediaRepo,
     this._session, {
     String? listingId,
+
+    /// New listing started from a category page (`?cat=`): pre-selects it.
+    String? initialCategoryId,
   }) {
     _listingId = listingId;
     _startedAsNew = listingId == null;
+    if (listingId == null &&
+        initialCategoryId != null &&
+        initialCategoryId.isNotEmpty) {
+      categoryId = initialCategoryId;
+    }
   }
 
   final ListingRepository _listingRepo;
@@ -90,7 +97,6 @@ class ListingFormController extends ChangeNotifier {
   /// New listing, no draft created yet, and the provider is at the limit.
   bool get limitReached =>
       _startedAsNew && _listingId == null && quota?.reached == true;
-
 
   String title = '';
   String? categoryId;
@@ -125,7 +131,6 @@ class ListingFormController extends ChangeNotifier {
     }
   }
 
-
   Future<void> init() async {
     if (_listingId == null) {
       await _loadQuota();
@@ -142,16 +147,13 @@ class ListingFormController extends ChangeNotifier {
         categoryId = listing.categoryId;
         description = listing.description;
         priceType = listing.priceType;
-        priceAmountText =
-            listing.priceAmount != null ? '${listing.priceAmount}' : '';
+        priceAmountText = listing.priceAmount != null
+            ? '${listing.priceAmount}'
+            : '';
         currency = listing.currency;
         communes = List.of(listing.communes);
         photos = listing.photos
-            .map((p) => PhotoEntry(
-                  id: p.id,
-                  storagePath: p.path,
-                  url: p.url,
-                ))
+            .map((p) => PhotoEntry(id: p.id, storagePath: p.path, url: p.url))
             .toList();
       }
     } on AppException catch (e) {
@@ -219,10 +221,7 @@ class ListingFormController extends ChangeNotifier {
   Future<void> addPhoto(XFile file) async {
     if (!canAddPhoto) return;
     final id = const Uuid().v4();
-    photos = [
-      ...photos,
-      PhotoEntry(id: id, localFile: file),
-    ];
+    photos = [...photos, PhotoEntry(id: id, localFile: file)];
     notifyListeners();
   }
 
@@ -384,7 +383,8 @@ class ListingFormController extends ChangeNotifier {
       id: '',
       providerId: uid,
       title: title.trim().length >= 4 ? title.trim() : 'draft',
-      categoryId: categoryId?.isNotEmpty == true ? categoryId! : 'autres',
+      // _validate() guarantees a real category before a draft is created.
+      categoryId: categoryId!,
       priceType: priceType,
       priceAmount: priceType == PriceType.quote
           ? null

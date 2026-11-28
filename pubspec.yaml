@@ -79,6 +79,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/data/
     - assets/kazi-logo-kit/svg/
 
   fonts:

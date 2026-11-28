@@ -24,7 +24,7 @@ describe.skipIf(!emulator)('processListingWrite (Firestore emulator)', () => {
     await db().collection('providers').doc('p1').set({
       status: 'approved', displayName: 'Jean', listingCount,
     });
-    await db().collection('categories').doc('plomberie').set({ name: { fr: 'Plomberie', en: 'Plumbing' } });
+    await db().collection('categories').doc('plomberie').set({ names: { fr: 'Plomberie', en: 'Plumbing' } });
     if (max !== undefined) await db().collection('config').doc('limits').set({ maxListingsPerProvider: max });
   }
 

@@ -65,7 +65,9 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
           final state = ctrl.state;
 
           if (state is ListingDetailLoading) {
-            return _LoadingScreen(onBack: () => Navigator.of(context).maybePop());
+            return _LoadingScreen(
+              onBack: () => Navigator.of(context).maybePop(),
+            );
           }
 
           if (state is ListingDetailError) {
@@ -74,7 +76,9 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                 : l.errorUnknown;
             return Scaffold(
               appBar: AppBar(
-                leading: BackButton(onPressed: () => Navigator.of(context).maybePop()),
+                leading: BackButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
               ),
               body: ErrorView(
                 message: msg,
@@ -87,7 +91,9 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
           if (state is ListingDetailNotFound) {
             return Scaffold(
               appBar: AppBar(
-                leading: BackButton(onPressed: () => Navigator.of(context).maybePop()),
+                leading: BackButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
               ),
               body: Center(
                 child: Text(
@@ -131,9 +137,9 @@ class _LoadedScreenState extends State<_LoadedScreen> {
   }
 
   Future<void> _loadProvider() async {
-    final profile = await context
-        .read<ProviderRepository>()
-        .getProvider(widget.listing.providerId);
+    final profile = await context.read<ProviderRepository>().getProvider(
+      widget.listing.providerId,
+    );
     if (mounted) setState(() => _provider = profile);
   }
 
@@ -188,8 +194,11 @@ class _LoadedScreenState extends State<_LoadedScreen> {
                     background: photos.isEmpty
                         ? Container(
                             color: KaziColors.surfaceAlt,
-                            child: const Icon(LucideIcons.image,
-                                size: 48, color: KaziColors.border),
+                            child: const Icon(
+                              LucideIcons.image,
+                              size: 48,
+                              color: KaziColors.border,
+                            ),
                           )
                         : _PhotoCarousel(
                             photos: photos,
@@ -250,23 +259,11 @@ class _LoadedScreenState extends State<_LoadedScreen> {
                                 color: KaziColors.primary,
                               ),
                             ),
-                            if (listing.ratingCount > 0) ...[
-                              const SizedBox(height: KaziSpacing.sm),
-                              Row(
-                                children: [
-                                  RatingStars(rating: listing.ratingAvg, size: 14),
-                                  const SizedBox(width: KaziSpacing.xs),
-                                  Text(
-                                    l.providerReviewCount(listing.ratingCount),
-                                    style: const TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      fontSize: 12,
-                                      color: KaziColors.muted,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                            const SizedBox(height: KaziSpacing.sm),
+                            RatingSummary(
+                              rating: listing.ratingAvg,
+                              count: listing.ratingCount,
+                            ),
                           ],
                         ),
                       ),
@@ -330,7 +327,8 @@ class _LoadedScreenState extends State<_LoadedScreen> {
                                         decoration: BoxDecoration(
                                           color: KaziColors.primarySurface,
                                           borderRadius: BorderRadius.circular(
-                                              KaziRadius.pill),
+                                            KaziRadius.pill,
+                                          ),
                                         ),
                                         child: Text(
                                           label,
@@ -486,7 +484,8 @@ class _ProviderMiniCard extends StatelessWidget {
           ),
           const SizedBox(height: KaziSpacing.md),
           GestureDetector(
-            onTap: () => context.push(Routes.providerProfile(listing.providerId)),
+            onTap: () =>
+                context.push(Routes.providerProfile(listing.providerId)),
             child: Container(
               padding: const EdgeInsets.all(KaziSpacing.md),
               decoration: BoxDecoration(
@@ -496,10 +495,7 @@ class _ProviderMiniCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  KaziAvatar(
-                    name: name,
-                    photoUrl: listing.providerPhotoUrl,
-                  ),
+                  KaziAvatar(name: name, photoUrl: listing.providerPhotoUrl),
                   const SizedBox(width: KaziSpacing.md),
                   Expanded(
                     child: Column(
@@ -525,28 +521,20 @@ class _ProviderMiniCard extends StatelessWidget {
                             ],
                           ],
                         ),
-                        if (listing.ratingCount > 0) ...[
-                          const SizedBox(height: KaziSpacing.xs),
-                          Row(
-                            children: [
-                              RatingStars(rating: listing.ratingAvg, size: 12),
-                              const SizedBox(width: KaziSpacing.xs),
-                              Text(
-                                l.providerReviewCount(listing.ratingCount),
-                                style: const TextStyle(
-                                  fontFamily: 'Montserrat',
-                                  fontSize: 11,
-                                  color: KaziColors.muted,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                        const SizedBox(height: KaziSpacing.xs),
+                        RatingSummary(
+                          rating: listing.ratingAvg,
+                          count: listing.ratingCount,
+                          starSize: 12,
+                        ),
                       ],
                     ),
                   ),
-                  const Icon(LucideIcons.chevronRight,
-                      size: 16, color: KaziColors.muted),
+                  const Icon(
+                    LucideIcons.chevronRight,
+                    size: 16,
+                    color: KaziColors.muted,
+                  ),
                 ],
               ),
             ),
@@ -569,7 +557,11 @@ class _LoadingScreen extends StatelessWidget {
       backgroundColor: KaziColors.surfaceAlt,
       body: Column(
         children: [
-          const SkeletonBox(width: double.infinity, height: 280, borderRadius: 0),
+          const SkeletonBox(
+            width: double.infinity,
+            height: 280,
+            borderRadius: 0,
+          ),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(KaziSpacing.screenPadding),
@@ -581,13 +573,19 @@ class _LoadingScreen extends StatelessWidget {
                   const SkeletonBox(width: 100, height: 18),
                   const SizedBox(height: KaziSpacing.xl),
                   SkeletonBox(
-                      width: MediaQuery.sizeOf(context).width - 40, height: 14),
+                    width: MediaQuery.sizeOf(context).width - 40,
+                    height: 14,
+                  ),
                   const SizedBox(height: KaziSpacing.sm),
                   SkeletonBox(
-                      width: MediaQuery.sizeOf(context).width - 80, height: 14),
+                    width: MediaQuery.sizeOf(context).width - 80,
+                    height: 14,
+                  ),
                   const SizedBox(height: KaziSpacing.sm),
                   SkeletonBox(
-                      width: MediaQuery.sizeOf(context).width - 120, height: 14),
+                    width: MediaQuery.sizeOf(context).width - 120,
+                    height: 14,
+                  ),
                 ],
               ),
             ),
@@ -605,12 +603,12 @@ class _Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const Divider(
-        height: 1,
-        thickness: 1,
-        color: KaziColors.border,
-        indent: KaziSpacing.screenPadding,
-        endIndent: KaziSpacing.screenPadding,
-      );
+    height: 1,
+    thickness: 1,
+    color: KaziColors.border,
+    indent: KaziSpacing.screenPadding,
+    endIndent: KaziSpacing.screenPadding,
+  );
 }
 
 class _CircleIconButton extends StatelessWidget {

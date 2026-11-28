@@ -26,7 +26,7 @@ describe.skipIf(!emulator)('reconcileListing (Firestore emulator)', () => {
         ratingAvg: 4.5, ratingCount: 3, listingCount: 0,
       });
     }
-    await db().collection('categories').doc('plomberie').set({ name: { fr: 'Plomberie', en: 'Plumbing' } });
+    await db().collection('categories').doc('plomberie').set({ names: { fr: 'Plomberie', en: 'Plumbing' } });
     await db().collection('listings').doc('l1').set({
       providerId: 'p1', title: 'Réparation de fuite', categoryId: 'plomberie',
       status: 'active', communes: ['gombe'], city: 'kinshasa', ...listing,

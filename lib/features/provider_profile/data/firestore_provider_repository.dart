@@ -45,11 +45,11 @@ class FirestoreProviderRepository implements ProviderRepository {
     Object? cursor,
   }) async {
     try {
-      // Index: status ASC, city ASC, ratingAvg DESC, ratingCount DESC
+      // Index: status ASC, city ASC, ratingScore DESC, ratingCount DESC
       Query<Map<String, dynamic>> q = _col
           .where('status', isEqualTo: 'approved')
           .where('city', isEqualTo: city)
-          .orderBy('ratingAvg', descending: true)
+          .orderBy('ratingScore', descending: true)
           .orderBy('ratingCount', descending: true);
 
       if (cursor != null) {
@@ -62,7 +62,7 @@ class FirestoreProviderRepository implements ProviderRepository {
           .map((d) => ProviderProfile.fromJson({...d.data(), 'uid': d.id}))
           .toList();
 
-      // No composite index for status+city+communes+ratingAvg — filter client-side.
+      // No composite index for status+city+communes+ratingScore — filter client-side.
       if (commune != null) {
         items = items.where((p) => p.communes.contains(commune)).toList();
       }

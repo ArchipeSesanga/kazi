@@ -19,7 +19,8 @@ class FirestoreContactRepository implements ContactRepository {
           'clientUid': draft.clientUid,
           'providerId': draft.providerId,
           'providerName': draft.providerName,
-          if (draft.providerPhotoUrl != null) 'providerPhotoUrl': draft.providerPhotoUrl,
+          if (draft.providerPhotoUrl != null)
+            'providerPhotoUrl': draft.providerPhotoUrl,
           if (draft.listingId != null) 'listingId': draft.listingId,
           'channel': draft.channel,
           'providerVerified': draft.providerVerified,
@@ -30,6 +31,19 @@ class FirestoreContactRepository implements ContactRepository {
         };
         tx.set(ref, data, SetOptions(merge: true));
       });
+    } catch (e, s) {
+      throw mapException(e, s);
+    }
+  }
+
+  @override
+  Future<bool> hasContacted(String clientUid, String providerId) async {
+    try {
+      final snap = await _db
+          .collection('contacts')
+          .doc('${clientUid}_$providerId')
+          .get();
+      return snap.exists;
     } catch (e, s) {
       throw mapException(e, s);
     }

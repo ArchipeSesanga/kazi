@@ -2113,6 +2113,138 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'.'**
   String get legalAcceptSuffix;
+
+  /// Last item of the Home category row (opens Explorer)
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir tout'**
+  String get homeCategoriesSeeAll;
+
+  /// Empty category screen
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun prestataire dans « {category} » pour l\'instant.'**
+  String categoryEmptyMessage(String category);
+
+  /// Empty category: button to publish a service in it
+  ///
+  /// In fr, this message translates to:
+  /// **'Soyez le premier à proposer ce service'**
+  String get categoryEmptyAction;
+
+  /// Category screen for an unknown or retired category
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie introuvable'**
+  String get categoryUnknown;
+
+  /// Counter under the category picker
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} sur {max} maximum'**
+  String onboardingCategoriesLimit(int count, int max);
+
+  /// Chip shown instead of a rating when a provider has no review yet
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau'**
+  String get ratingNew;
+
+  /// Rating text next to the stars, e.g. 4,8 (32 avis)
+  ///
+  /// In fr, this message translates to:
+  /// **'{rating} ({count, plural, =1{1 avis} other{{count} avis}})'**
+  String ratingSummary(String rating, int count);
+
+  /// Screen-reader label of a rating
+  ///
+  /// In fr, this message translates to:
+  /// **'Note {rating} sur 5, {count, plural, =1{1 avis} other{{count} avis}}'**
+  String ratingSemantics(String rating, int count);
+
+  /// Screen-reader label of the New chip
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau prestataire, pas encore d\'avis'**
+  String get ratingSemanticsNew;
+
+  /// Screen-reader label of one star of the rating input
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 étoile} other{{count} étoiles}}'**
+  String ratingInputStar(int count);
+
+  /// Shown to a user who has not contacted the provider yet
+  ///
+  /// In fr, this message translates to:
+  /// **'Contactez ce prestataire pour laisser un avis'**
+  String get reviewsContactFirst;
+
+  /// Provider opening their own review screen
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous ne pouvez pas noter votre propre profil.'**
+  String get reviewsOwnProfile;
+
+  /// Guest on the review screen
+  ///
+  /// In fr, this message translates to:
+  /// **'Connectez-vous pour laisser un avis.'**
+  String get reviewsSignIn;
+
+  /// Title and button when the user already reviewed
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier mon avis'**
+  String get reviewsEdit;
+
+  /// Delete own review
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer mon avis'**
+  String get reviewsDelete;
+
+  /// Delete confirmation
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer votre avis ? Cette action est définitive.'**
+  String get reviewsDeleteConfirm;
+
+  /// Snackbar after publishing
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci pour votre avis !'**
+  String get reviewsPublished;
+
+  /// Snackbar after editing
+  ///
+  /// In fr, this message translates to:
+  /// **'Avis mis à jour.'**
+  String get reviewsUpdated;
+
+  /// Snackbar after deleting
+  ///
+  /// In fr, this message translates to:
+  /// **'Avis supprimé.'**
+  String get reviewsDeleted;
+
+  /// Hint under the stars until one is chosen
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez une note de 1 à 5 étoiles.'**
+  String get reviewsRatingRequired;
+
+  /// Report action on a review
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler cet avis'**
+  String get reviewsReport;
+
+  /// Tag on the user's own review in the list
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre avis'**
+  String get reviewsMineTag;
 }
 
 class _AppLocalizationsDelegate

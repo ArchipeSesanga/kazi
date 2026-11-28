@@ -22,7 +22,7 @@
       "fields": [
         { "fieldPath": "visible", "order": "ASCENDING" },
         { "fieldPath": "city", "order": "ASCENDING" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -41,7 +41,7 @@
         { "fieldPath": "visible", "order": "ASCENDING" },
         { "fieldPath": "city", "order": "ASCENDING" },
         { "fieldPath": "categoryId", "order": "ASCENDING" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -62,7 +62,7 @@
         { "fieldPath": "city", "order": "ASCENDING" },
         { "fieldPath": "categoryId", "order": "ASCENDING" },
         { "fieldPath": "providerVerified", "order": "ASCENDING" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -72,7 +72,7 @@
         { "fieldPath": "visible", "order": "ASCENDING" },
         { "fieldPath": "city", "order": "ASCENDING" },
         { "fieldPath": "providerVerified", "order": "ASCENDING" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -82,7 +82,7 @@
         { "fieldPath": "visible", "order": "ASCENDING" },
         { "fieldPath": "city", "order": "ASCENDING" },
         { "fieldPath": "communes", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -93,7 +93,7 @@
         { "fieldPath": "city", "order": "ASCENDING" },
         { "fieldPath": "categoryId", "order": "ASCENDING" },
         { "fieldPath": "communes", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -103,7 +103,7 @@
         { "fieldPath": "visible", "order": "ASCENDING" },
         { "fieldPath": "city", "order": "ASCENDING" },
         { "fieldPath": "searchKeywords", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -114,7 +114,7 @@
         { "fieldPath": "city", "order": "ASCENDING" },
         { "fieldPath": "categoryId", "order": "ASCENDING" },
         { "fieldPath": "searchKeywords", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" }
+        { "fieldPath": "ratingScore", "order": "DESCENDING" }
       ]
     },
     {
@@ -140,7 +140,7 @@
       "fields": [
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "city", "order": "ASCENDING" },
-        { "fieldPath": "ratingAvg", "order": "DESCENDING" },
+        { "fieldPath": "ratingScore", "order": "DESCENDING" },
         { "fieldPath": "ratingCount", "order": "DESCENDING" }
       ]
     },

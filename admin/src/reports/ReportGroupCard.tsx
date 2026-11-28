@@ -11,6 +11,8 @@ export function availableActions(target: Target): GroupAction[] {
   if (target.kind === "listing") {
     return target.moderation === "hidden" ? ["restore", "dismiss"] : ["hide", "dismiss"];
   }
+  // Reviews are removed by a moderator in Firestore (rules allow it); no callable yet.
+  if (target.kind === "review") return ["dismiss"];
   return target.status === "suspended" ? ["dismiss"] : ["suspend", "dismiss"];
 }
 
@@ -27,7 +29,13 @@ export function ReportGroupCard({
   const actions = availableActions(target);
   const restoreBlocked =
     target?.kind === "listing" && target.moderation === "hidden" && target.moderationReason === MODERATION_REASON.overLimit;
-  const name = !target ? t.reports.deletedTarget : target.kind === "listing" ? target.title : target.displayName;
+  const name = !target
+    ? t.reports.deletedTarget
+    : target.kind === "listing"
+      ? target.title
+      : target.kind === "review"
+        ? `${target.authorName} · ${target.rating}/5`
+        : target.displayName;
   const photo = target?.photoUrl ?? null;
   const date = group.latestAt
     ? new Intl.DateTimeFormat(lang, { dateStyle: "medium", timeStyle: "short" }).format(group.latestAt)
@@ -42,7 +50,7 @@ export function ReportGroupCard({
       {photo ? <img className="thumb" src={photo} alt="" loading="lazy" /> : <div className="thumb thumb-empty" aria-hidden />}
       <div className="report-main">
         <div className="chips">
-          <span className="chip chip-kind">{group.targetType === "listing" ? t.reports.listing : t.reports.provider}</span>
+          <span className="chip chip-kind">{group.targetType === "listing" ? t.reports.listing : group.targetType === "review" ? t.reports.review : t.reports.provider}</span>
           <span className="chip chip-count">{t.reports.count(group.count)}</span>
           {target?.kind === "listing" && (
             <span className={`chip ${target.moderation === "hidden" ? "chip-warn" : "chip-ok"}`}>
@@ -57,6 +65,7 @@ export function ReportGroupCard({
         </div>
         <h3>{name}</h3>
         {hiddenReason && <p className="muted small">{hiddenReason}</p>}
+        {target?.kind === "review" && target.text && <p className="muted small">“{target.text}”</p>}
         <p className="reasons">
           {REPORT_REASONS.filter((r) => group.reasons[r]).map((r) => (
             <span key={r} className="chip">

@@ -44,7 +44,10 @@
 | providers read | approved by guest; pending by owner | pending by another user |
 | listings create | approved provider, valid | `visible: true` included; 7 photos; `priceType: quote` with amount; provider with listingCount 10 (denied) vs 9 (allowed) against `config/limits`; limit raised/lowered via `config/limits`; missing `config/limits` falls back to 10; other user's providerId |
 | listings read | visible by guest; draft by owner | draft by another user; query without `visible == true` by guest |
-| reviews create | after contact | without contact; self-review; rating 6; doc id ≠ uid |
+| reviews create | after contact (`reviews.rules.test.ts`) | without contact (and a contact with another provider); self-review; rating 0 / 6 / 3.5; text 301 chars; doc id ≠ uid (a second review); guest; user being deleted |
+| reviews update / delete | author edits rating + text, deletes; moderator deletes | other user, the provider; changing `authorUid`, `createdAt` |
+| providers `rating*` | — | owner, other user or moderator writing `ratingAvg`, `ratingCount`, `ratingSum` or `ratingScore`; create with a rating or `ratingScore` |
+| categories write | — | any client, admin and moderator included (callable / seed only) |
 | contacts create | `uid_pid` id | wrong id format; self-contact |
 | reports create | none from clients (callable only); moderator read | any client write, verified phone or not; `reportQuota` access; reading reports as user |
 | verificationRequests | read own | write by client |
@@ -52,7 +55,8 @@
 | storage private | owner create | read by anyone; overwrite |
 
 ### 2.4 Functions
-- `onReviewWritten`: create (avg updates), update rating (delta), delete (count decrements), last review deleted → avg 0.
+- `onReviewWritten` (`ratings.emulator.test.ts`, `ratings.test.ts`): add, edit (sum moves, count does not), delete, last review deleted → 0 and score 4.0; anonymising move (delete + create, same rating) is net zero; duplicate delivery changes nothing; never creates a provider; malformed rating ignored; score formula `(4.0·5 + sum)/(5 + count)`.
+- Categories (`categories.test.ts`, `seedCategories.emulator.test.ts`): taxonomy valid (slugs, 4–8 fr/en synonyms, ln/sw empty, 8 featured, `autres` last); every synonym survives the keyword cap; "plombier" finds Plomberie; seed idempotent, keeps `listingCount`, rename keeps the id, retired ≠ deleted, dev wipe + legacy id remap.
 - `onListingWritten`: over-limit → hidden `over_limit`, doc and photos kept, restored when a slot frees; only active + paused count; no write loop (self-triggered run is a no-op); visibility matrix (status × providerStatus × moderation); keywords generated; phone number in title → hidden; photo removal deletes Storage objects; listingCount maintained.
 - `onProviderWritten`: name change propagates to all listings; suspension hides all listings; no write loop (function invocation count stable).
 - `onContactWritten`: cooldown respected.
@@ -78,6 +82,9 @@
 - `SearchResultsController`: debounce; filter change resets pagination; client-side commune filter when keyword present; auto-fetch extra pages when the filtered result is short.
 - `ListingFormController`: validation messages; quote clears amount; upload progress; publish sets `status active`; can't add a 7th photo.
 - `ContactController`: guest → redirect to sign-in; signed in → records the contact once, then launches the URL.
+- `WriteReviewController` / screen: no prior contact → "Contactez ce prestataire pour laisser un avis" and no form; contact with another provider does not count; own profile; signed out; 1–5 stars required, comment ≤ 300; publish, then edit (still one review); delete; failed write keeps the form.
+- `RatingStars` / `RatingSummary` / `RatingInput`: 0, 1, 4.6, 5 stars (4.6 → 4½, 4.8 → 5); orange vs border colour; "4,8 (32 avis)" FR / "4.8 (32 reviews)" EN; "Nouveau" never "0,0"; Label style; semantics "Note 4,8 sur 5, 32 avis"; 44 px targets.
+- Categories: `iconKey` fallback and every bundled key known; catalog reads the new shape and falls back to the bundled list; Home = 8 featured; onboarding picker max 3; empty category state opens the listing form with `?cat=`; FR/EN ARB parity (`arb_parity_test.dart`).
 
 ## 3. Critical user journeys (E2E)
 

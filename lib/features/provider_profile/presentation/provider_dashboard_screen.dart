@@ -14,6 +14,7 @@ import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/kazi_network_image.dart';
 import '../../../core/widgets/offline_banner.dart';
+import '../../../core/widgets/rating_stars.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../../core/widgets/stat_tile.dart';
@@ -149,7 +150,10 @@ class _Body extends StatelessWidget {
       return Center(
         child: Text(
           l.errorUnknown,
-          style: const TextStyle(fontFamily: 'Montserrat', color: KaziColors.muted),
+          style: const TextStyle(
+            fontFamily: 'Montserrat',
+            color: KaziColors.muted,
+          ),
         ),
       );
     }
@@ -162,7 +166,9 @@ class _Body extends StatelessWidget {
         // Status card
         if (profile != null) ...[
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: KaziSpacing.screenPadding),
+            padding: const EdgeInsets.symmetric(
+              horizontal: KaziSpacing.screenPadding,
+            ),
             child: _StatusCard(profile: profile, l: l),
           ),
           const SizedBox(height: KaziSpacing.lg),
@@ -267,29 +273,29 @@ class _StatusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg, icon, label) = switch (profile.status) {
       ProviderStatus.pending => (
-          KaziColors.star.withValues(alpha: 0.1),
-          KaziColors.star,
-          LucideIcons.clock,
-          l.dashboardStatusPending,
-        ),
+        KaziColors.star.withValues(alpha: 0.1),
+        KaziColors.star,
+        LucideIcons.clock,
+        l.dashboardStatusPending,
+      ),
       ProviderStatus.approved => (
-          KaziColors.success.withValues(alpha: 0.1),
-          KaziColors.success,
-          LucideIcons.circleCheck,
-          l.dashboardStatusApproved,
-        ),
+        KaziColors.success.withValues(alpha: 0.1),
+        KaziColors.success,
+        LucideIcons.circleCheck,
+        l.dashboardStatusApproved,
+      ),
       ProviderStatus.rejected => (
-          KaziColors.error.withValues(alpha: 0.1),
-          KaziColors.error,
-          LucideIcons.circleX,
-          l.dashboardStatusRejected,
-        ),
+        KaziColors.error.withValues(alpha: 0.1),
+        KaziColors.error,
+        LucideIcons.circleX,
+        l.dashboardStatusRejected,
+      ),
       ProviderStatus.suspended => (
-          KaziColors.error.withValues(alpha: 0.1),
-          KaziColors.error,
-          LucideIcons.ban,
-          l.dashboardStatusSuspended,
-        ),
+        KaziColors.error.withValues(alpha: 0.1),
+        KaziColors.error,
+        LucideIcons.ban,
+        l.dashboardStatusSuspended,
+      ),
     };
 
     return Container(
@@ -374,7 +380,9 @@ class _StatsRow extends StatelessWidget {
       height: 116,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: KaziSpacing.screenPadding),
+        padding: const EdgeInsets.symmetric(
+          horizontal: KaziSpacing.screenPadding,
+        ),
         children: [
           StatTile(
             value: contactsMonth.toString(),
@@ -389,7 +397,7 @@ class _StatsRow extends StatelessWidget {
           ),
           const SizedBox(width: KaziSpacing.sm),
           StatTile(
-            value: rating > 0 ? rating.toStringAsFixed(1) : '—',
+            value: rating > 0 ? formatRating(context, rating) : '—',
             label: l.dashboardStatRating,
             icon: LucideIcons.star,
           ),
@@ -518,7 +526,11 @@ class _ActionMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<_Action>(
-      icon: const Icon(LucideIcons.ellipsisVertical, size: 18, color: KaziColors.muted),
+      icon: const Icon(
+        LucideIcons.ellipsisVertical,
+        size: 18,
+        color: KaziColors.muted,
+      ),
       onSelected: (action) => _handle(context, action),
       itemBuilder: (_) => [
         PopupMenuItem(value: _Action.edit, child: Text(l.dashboardListingEdit)),
@@ -607,7 +619,9 @@ class _LoadingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: KaziSpacing.screenPadding),
+      padding: const EdgeInsets.symmetric(
+        horizontal: KaziSpacing.screenPadding,
+      ),
       children: [
         const SkeletonBox(width: null, height: 64),
         const SizedBox(height: KaziSpacing.lg),

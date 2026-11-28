@@ -7,6 +7,7 @@ import {
   REPORT_DETAILS_MAX,
   REPORT_REASONS,
   REPORT_TARGETS,
+  REVIEW_KEY_SEPARATOR,
   type ReportReason as ReportReasonValue,
   type ReportTarget,
 } from "../../../shared/moderation.js";
@@ -22,6 +23,15 @@ export interface ReportInput {
 }
 
 export type SubmitReportResult = { status: "created" | "already_reported"; reportId: string };
+
+/** `{providerId}__{reviewerUid}` → its parts, or null when malformed. */
+export function parseReviewKey(key: string): { providerId: string; reviewerUid: string } | null {
+  const i = key.indexOf(REVIEW_KEY_SEPARATOR);
+  if (i < 1 || i + REVIEW_KEY_SEPARATOR.length >= key.length) return null;
+  const providerId = key.slice(0, i);
+  const reviewerUid = key.slice(i + REVIEW_KEY_SEPARATOR.length);
+  return providerId.includes("/") || reviewerUid.includes("/") ? null : { providerId, reviewerUid };
+}
 
 export const reportId = (uid: string, type: string, key: string) => `${uid}_${type}_${key}`;
 
@@ -47,9 +57,11 @@ export async function submitReport(
   const id = reportId(uid, input.targetType, input.targetKey);
   const reportRef = db.collection("reports").doc(id);
   const quotaRef = db.collection("reportQuota").doc(uid);
-  const targetRef = db
-    .collection(input.targetType === "listing" ? "listings" : "providers")
-    .doc(input.targetKey);
+  const review = input.targetType === "review" ? parseReviewKey(input.targetKey) : null;
+  if (input.targetType === "review" && !review) throw new HttpsError("invalid-argument", "invalid-input");
+  const targetRef = review
+    ? db.collection("providers").doc(review.providerId).collection("reviews").doc(review.reviewerUid)
+    : db.collection(input.targetType === "listing" ? "listings" : "providers").doc(input.targetKey);
 
   return db.runTransaction(async (tx) => {
     const [existing, quota, target] = await Promise.all([
@@ -59,7 +71,12 @@ export async function submitReport(
     ]);
     if (existing.exists) return { status: "already_reported", reportId: id };
     if (!target.exists) throw new HttpsError("not-found", "target-not-found");
-    const ownerId = input.targetType === "listing" ? target.data()?.providerId : input.targetKey;
+    // Own target: the listing's / profile's owner, or the review's author.
+    const ownerId = review
+      ? review.reviewerUid
+      : input.targetType === "listing"
+        ? target.data()?.providerId
+        : input.targetKey;
     if (ownerId === uid) throw new HttpsError("failed-precondition", "own-target");
 
     const q = quota.data() as { windowStart?: number; count?: number } | undefined;

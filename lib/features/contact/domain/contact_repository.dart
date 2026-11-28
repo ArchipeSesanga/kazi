@@ -1,6 +1,11 @@
 abstract interface class ContactRepository {
   Future<void> record(ContactDraft draft);
   Stream<List<ContactRecord>> watchContacts(String clientUid);
+
+  /// Whether [clientUid] has already contacted [providerId] (the document
+  /// `contacts/{clientUid}_{providerId}` exists). The security rules require it
+  /// before a review can be written.
+  Future<bool> hasContacted(String clientUid, String providerId);
 }
 
 class ContactDraft {

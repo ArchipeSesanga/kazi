@@ -1,4 +1,5 @@
-import { buildSearchKeywords } from "./search.js";
+import { ratingScoreOf } from "./ratings.js";
+import { buildSearchKeywords, categorySynonyms } from "./search.js";
 import {
   AUTO_CONTENT_REASON,
   computeVisible,
@@ -21,10 +22,13 @@ export interface ProviderInput {
   verified?: boolean;
   ratingAvg?: number;
   ratingCount?: number;
+  ratingSum?: number;
+  ratingScore?: number;
 }
 
 export interface CategoryInput {
-  name?: { fr?: string; en?: string };
+  names?: { fr?: string; en?: string };
+  synonyms?: Partial<Record<"fr" | "en" | "ln" | "sw", string[]>>;
 }
 
 /** Server-owned listing fields (TDD §4.6). `null` means "remove the field". */
@@ -38,6 +42,7 @@ export interface Derived {
   providerVerified: boolean;
   ratingAvg: number;
   ratingCount: number;
+  ratingScore: number;
   categoryName: { fr: string; en: string } | null;
   searchKeywords: string[];
 }
@@ -62,8 +67,8 @@ export function computeListingDerived(
   if (moderation === "ok") moderationReason = null;
 
   const categoryName =
-    category?.name?.fr !== undefined || category?.name?.en !== undefined
-      ? { fr: category?.name?.fr ?? "", en: category?.name?.en ?? "" }
+    category?.names?.fr !== undefined || category?.names?.en !== undefined
+      ? { fr: category?.names?.fr ?? "", en: category?.names?.en ?? "" }
       : null;
 
   return {
@@ -76,6 +81,7 @@ export function computeListingDerived(
     providerVerified: provider?.verified === true,
     ratingAvg: provider?.ratingAvg ?? 0,
     ratingCount: provider?.ratingCount ?? 0,
+    ratingScore: provider?.ratingScore ?? ratingScoreOf(provider?.ratingSum ?? 0, provider?.ratingCount ?? 0),
     categoryName,
     searchKeywords: buildSearchKeywords([
       listing.title,
@@ -83,6 +89,8 @@ export function computeListingDerived(
       categoryName?.en,
       provider?.displayName,
       ...(listing.communes ?? []).map(communeNames),
+      // Synonyms last: "plombier" finds Plomberie.
+      ...categorySynonyms(category),
     ]),
   };
 }

@@ -15,7 +15,7 @@ const PROVIDER_STATUSES = ['pending', 'approved', 'rejected', 'suspended', undef
 const MODERATIONS = ['ok', 'hidden'] as const;
 
 const names = (id: string) => id;
-const category = { name: { fr: 'Plomberie', en: 'Plumbing' } };
+const category = { names: { fr: 'Plomberie', en: 'Plumbing' } };
 
 describe('visibility matrix: status × providerStatus × moderation', () => {
   for (const status of STATUSES) {

@@ -144,7 +144,13 @@ export function ReportsPage({ api }: { api: AdminApi }) {
 
 function describeDialog(p: Pending, load: Load, t: ReturnType<typeof useI18n>["t"]) {
   const target = load.status === "ready" ? load.targets[p.group.key] ?? null : null;
-  const name = !target ? t.reports.deletedTarget : target.kind === "listing" ? target.title : target.displayName;
+  const name = !target
+    ? t.reports.deletedTarget
+    : target.kind === "listing"
+      ? target.title
+      : target.kind === "review"
+        ? target.authorName
+        : target.displayName;
   switch (p.action) {
     case "hide":
       return { title: t.dialog.hideTitle, body: t.dialog.hideBody(name), confirmLabel: t.reports.actions.hide, danger: true, noteMin: 0 };

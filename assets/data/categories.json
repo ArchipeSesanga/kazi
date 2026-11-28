@@ -1,0 +1,760 @@
+[
+  {
+    "id": "plomberie",
+    "names": {
+      "fr": "Plomberie",
+      "en": "Plumbing"
+    },
+    "iconKey": "plumbing",
+    "order": 1,
+    "featured": true,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "plombier",
+        "fuite",
+        "robinet",
+        "tuyauterie",
+        "canalisation",
+        "sanitaire",
+        "chauffe-eau"
+      ],
+      "en": [
+        "plumber",
+        "leak",
+        "tap",
+        "pipes",
+        "drain",
+        "toilet",
+        "water heater"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "electricite",
+    "names": {
+      "fr": "Électricité",
+      "en": "Electrical"
+    },
+    "iconKey": "electrical_services",
+    "order": 2,
+    "featured": true,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "électricien",
+        "courant",
+        "installation électrique",
+        "câblage",
+        "disjoncteur",
+        "panne de courant",
+        "prise"
+      ],
+      "en": [
+        "electrician",
+        "wiring",
+        "power outage",
+        "socket",
+        "circuit breaker",
+        "lighting"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "maconnerie",
+    "names": {
+      "fr": "Maçonnerie & carrelage",
+      "en": "Masonry & tiling"
+    },
+    "iconKey": "construction",
+    "order": 3,
+    "featured": false,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "maçon",
+        "carreleur",
+        "carrelage",
+        "construction",
+        "briques",
+        "béton",
+        "dalle"
+      ],
+      "en": [
+        "mason",
+        "bricklayer",
+        "tiler",
+        "tiles",
+        "construction",
+        "concrete",
+        "building"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "peinture",
+    "names": {
+      "fr": "Peinture & décoration",
+      "en": "Painting & decoration"
+    },
+    "iconKey": "format_paint",
+    "order": 4,
+    "featured": false,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "peintre",
+        "peinture",
+        "décorateur",
+        "ravalement",
+        "enduit",
+        "badigeon"
+      ],
+      "en": [
+        "painter",
+        "paint",
+        "decorator",
+        "wall painting",
+        "plaster",
+        "interior design"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "menuiserie",
+    "names": {
+      "fr": "Menuiserie & meubles",
+      "en": "Carpentry & furniture"
+    },
+    "iconKey": "carpenter",
+    "order": 5,
+    "featured": false,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "menuisier",
+        "charpentier",
+        "meuble",
+        "porte",
+        "fenêtre",
+        "ébéniste",
+        "placard"
+      ],
+      "en": [
+        "carpenter",
+        "joiner",
+        "furniture",
+        "wardrobe",
+        "door",
+        "cabinet maker",
+        "woodwork"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "soudure",
+    "names": {
+      "fr": "Soudure & métallerie",
+      "en": "Welding & metalwork"
+    },
+    "iconKey": "hardware",
+    "order": 6,
+    "featured": false,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "soudeur",
+        "métallier",
+        "ferronnier",
+        "portail",
+        "grille",
+        "barrière",
+        "tôle"
+      ],
+      "en": [
+        "welder",
+        "metalworker",
+        "gate",
+        "grille",
+        "fence",
+        "steel",
+        "blacksmith"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "froid-clim",
+    "names": {
+      "fr": "Frigo & climatisation",
+      "en": "Fridge & air conditioning"
+    },
+    "iconKey": "ac_unit",
+    "order": 7,
+    "featured": false,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "frigoriste",
+        "frigo",
+        "réfrigérateur",
+        "climatiseur",
+        "clim",
+        "congélateur",
+        "split"
+      ],
+      "en": [
+        "refrigeration",
+        "fridge",
+        "freezer",
+        "air conditioner",
+        "aircon",
+        "hvac",
+        "cooling"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "menage",
+    "names": {
+      "fr": "Ménage & nettoyage",
+      "en": "Cleaning"
+    },
+    "iconKey": "cleaning_services",
+    "order": 8,
+    "featured": true,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "femme de ménage",
+        "nettoyage",
+        "lessive",
+        "repassage",
+        "vitres",
+        "désinfection",
+        "bonne"
+      ],
+      "en": [
+        "cleaner",
+        "housekeeping",
+        "laundry",
+        "ironing",
+        "windows",
+        "maid",
+        "disinfection"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "jardinage",
+    "names": {
+      "fr": "Jardinage",
+      "en": "Gardening"
+    },
+    "iconKey": "yard",
+    "order": 9,
+    "featured": false,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "jardinier",
+        "pelouse",
+        "tonte",
+        "arrosage",
+        "élagage",
+        "plantes",
+        "paysagiste"
+      ],
+      "en": [
+        "gardener",
+        "lawn",
+        "mowing",
+        "pruning",
+        "plants",
+        "landscaping",
+        "hedge"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "coiffure",
+    "names": {
+      "fr": "Coiffure & tresses",
+      "en": "Hairdressing & braiding"
+    },
+    "iconKey": "content_cut",
+    "order": 10,
+    "featured": true,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "coiffeur",
+        "coiffeuse",
+        "tresses",
+        "mèches",
+        "perruque",
+        "barbier",
+        "défrisage",
+        "tissage"
+      ],
+      "en": [
+        "hairdresser",
+        "hairstylist",
+        "braids",
+        "weave",
+        "wig",
+        "barber",
+        "haircut"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "beaute",
+    "names": {
+      "fr": "Beauté & ongles",
+      "en": "Beauty & nails"
+    },
+    "iconKey": "face_retouching_natural",
+    "order": 11,
+    "featured": false,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "esthéticienne",
+        "manucure",
+        "pédicure",
+        "maquillage",
+        "ongles",
+        "soins du visage",
+        "vernis"
+      ],
+      "en": [
+        "beautician",
+        "manicure",
+        "pedicure",
+        "makeup",
+        "nails",
+        "facial",
+        "beauty salon"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "couture",
+    "names": {
+      "fr": "Couture & mode",
+      "en": "Tailoring & fashion"
+    },
+    "iconKey": "checkroom",
+    "order": 12,
+    "featured": true,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "couturier",
+        "couturière",
+        "tailleur",
+        "retouche",
+        "pagne",
+        "costume",
+        "stylisme",
+        "robe"
+      ],
+      "en": [
+        "tailor",
+        "seamstress",
+        "dressmaker",
+        "alteration",
+        "fashion designer",
+        "suit",
+        "sewing"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "telephones",
+    "names": {
+      "fr": "Réparation de téléphones",
+      "en": "Phone repair"
+    },
+    "iconKey": "phone_android",
+    "order": 13,
+    "featured": true,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "réparateur téléphone",
+        "écran cassé",
+        "smartphone",
+        "batterie",
+        "déblocage",
+        "tablette",
+        "chargeur"
+      ],
+      "en": [
+        "phone repairer",
+        "cracked screen",
+        "smartphone",
+        "battery",
+        "unlocking",
+        "tablet",
+        "charger"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "informatique",
+    "names": {
+      "fr": "Informatique & réseaux",
+      "en": "IT & networks"
+    },
+    "iconKey": "computer",
+    "order": 14,
+    "featured": false,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "informaticien",
+        "ordinateur",
+        "laptop",
+        "réseau",
+        "wifi",
+        "logiciel",
+        "dépannage informatique",
+        "imprimante"
+      ],
+      "en": [
+        "it technician",
+        "computer",
+        "laptop",
+        "network",
+        "wifi",
+        "software",
+        "printer"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "electromenager",
+    "names": {
+      "fr": "Réparation électroménager",
+      "en": "Appliance repair"
+    },
+    "iconKey": "home_repair_service",
+    "order": 15,
+    "featured": false,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "machine à laver",
+        "réparateur",
+        "télévision",
+        "micro-ondes",
+        "cuisinière",
+        "fer à repasser",
+        "ventilateur"
+      ],
+      "en": [
+        "washing machine",
+        "appliance repairer",
+        "television",
+        "microwave",
+        "cooker",
+        "iron",
+        "fan"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "mecanique-auto",
+    "names": {
+      "fr": "Mécanique auto",
+      "en": "Auto repair"
+    },
+    "iconKey": "car_repair",
+    "order": 16,
+    "featured": true,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "mécanicien",
+        "garagiste",
+        "panne",
+        "voiture",
+        "moteur",
+        "vidange",
+        "carrosserie",
+        "pneu"
+      ],
+      "en": [
+        "mechanic",
+        "garage",
+        "breakdown",
+        "car",
+        "engine",
+        "oil change",
+        "bodywork",
+        "tyre"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "transport",
+    "names": {
+      "fr": "Transport & déménagement",
+      "en": "Transport & moving"
+    },
+    "iconKey": "local_shipping",
+    "order": 17,
+    "featured": false,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "déménageur",
+        "camion",
+        "chauffeur",
+        "taxi",
+        "fret",
+        "transporteur",
+        "manutention"
+      ],
+      "en": [
+        "mover",
+        "truck",
+        "driver",
+        "taxi",
+        "freight",
+        "removal",
+        "haulage"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "livraison",
+    "names": {
+      "fr": "Livraison & coursier",
+      "en": "Delivery & courier"
+    },
+    "iconKey": "delivery_dining",
+    "order": 18,
+    "featured": false,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "livreur",
+        "coursier",
+        "colis",
+        "moto",
+        "commissionnaire",
+        "course"
+      ],
+      "en": [
+        "delivery",
+        "courier",
+        "parcel",
+        "motorbike",
+        "errand",
+        "dispatch rider"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "cours",
+    "names": {
+      "fr": "Cours particuliers",
+      "en": "Tutoring"
+    },
+    "iconKey": "school",
+    "order": 19,
+    "featured": true,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "répétiteur",
+        "soutien scolaire",
+        "professeur",
+        "leçon",
+        "maths",
+        "langues",
+        "devoirs",
+        "enseignant"
+      ],
+      "en": [
+        "tutor",
+        "private lessons",
+        "teacher",
+        "homework",
+        "maths",
+        "languages",
+        "coaching"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "evenements",
+    "names": {
+      "fr": "Événements, traiteur & DJ",
+      "en": "Events, catering & DJ"
+    },
+    "iconKey": "celebration",
+    "order": 20,
+    "featured": false,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "traiteur",
+        "dj",
+        "mariage",
+        "décoration salle",
+        "animation",
+        "sono",
+        "anniversaire",
+        "cuisinier"
+      ],
+      "en": [
+        "caterer",
+        "dj",
+        "wedding",
+        "party",
+        "event planner",
+        "sound system",
+        "birthday",
+        "cook"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "photo-video",
+    "names": {
+      "fr": "Photo & vidéo",
+      "en": "Photo & video"
+    },
+    "iconKey": "photo_camera",
+    "order": 21,
+    "featured": false,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "photographe",
+        "vidéaste",
+        "cameraman",
+        "montage",
+        "reportage",
+        "séance photo",
+        "drone"
+      ],
+      "en": [
+        "photographer",
+        "videographer",
+        "camera operator",
+        "video editing",
+        "photoshoot",
+        "drone",
+        "filming"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "securite",
+    "names": {
+      "fr": "Sécurité & gardiennage",
+      "en": "Security"
+    },
+    "iconKey": "security",
+    "order": 22,
+    "featured": false,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "gardien",
+        "vigile",
+        "agent de sécurité",
+        "alarme",
+        "caméra de surveillance",
+        "clôture électrique",
+        "surveillance"
+      ],
+      "en": [
+        "guard",
+        "security officer",
+        "alarm",
+        "cctv",
+        "surveillance",
+        "electric fence",
+        "watchman"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  },
+  {
+    "id": "autres",
+    "names": {
+      "fr": "Autres services",
+      "en": "Other services"
+    },
+    "iconKey": "more_horiz",
+    "order": 23,
+    "featured": false,
+    "active": true,
+    "synonyms": {
+      "fr": [
+        "divers",
+        "autre",
+        "service",
+        "dépannage",
+        "bricolage"
+      ],
+      "en": [
+        "misc",
+        "other",
+        "service",
+        "odd jobs",
+        "handyman"
+      ],
+      "ln": [],
+      "sw": []
+    }
+  }
+]

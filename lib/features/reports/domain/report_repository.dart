@@ -24,7 +24,8 @@ class ReportFailure implements Exception {
 }
 
 abstract interface class ReportRepository {
-  /// Reports a listing or a provider (reviews are not reportable yet).
+  /// Reports a listing, a provider or a review (`targetKey` =
+  /// `{providerId}__{reviewerUid}`).
   /// Throws [ReportFailure].
   Future<ReportOutcome> submit({
     required ReportTargetType targetType,

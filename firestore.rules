@@ -152,11 +152,16 @@ service cloud.firestore {
       allow delete: if false; // deleteAccount callable
 
       // ----- reviews -----
+      // One review per user and provider (the document id is the author's uid).
+      // Creating one needs a prior contact of that user with that provider
+      // (`contacts/{uid}_{providerId}`, written by the client on WhatsApp / call)
+      // and never your own profile. `rating*` on the provider are server-only
+      // (see providerClientKeys): `onReviewWritten` recomputes them.
       match /reviews/{reviewerId} {
         function isAuthor() { return signedIn() && uid() == reviewerId; }
         function validReview() {
           return data().rating is int && data().rating >= 1 && data().rating <= 5
-            && optStr('text', 0, 500)
+            && optStr('text', 0, 300)
             && str(data().authorName, 1, 60)
             && optStr('authorPhotoUrl', 10, 2048);
         }

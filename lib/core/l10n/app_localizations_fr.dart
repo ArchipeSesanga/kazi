@@ -1122,4 +1122,101 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get legalAcceptSuffix => '.';
+
+  @override
+  String get homeCategoriesSeeAll => 'Voir tout';
+
+  @override
+  String categoryEmptyMessage(String category) {
+    return 'Aucun prestataire dans « $category » pour l\'instant.';
+  }
+
+  @override
+  String get categoryEmptyAction => 'Soyez le premier à proposer ce service';
+
+  @override
+  String get categoryUnknown => 'Catégorie introuvable';
+
+  @override
+  String onboardingCategoriesLimit(int count, int max) {
+    return '$count sur $max maximum';
+  }
+
+  @override
+  String get ratingNew => 'Nouveau';
+
+  @override
+  String ratingSummary(String rating, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count avis',
+      one: '1 avis',
+    );
+    return '$rating ($_temp0)';
+  }
+
+  @override
+  String ratingSemantics(String rating, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count avis',
+      one: '1 avis',
+    );
+    return 'Note $rating sur 5, $_temp0';
+  }
+
+  @override
+  String get ratingSemanticsNew => 'Nouveau prestataire, pas encore d\'avis';
+
+  @override
+  String ratingInputStar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count étoiles',
+      one: '1 étoile',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewsContactFirst =>
+      'Contactez ce prestataire pour laisser un avis';
+
+  @override
+  String get reviewsOwnProfile =>
+      'Vous ne pouvez pas noter votre propre profil.';
+
+  @override
+  String get reviewsSignIn => 'Connectez-vous pour laisser un avis.';
+
+  @override
+  String get reviewsEdit => 'Modifier mon avis';
+
+  @override
+  String get reviewsDelete => 'Supprimer mon avis';
+
+  @override
+  String get reviewsDeleteConfirm =>
+      'Supprimer votre avis ? Cette action est définitive.';
+
+  @override
+  String get reviewsPublished => 'Merci pour votre avis !';
+
+  @override
+  String get reviewsUpdated => 'Avis mis à jour.';
+
+  @override
+  String get reviewsDeleted => 'Avis supprimé.';
+
+  @override
+  String get reviewsRatingRequired => 'Choisissez une note de 1 à 5 étoiles.';
+
+  @override
+  String get reviewsReport => 'Signaler cet avis';
+
+  @override
+  String get reviewsMineTag => 'Votre avis';
 }

@@ -11,7 +11,9 @@
 export const FUNCTIONS_REGION = "africa-south1";
 
 // ── Reports ────────────────────────────────────────────────────────────────
-export const REPORT_TARGETS = ["listing", "provider"] as const;
+/** A review is reported with `targetKey = "{providerId}__{reviewerUid}"` (TDD §4.8). */
+export const REPORT_TARGETS = ["listing", "provider", "review"] as const;
+export const REVIEW_KEY_SEPARATOR = "__";
 export type ReportTarget = (typeof REPORT_TARGETS)[number];
 
 export const REPORT_REASONS = ["scam", "inappropriate", "fake", "wrong_category", "other"] as const;

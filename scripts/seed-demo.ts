@@ -7,14 +7,12 @@
 import * as admin from 'firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { faker } from '@faker-js/faker/locale/fr';
+import { CATEGORIES } from '../shared/categories.js';
 import { initAdmin, parseArgs, db } from './_init.js';
 
 // ── constants ────────────────────────────────────────────────────────────────
 
-const CATEGORY_IDS = [
-  'plomberie', 'electricite', 'coiffure_beaute', 'couture', 'menuiserie',
-  'maconnerie', 'peinture', 'mecanique_auto', 'reparation_telephones', 'informatique',
-];
+const CATEGORY_IDS = CATEGORIES.map((c) => c.id);
 
 const COMMUNE_IDS = [
   'gombe', 'lingwala', 'kinshasa', 'barumbu', 'kintambo',

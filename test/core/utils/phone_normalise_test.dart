@@ -19,7 +19,14 @@ void main() {
     test('rejects numbers the real numbering plan does not allow', () {
       // The number from the bug report: right prefix, one digit too many.
       expect(PhoneUtils.normalise('+2431212211212'), isNull);
-      for (final input in ['', '12', 'abc', '+243', '+24381234', '0812345678901']) {
+      for (final input in [
+        '',
+        '12',
+        'abc',
+        '+243',
+        '+24381234',
+        '0812345678901',
+      ]) {
         expect(PhoneUtils.normalise(input), isNull, reason: input);
       }
     });

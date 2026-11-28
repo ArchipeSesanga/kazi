@@ -46,8 +46,7 @@ GoRouter createAppRouter(
   GateController gate,
   OnboardingController onboarding, {
   bool? devToolsEnabled,
-}) =>
-    GoRouter(
+}) => GoRouter(
   initialLocation: Routes.splash,
   refreshListenable: Listenable.merge([session, gate, onboarding]),
   redirect: (context, state) => resolveRedirect(
@@ -70,8 +69,7 @@ GoRouter createAppRouter(
     // ── Auth flow ────────────────────────────────────────────────────────────
     GoRoute(
       path: Routes.authPhone,
-      builder: (context, state) => const PhoneScreen(
-          ),
+      builder: (context, state) => const PhoneScreen(),
     ),
     GoRoute(
       path: Routes.authOtp,
@@ -90,50 +88,60 @@ GoRouter createAppRouter(
     StatefulShellRoute.indexedStack(
       builder: (context, state, shell) => AppShell(navigationShell: shell),
       branches: [
-        StatefulShellBranch(routes: [
-          GoRoute(
-            path: Routes.home,
-            builder: (context, state) => const HomeScreen(),
-          ),
-        ]),
-        StatefulShellBranch(routes: [
-          GoRoute(
-            path: Routes.explore,
-            builder: (context, state) => const ExploreScreen(),
-          ),
-        ]),
-        StatefulShellBranch(routes: [
-          GoRoute(
-            path: Routes.publish,
-            builder: (context, state) => const PublishScreen(),
-          ),
-        ]),
-        StatefulShellBranch(routes: [
-          GoRoute(
-            path: Routes.messages,
-            builder: (context, state) => const MessagesScreen(),
-          ),
-        ]),
-        StatefulShellBranch(routes: [
-          GoRoute(
-            path: Routes.profile,
-            builder: (context, state) => const ProfileScreen(),
-            routes: [
-              GoRoute(
-                path: 'favorites',
-                builder: (context, state) => const FavoritesScreen(),
-              ),
-              GoRoute(
-                path: 'settings',
-                builder: (context, state) => const SettingsScreen(),
-              ),
-              GoRoute(
-                path: 'delete',
-                builder: (context, state) => const DeleteAccountScreen(),
-              ),
-            ],
-          ),
-        ]),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.home,
+              builder: (context, state) => const HomeScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.explore,
+              builder: (context, state) => const ExploreScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.publish,
+              builder: (context, state) => const PublishScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.messages,
+              builder: (context, state) => const MessagesScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.profile,
+              builder: (context, state) => const ProfileScreen(),
+              routes: [
+                GoRoute(
+                  path: 'favorites',
+                  builder: (context, state) => const FavoritesScreen(),
+                ),
+                GoRoute(
+                  path: 'settings',
+                  builder: (context, state) => const SettingsScreen(),
+                ),
+                GoRoute(
+                  path: 'delete',
+                  builder: (context, state) => const DeleteAccountScreen(),
+                ),
+              ],
+            ),
+          ],
+        ),
       ],
     ),
 
@@ -145,9 +153,8 @@ GoRouter createAppRouter(
     ),
     GoRoute(
       path: '/category/:categoryId',
-      builder: (context, state) => CategoryScreen(
-        categoryId: state.pathParameters['categoryId']!,
-      ),
+      builder: (context, state) =>
+          CategoryScreen(categoryId: state.pathParameters['categoryId']!),
     ),
 
     // ── Provider profile ─────────────────────────────────────────────────────
@@ -175,9 +182,8 @@ GoRouter createAppRouter(
     // ── Listing ──────────────────────────────────────────────────────────────
     GoRoute(
       path: '/l/:listingId',
-      builder: (context, state) => ListingDetailScreen(
-        listingId: state.pathParameters['listingId']!,
-      ),
+      builder: (context, state) =>
+          ListingDetailScreen(listingId: state.pathParameters['listingId']!),
     ),
 
     // ── Provider space ───────────────────────────────────────────────────────
@@ -196,6 +202,7 @@ GoRouter createAppRouter(
           c.read(),
           c.read(),
           c.read(),
+          initialCategoryId: state.uri.queryParameters['cat'],
         )..init(),
         child: const ListingFormScreen(),
       ),
@@ -227,10 +234,7 @@ GoRouter createAppRouter(
       builder: (context, state) =>
           const LegalScreen(kind: LegalPageKind.privacy),
     ),
-    GoRoute(
-      path: Routes.help,
-      builder: (context, state) => const HelpScreen(),
-    ),
+    GoRoute(path: Routes.help, builder: (context, state) => const HelpScreen()),
     GoRoute(
       path: Routes.updateRequired,
       builder: (context, state) => const UpdateRequiredScreen(),

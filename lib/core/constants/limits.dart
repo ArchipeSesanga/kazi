@@ -11,7 +11,7 @@ abstract final class Limits {
   static const int maxListingTitleChars = 80;
   static const int minListingTitleChars = 4;
   static const int maxListingDescriptionChars = 1000;
-  static const int maxReviewTextChars = 500;
+  static const int maxReviewTextChars = 300;
   static const int maxReportDetailsChars = 500;
   static const int maxUploadSizeMb = 2;
   static const int maxPrivateUploadSizeMb = 5;

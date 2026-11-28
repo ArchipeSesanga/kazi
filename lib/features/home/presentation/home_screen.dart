@@ -87,7 +87,7 @@ class _HomeBody extends StatelessWidget {
         ),
 
         // Category row
-        if (catalog.categories.isNotEmpty)
+        if (catalog.featured.isNotEmpty)
           SliverPadding(
             padding: const EdgeInsets.only(top: KaziSpacing.lg),
             sliver: SliverToBoxAdapter(
@@ -285,18 +285,15 @@ class _HomeBody extends StatelessWidget {
         padding: padding,
         sliver: SliverGrid(
           gridDelegate: gridDelegate,
-          delegate: SliverChildBuilderDelegate(
-            (ctx, i) {
-              final p = providers[i];
-              return _ProviderCardAdapter(
-                provider: p,
-                catalog: catalog,
-                locale: locale,
-                onTap: () => ctx.push(Routes.providerProfile(p.uid)),
-              );
-            },
-            childCount: providers.length,
-          ),
+          delegate: SliverChildBuilderDelegate((ctx, i) {
+            final p = providers[i];
+            return _ProviderCardAdapter(
+              provider: p,
+              catalog: catalog,
+              locale: locale,
+              onTap: () => ctx.push(Routes.providerProfile(p.uid)),
+            );
+          }, childCount: providers.length),
         ),
       ),
     ];
@@ -470,8 +467,9 @@ class _AppBar extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: 'Montserrat',
                         color: selected ? KaziColors.primary : KaziColors.ink,
-                        fontWeight:
-                            selected ? FontWeight.w600 : FontWeight.w400,
+                        fontWeight: selected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
                       ),
                     ),
                     trailing: selected
@@ -505,6 +503,9 @@ class _CategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    // Home shows only the featured categories, then "Voir tout" (Explorer).
+    final featured = catalog.featured;
     return SizedBox(
       height: 90,
       child: ListView.builder(
@@ -512,24 +513,33 @@ class _CategoryRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
           horizontal: KaziSpacing.screenPadding,
         ),
-        itemCount: catalog.categories.length,
+        itemCount: featured.length + 1,
         itemBuilder: (_, i) {
-          final cat = catalog.categories[i];
-          final label =
-              locale.startsWith('fr') ? cat.name.fr : cat.name.en;
+          final Widget circle;
+          if (i == featured.length) {
+            circle = CategoryCircle(
+              key: const ValueKey('home-categories-see-all'),
+              label: l.homeCategoriesSeeAll,
+              icon: Icons.grid_view_rounded,
+              onTap: () => context.go(Routes.explore),
+            );
+          } else {
+            final cat = featured[i];
+            circle = CategoryCircle(
+              key: ValueKey('home-category-${cat.id}'),
+              label: cat.label(locale),
+              icon: categoryIconFor(cat.iconKey),
+              onTap: () => context.push(Routes.category(cat.id)),
+            );
+          }
           return Padding(
             padding: const EdgeInsets.only(right: KaziSpacing.md),
-            child: CategoryCircle(
-              label: label,
-              icon: categoryIconForName(cat.icon),
-              onTap: () => context.push(Routes.category(cat.id)),
-            ),
+            child: circle,
           );
         },
       ),
     );
   }
-
 }
 
 // ── Provider card adapter ─────────────────────────────────────────────────────
@@ -550,11 +560,10 @@ class _ProviderCardAdapter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final firstCatId = provider.categoryIds.firstOrNull;
-    final category =
-        firstCatId != null ? catalog.categoryById(firstCatId) : null;
-    final serviceLabel = category == null
-        ? ''
-        : (locale.startsWith('fr') ? category.name.fr : category.name.en);
+    final category = firstCatId != null
+        ? catalog.categoryById(firstCatId)
+        : null;
+    final serviceLabel = category == null ? '' : category.label(locale);
 
     final headline = provider.headline;
     final price = headline != null
@@ -597,11 +606,7 @@ class _ProviderCardSkeleton extends StatelessWidget {
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SkeletonBox(
-            width: double.infinity,
-            height: 112,
-            borderRadius: 0,
-          ),
+          SkeletonBox(width: double.infinity, height: 112, borderRadius: 0),
           Padding(
             padding: EdgeInsets.all(KaziSpacing.md),
             child: Column(
@@ -615,10 +620,7 @@ class _ProviderCardSkeleton extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SkeletonBox(
-                            width: double.infinity,
-                            height: 11,
-                          ),
+                          SkeletonBox(width: double.infinity, height: 11),
                           SizedBox(height: KaziSpacing.xs),
                           SkeletonBox(width: 60, height: 10),
                         ],

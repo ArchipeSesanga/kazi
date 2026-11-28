@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/constants/limits.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/phone.dart';
 import '../../auth/application/session_controller.dart';
@@ -108,7 +109,7 @@ class OnboardingController extends ChangeNotifier {
   void toggleCategory(String id) {
     if (categoryIds.contains(id)) {
       categoryIds = categoryIds.where((c) => c != id).toList();
-    } else if (categoryIds.length < 3) {
+    } else if (categoryIds.length < Limits.maxCategoriesPerProvider) {
       categoryIds = [...categoryIds, id];
     }
     notifyListeners();

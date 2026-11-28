@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import * as admin from 'firebase-admin';
 import { applicationDefault } from 'firebase-admin/app';
@@ -9,6 +10,10 @@ const PROJECT_MAP: Record<string, string> = {
   'kazi-prod': 'kazi-prod-d9c00',
   'kazi-prod-d9c00': 'kazi-prod-d9c00',
 };
+
+// Public OAuth client of firebase-tools (not a secret).
+const FIREBASE_CLI_CLIENT_ID = '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com';
+const FIREBASE_CLI_CLIENT_SECRET = 'j9iVZfS8kkCEFUPaAeJV0sAi';
 
 const PROD_IDS = new Set(['kazi-prod', 'kazi-prod-d9c00']);
 
@@ -38,14 +43,34 @@ function hasApplicationDefaultCredentials(): boolean {
 
 export function initAdmin(projectId: string): admin.app.App {
   if (admin.apps.length) return admin.apps[0]!;
-  if (!hasApplicationDefaultCredentials()) {
+  if (hasApplicationDefaultCredentials()) {
+    return admin.initializeApp({ credential: applicationDefault(), projectId });
+  }
+  // No gcloud ADC: reuse the `firebase login` session (same account the CLI deploys with).
+  const refreshToken = getFirebaseCliRefreshToken();
+  if (!refreshToken) {
     console.error(
-      'No Application Default Credentials found.\n' +
-      'Run: gcloud auth application-default login\n' +
-      'Or use the REST-based seed: npx tsx seed-rest.ts --project kazi-dev',
+      'No credentials found.\n' +
+      'Run `firebase login` (or `gcloud auth application-default login`) and retry.',
     );
     process.exit(1);
   }
+  // Firestore only accepts application-default style credentials, so hand it the
+  // CLI session as an `authorized_user` file (0600, deleted when the script ends).
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kazi-seed-'));
+  const file = path.join(dir, 'adc.json');
+  fs.writeFileSync(
+    file,
+    JSON.stringify({
+      type: 'authorized_user',
+      client_id: FIREBASE_CLI_CLIENT_ID,
+      client_secret: FIREBASE_CLI_CLIENT_SECRET,
+      refresh_token: refreshToken,
+    }),
+    { mode: 0o600 },
+  );
+  process.on('exit', () => fs.rmSync(dir, { recursive: true, force: true }));
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = file;
   return admin.initializeApp({ credential: applicationDefault(), projectId });
 }
 
@@ -78,8 +103,8 @@ async function getAccessToken(): Promise<string> {
     body: new URLSearchParams({
       grant_type: 'refresh_token',
       refresh_token: refreshToken,
-      client_id: '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com',
-      client_secret: 'j9iVZfS8kkCEFUPaAeJV0sAi',
+      client_id: FIREBASE_CLI_CLIENT_ID,
+      client_secret: FIREBASE_CLI_CLIENT_SECRET,
     }),
   });
   if (!res.ok) throw new Error(`Token exchange failed: ${res.status} ${await res.text()}`);

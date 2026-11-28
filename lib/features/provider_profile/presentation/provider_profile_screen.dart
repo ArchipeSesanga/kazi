@@ -8,19 +8,20 @@ import '../../../app/router/routes.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/models/enums.dart';
-import '../../../core/models/localized_text.dart';
 import '../../../core/theme/kazi_colors.dart';
 import '../../../core/theme/kazi_spacing.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/contact_bar.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/kazi_avatar.dart';
+import '../../../core/widgets/kazi_button.dart';
 import '../../../core/widgets/kazi_network_image.dart';
 import '../../../core/widgets/offline_banner.dart';
 import '../../../core/widgets/rating_stars.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../../core/widgets/verified_badge.dart';
+import '../../auth/application/session_controller.dart';
 import '../../block/application/block_controller.dart';
 import '../../catalog/application/catalog_controller.dart';
 import '../../contact/application/contact_controller.dart';
@@ -68,7 +69,8 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
 
           if (state is ProviderProfileLoading) {
             return _LoadingScreen(
-                onBack: () => Navigator.of(context).maybePop());
+              onBack: () => Navigator.of(context).maybePop(),
+            );
           }
 
           if (state is ProviderProfileError) {
@@ -78,7 +80,8 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
             return Scaffold(
               appBar: AppBar(
                 leading: BackButton(
-                    onPressed: () => Navigator.of(context).maybePop()),
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
               ),
               body: ErrorView(
                 message: msg,
@@ -92,7 +95,8 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
             return Scaffold(
               appBar: AppBar(
                 leading: BackButton(
-                    onPressed: () => Navigator.of(context).maybePop()),
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
               ),
               body: Center(
                 child: Text(
@@ -114,7 +118,8 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
             return Scaffold(
               appBar: AppBar(
                 leading: BackButton(
-                    onPressed: () => Navigator.of(context).maybePop()),
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
               ),
               body: Center(
                 child: Text(
@@ -172,7 +177,9 @@ class _LoadedScreen extends StatelessWidget {
                         icon: LucideIcons.share2,
                         onTap: () {
                           final url = 'https://kazi.app/p/${profile.uid}';
-                          final message = l.providerShareMessage(profile.displayName);
+                          final message = l.providerShareMessage(
+                            profile.displayName,
+                          );
                           Share.share('$message\n$url');
                         },
                       ),
@@ -245,26 +252,14 @@ class _LoadedScreen extends StatelessWidget {
                                       ],
                                     ],
                                   ),
-                                  if (profile.ratingCount > 0) ...[
-                                    const SizedBox(height: KaziSpacing.xs),
-                                    Row(
-                                      children: [
-                                        RatingStars(
-                                            rating: profile.ratingAvg,
-                                            size: 14),
-                                        const SizedBox(width: KaziSpacing.xs),
-                                        Text(
-                                          l.providerReviewCount(
-                                              profile.ratingCount),
-                                          style: const TextStyle(
-                                            fontFamily: 'Montserrat',
-                                            fontSize: 12,
-                                            color: KaziColors.muted,
-                                          ),
-                                        ),
-                                      ],
+                                  const SizedBox(height: KaziSpacing.xs),
+                                  RatingSummary(
+                                    rating: profile.ratingAvg,
+                                    count: profile.ratingCount,
+                                    onTap: () => context.push(
+                                      Routes.providerReviews(profile.uid),
                                     ),
-                                  ],
+                                  ),
                                 ],
                               ),
                             ),
@@ -340,7 +335,7 @@ class _LoadedScreen extends StatelessWidget {
                                           ),
                                         ),
                                         child: Text(
-                                          c.name.resolve(locale),
+                                          c.label(locale),
                                           style: const TextStyle(
                                             fontFamily: 'Montserrat',
                                             fontSize: 13,
@@ -368,7 +363,10 @@ class _LoadedScreen extends StatelessWidget {
                         child: SectionHeader(title: l.providerServices),
                       ),
                       _ListingsSection(
-                          providerId: profile.uid, locale: locale, l: l),
+                        providerId: profile.uid,
+                        locale: locale,
+                        l: l,
+                      ),
 
                       const _Divider(),
 
@@ -407,8 +405,9 @@ class _LoadedScreen extends StatelessWidget {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () => context
-                                  .push(Routes.providerReviews(profile.uid)),
+                              onTap: () => context.push(
+                                Routes.providerReviews(profile.uid),
+                              ),
                               child: Text(
                                 l.buttonSeeAll,
                                 style: const TextStyle(
@@ -437,6 +436,26 @@ class _LoadedScreen extends StatelessWidget {
                               fontSize: 14,
                               color: KaziColors.muted,
                             ),
+                          ),
+                        ),
+
+                      // Anyone but the provider can open the review form; it shows
+                      // "Contactez ce prestataire …" until they have made contact.
+                      if (context.read<SessionController>().uid != profile.uid)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            KaziSpacing.screenPadding,
+                            0,
+                            KaziSpacing.screenPadding,
+                            0,
+                          ),
+                          child: KaziButton(
+                            key: const ValueKey('profile-write-review'),
+                            label: l.reviewsWrite,
+                            variant: KaziButtonVariant.outline,
+                            isFullWidth: false,
+                            onPressed: () =>
+                                context.push(Routes.writeReview(profile.uid)),
                           ),
                         ),
 
@@ -499,19 +518,25 @@ class _StatsRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-              child: _StatCell(
-                  value: '${profile.yearsExperience}',
-                  label: l.providerExperience)),
+            child: _StatCell(
+              value: '${profile.yearsExperience}',
+              label: l.providerExperience,
+            ),
+          ),
           _StatDivider(),
           Expanded(
-              child: _StatCell(
-                  value: '${profile.listingCount}',
-                  label: l.providerWorks)),
+            child: _StatCell(
+              value: '${profile.listingCount}',
+              label: l.providerWorks,
+            ),
+          ),
           _StatDivider(),
           Expanded(
-              child: _StatCell(
-                  value: '${profile.stats?.contactsTotal ?? 0}',
-                  label: l.providerContacts)),
+            child: _StatCell(
+              value: '${profile.stats?.contactsTotal ?? 0}',
+              label: l.providerContacts,
+            ),
+          ),
         ],
       ),
     );
@@ -525,37 +550,34 @@ class _StatCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        children: [
-          Text(
-            value,
-            style: const TextStyle(
-              fontFamily: 'Montserrat',
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: KaziColors.ink,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: const TextStyle(
-              fontFamily: 'Montserrat',
-              fontSize: 11,
-              color: KaziColors.muted,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      );
+    children: [
+      Text(
+        value,
+        style: const TextStyle(
+          fontFamily: 'Montserrat',
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: KaziColors.ink,
+        ),
+      ),
+      const SizedBox(height: 2),
+      Text(
+        label,
+        style: const TextStyle(
+          fontFamily: 'Montserrat',
+          fontSize: 11,
+          color: KaziColors.muted,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    ],
+  );
 }
 
 class _StatDivider extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => Container(
-        width: 1,
-        height: 36,
-        color: KaziColors.border,
-      );
+  Widget build(BuildContext context) =>
+      Container(width: 1, height: 36, color: KaziColors.border);
 }
 
 // ── Listings section ──────────────────────────────────────────────────────────
@@ -651,8 +673,9 @@ class _ListingsSectionState extends State<_ListingsSection> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(
-          horizontal: KaziSpacing.screenPadding,
-          vertical: KaziSpacing.sm),
+        horizontal: KaziSpacing.screenPadding,
+        vertical: KaziSpacing.sm,
+      ),
       itemCount: listings.length,
       separatorBuilder: (_, __) => const SizedBox(height: KaziSpacing.sm),
       itemBuilder: (_, i) {
@@ -698,8 +721,11 @@ class _ListingsSectionState extends State<_ListingsSection> {
                     ],
                   ),
                 ),
-                const Icon(LucideIcons.chevronRight,
-                    size: 16, color: KaziColors.muted),
+                const Icon(
+                  LucideIcons.chevronRight,
+                  size: 16,
+                  color: KaziColors.muted,
+                ),
               ],
             ),
           ),
@@ -719,8 +745,9 @@ class _PortfolioGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-          horizontal: KaziSpacing.screenPadding,
-          vertical: KaziSpacing.sm),
+        horizontal: KaziSpacing.screenPadding,
+        vertical: KaziSpacing.sm,
+      ),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -751,7 +778,11 @@ class _LoadingScreen extends StatelessWidget {
       backgroundColor: KaziColors.surfaceAlt,
       body: Column(
         children: [
-          const SkeletonBox(width: double.infinity, height: 200, borderRadius: 0),
+          const SkeletonBox(
+            width: double.infinity,
+            height: 200,
+            borderRadius: 0,
+          ),
           Padding(
             padding: const EdgeInsets.all(KaziSpacing.screenPadding),
             child: Row(
@@ -764,8 +795,9 @@ class _LoadingScreen extends StatelessWidget {
                     const SkeletonBox(width: 160, height: 18),
                     const SizedBox(height: KaziSpacing.xs),
                     SkeletonBox(
-                        width: MediaQuery.sizeOf(context).width * 0.3,
-                        height: 12),
+                      width: MediaQuery.sizeOf(context).width * 0.3,
+                      height: 12,
+                    ),
                   ],
                 ),
               ],
@@ -784,12 +816,12 @@ class _Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const Divider(
-        height: 1,
-        thickness: 1,
-        color: KaziColors.border,
-        indent: KaziSpacing.screenPadding,
-        endIndent: KaziSpacing.screenPadding,
-      );
+    height: 1,
+    thickness: 1,
+    color: KaziColors.border,
+    indent: KaziSpacing.screenPadding,
+    endIndent: KaziSpacing.screenPadding,
+  );
 }
 
 class _CircleIconButton extends StatelessWidget {
@@ -869,7 +901,11 @@ class _BlockMenu extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: const Center(
-          child: Icon(LucideIcons.moreVertical, size: 18, color: KaziColors.ink),
+          child: Icon(
+            LucideIcons.moreVertical,
+            size: 18,
+            color: KaziColors.ink,
+          ),
         ),
       ),
     );
@@ -883,16 +919,17 @@ class _BlockMenu extends StatelessWidget {
     if (action == _ProfileMenuAction.unblock) {
       await blocked.unblock(profile.uid);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l.providerUnblockedSnackbar)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l.providerUnblockedSnackbar)));
       return;
     }
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(ctx).providerBlockTitle(profile.displayName)),
+        title: Text(
+          AppLocalizations.of(ctx).providerBlockTitle(profile.displayName),
+        ),
         content: Text(AppLocalizations.of(ctx).providerBlockBody),
         actions: [
           TextButton(
@@ -913,7 +950,9 @@ class _BlockMenu extends StatelessWidget {
     await blocked.block(profile.uid);
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context).providerBlockedSnackbar)),
+      SnackBar(
+        content: Text(AppLocalizations.of(context).providerBlockedSnackbar),
+      ),
     );
     Navigator.of(context).maybePop();
   }

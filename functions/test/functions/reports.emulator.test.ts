@@ -41,7 +41,7 @@ describe.skipIf(!emulator)('reports, moderation and draft cleanup (Firestore emu
   });
   afterAll(clear);
 
-  const report = (uid: string, key = 'l1', type: 'listing' | 'provider' = 'listing', now?: number) =>
+  const report = (uid: string, key = 'l1', type: 'listing' | 'provider' | 'review' = 'listing', now?: number) =>
     submitReport(db(), uid, { targetType: type, targetKey: key, reason: 'scam', details: ' arnaque ' }, now);
 
   describe('submitReport', () => {
@@ -57,6 +57,15 @@ describe.skipIf(!emulator)('reports, moderation and draft cleanup (Firestore emu
     it('reports a provider as well', async () => {
       const r = await report('u1', 'p1', 'provider');
       expect(r.status).toBe('created');
+    });
+
+    it('reports a review (key "{providerId}__{reviewerUid}"); not your own, not a missing one', async () => {
+      await db().doc('providers/p1/reviews/rev1').set({ authorUid: 'rev1', rating: 1, text: 'insulte' });
+      const r = await report('u1', 'p1__rev1', 'review');
+      expect(r).toEqual({ status: 'created', reportId: reportId('u1', 'review', 'p1__rev1') });
+      expect(await code(report('rev1', 'p1__rev1', 'review'))).toBe('failed-precondition:own-target');
+      expect(await code(report('u1', 'p1__ghost', 'review'))).toBe('not-found:target-not-found');
+      expect(await code(report('u1', 'malformed', 'review'))).toBe('invalid-argument:invalid-input');
     });
 
     it('a second report on the same target is "already reported" and costs no quota', async () => {

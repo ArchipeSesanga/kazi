@@ -1106,4 +1106,99 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get legalAcceptSuffix => '.';
+
+  @override
+  String get homeCategoriesSeeAll => 'See all';
+
+  @override
+  String categoryEmptyMessage(String category) {
+    return 'No provider in “$category” yet.';
+  }
+
+  @override
+  String get categoryEmptyAction => 'Be the first to offer this service';
+
+  @override
+  String get categoryUnknown => 'Category not found';
+
+  @override
+  String onboardingCategoriesLimit(int count, int max) {
+    return '$count of $max max';
+  }
+
+  @override
+  String get ratingNew => 'New';
+
+  @override
+  String ratingSummary(String rating, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reviews',
+      one: '1 review',
+    );
+    return '$rating ($_temp0)';
+  }
+
+  @override
+  String ratingSemantics(String rating, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reviews',
+      one: '1 review',
+    );
+    return 'Rated $rating out of 5, $_temp0';
+  }
+
+  @override
+  String get ratingSemanticsNew => 'New provider, no reviews yet';
+
+  @override
+  String ratingInputStar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stars',
+      one: '1 star',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewsContactFirst => 'Contact this provider to leave a review';
+
+  @override
+  String get reviewsOwnProfile => 'You can\'t review your own profile.';
+
+  @override
+  String get reviewsSignIn => 'Sign in to leave a review.';
+
+  @override
+  String get reviewsEdit => 'Edit my review';
+
+  @override
+  String get reviewsDelete => 'Delete my review';
+
+  @override
+  String get reviewsDeleteConfirm =>
+      'Delete your review? This cannot be undone.';
+
+  @override
+  String get reviewsPublished => 'Thanks for your review!';
+
+  @override
+  String get reviewsUpdated => 'Review updated.';
+
+  @override
+  String get reviewsDeleted => 'Review deleted.';
+
+  @override
+  String get reviewsRatingRequired => 'Choose a rating from 1 to 5 stars.';
+
+  @override
+  String get reviewsReport => 'Report this review';
+
+  @override
+  String get reviewsMineTag => 'Your review';
 }

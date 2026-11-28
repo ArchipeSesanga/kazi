@@ -69,6 +69,22 @@ export function createFirebaseAdminApi(db: Firestore, functions: Functions): Adm
           providerId: str(l.providerId) ?? "",
         };
       }
+      if (type === "review") {
+        const [providerId, reviewerUid] = key.split("__");
+        if (!providerId || !reviewerUid) return null;
+        const snap = await getDoc(doc(db, "providers", providerId, "reviews", reviewerUid));
+        if (!snap.exists()) return null;
+        const r = snap.data();
+        return {
+          kind: "review",
+          id: snap.id,
+          providerId,
+          authorName: str(r.authorName) ?? snap.id,
+          rating: typeof r.rating === "number" ? r.rating : 0,
+          text: typeof r.text === "string" ? r.text : "",
+          photoUrl: null,
+        };
+      }
       const snap = await getDoc(doc(db, "providers", key));
       if (!snap.exists()) return null;
       const p = snap.data();

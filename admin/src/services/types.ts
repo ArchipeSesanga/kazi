@@ -48,8 +48,19 @@ export interface ProviderTarget {
   status: ProviderStatus;
 }
 
+/** A review is identified by `{providerId}__{reviewerUid}` (TDD §4.8). */
+export interface ReviewTarget {
+  kind: "review";
+  id: string;
+  providerId: string;
+  authorName: string;
+  rating: number;
+  text: string;
+  photoUrl: null;
+}
+
 /** `null` when the target no longer exists. */
-export type Target = ListingTarget | ProviderTarget | null;
+export type Target = ListingTarget | ProviderTarget | ReviewTarget | null;
 
 /** Reads from Firestore and calls the moderator callables (never writes). */
 export interface AdminApi {

@@ -246,7 +246,8 @@ Readable by any signed-in user when `status == 'approved'`; always by the owner 
 | `verified` | bool | server | ID-verified badge |
 | `ratingAvg` | number | server | 0 when no reviews; 1 decimal |
 | `ratingCount` | int | server | |
-| `ratingSum` | int | server | |
+| `ratingSum` | int | server | Sum of the review stars |
+| `ratingScore` | number | server | Smoothed average used **only** to rank "best rated": `(4.0 * 5 + ratingSum) / (5 + ratingCount)` (a provider with no review scores 4.0). Set by `onReviewWritten` / `onProviderWritten`; clients never write it and never see it as a rating |
 | `listingCount` | int | server | Listings that hold a limit slot: **`active` + `paused` only** (drafts and listings hidden for the limit do not count). Maintained by `onListingWritten`; compared with `config/limits.maxListingsPerProvider` by the create rule |
 | `headline` | `{ categoryId, fromAmount, fromCurrency, fromPriceType }` | server | For cards: "Plombier · dès 10 $" |
 | `stats` | `{ contactsTotal, contactsByMonth: { "2026-11": n } }` | server | |
@@ -254,7 +255,7 @@ Readable by any signed-in user when `status == 'approved'`; always by the owner 
 | `createdAt`, `updatedAt` | timestamp | client | |
 | `approvedAt` | timestamp? | server | |
 
-> **Create payload:** the client must send the server fields with their initial values (`status: 'pending'`, `verified: false`, `ratingAvg: 0`, `ratingCount: 0`, `ratingSum: 0`, `listingCount: 0`); the rules reject anything else. All other server fields are added by Functions.
+> **Create payload:** the client must send the server fields with their initial values (`status: 'pending'`, `verified: false`, `ratingAvg: 0`, `ratingCount: 0`, `ratingSum: 0`, `listingCount: 0`); the rules reject anything else (and any `ratingScore`: `onProviderWritten` adds it). All other server fields are added by Functions.
 > **Listing create payload:** always include `photos: []` (drafts start without photos) and `communes` with at least one commune.
 
 ### 4.5 `providers/{pid}/reviews/{reviewerUid}`
@@ -265,12 +266,14 @@ Readable by any signed-in user when `status == 'approved'`; always by the owner 
 | `authorName` | string 1–60 | client | Snapshot |
 | `authorPhotoUrl` | string? | client | Snapshot |
 | `rating` | int 1–5 | client | |
-| `text` | string 0–500 | client | |
+| `text` | string 0–300 | client | Optional comment |
 | `providerReply` | string 0–500? | provider (P2) | |
 | `providerReplyAt` | timestamp? | provider | |
 | `createdAt`, `updatedAt` | timestamp | client | |
 
-Create is allowed only if `contacts/{reviewerUid}_{pid}` exists and the reviewer isn't the provider.
+Create is allowed only if `contacts/{reviewerUid}_{pid}` exists (written by the client when it opens WhatsApp / the dialler) and the reviewer isn't the provider; the document id is the author's uid, so a user has one review per provider; the author may edit `rating` / `text` or delete it; a moderator may delete it. **Stars are whole numbers 1–5; the comment is optional, ≤ 300 characters.** The provider's `rating*` fields are never client-writable. The UI states the gate before the form: a user who has not contacted the provider sees "Contactez ce prestataire pour laisser un avis".
+
+**Display** (provider card, list item, search results, profile, listing detail): `RatingSummary` = orange stars (`#F25912`; empty stars in the border colour; fill rounded to the nearest half) + `4,8 (32 avis)` in the Label style (locale number format); no review → a "Nouveau" chip, never `0,0`; screen-reader label "Note 4,8 sur 5, 32 avis"; tappable parts are ≥ 44 px.
 
 ### 4.6 `listings/{listingId}`
 
@@ -296,7 +299,7 @@ Readable by any signed-in user when `visible == true`; always by the owner and m
 | `providerStatus` | provider status enum | server | Denormalised |
 | `providerName`, `providerPhotoUrl` | string | server | Denormalised |
 | `providerVerified` | bool | server | Denormalised |
-| `ratingAvg`, `ratingCount` | number, int | server | Provider rating, denormalised |
+| `ratingAvg`, `ratingCount`, `ratingScore` | number, int, number | server | Provider rating, denormalised (`ratingScore` is what "best rated" sorts on) |
 | `categoryName` | `{fr, en}` | server | Denormalised |
 | `searchKeywords` | string[] ≤ 200 | server | See §8 |
 | `contactCount` | int | server | |
@@ -325,7 +328,7 @@ Readable by any signed-in user when `visible == true`; always by the owner and m
 
 ### 4.8 `reports/{reporterUid}_{targetType}_{targetKey}`
 
-`targetKey` = `listingId`, `providerId`, or `{providerId}__{reviewerUid}` for reviews. The deterministic ID gives one report per user per target. **Reports are created only by the `submitReport` callable** (rules deny client writes): it checks the target exists and is not the reporter's own, applies the per-user limit and returns `already_reported` for a repeat. Only `listing` and `provider` targets are accepted until reviews ship. The limit is `REPORTS_PER_DAY` (10 new reports per rolling 24 h) tracked in the server-only `reportQuota/{uid}` (`{ windowStart, count }`).
+`targetKey` = `listingId`, `providerId`, or `{providerId}__{reviewerUid}` for reviews. The deterministic ID gives one report per user per target. **Reports are created only by the `submitReport` callable** (rules deny client writes): it checks the target exists and is not the reporter's own (for a review: not the reviewer), applies the per-user limit and returns `already_reported` for a repeat. `listing`, `provider` and `review` targets are accepted. A reported review shows in the admin queue (dismiss only); an abusive review is removed by a moderator (rules allow `delete`), there is no removal callable yet. The limit is `REPORTS_PER_DAY` (10 new reports per rolling 24 h) tracked in the server-only `reportQuota/{uid}` (`{ windowStart, count }`).
 
 | Field | Type | Writer |
 |---|---|---|
@@ -352,32 +355,42 @@ Created only through the `submitVerification` callable.
 
 ### 4.10 `categories/{categoryId}`
 
-`{ name: {fr, en}, icon: string (Lucide icon name), order: int, active: bool, listingCount: int (server) }`. Readable by all; written by admins via callable or by the seed script.
+`{ names: {fr, en}, iconKey: string, order: int, featured: bool, active: bool, synonyms: {fr: string[], en: string[], ln: string[], sw: string[]}, listingCount: int (server) }`. Readable by any signed-in user; **never written by a client** (rules: `allow write: if false`): the seed script and, later, `admin_upsertCategory` write them.
 
-Seed ids: `plomberie, electricite, coiffure_beaute, couture, menuiserie, maconnerie, peinture, mecanique_auto, reparation_telephones, informatique, cours_particuliers, menage, cuisine_traiteur, transport_demenagement, evenementiel, climatisation, soudure, jardinage, garde_enfants, autres`.
+- **The id is a permanent slug** (`plomberie`, `froid-clim`, `mecanique-auto`…). Once data exists it is never renamed: rename only `names`, and retire a category with `active: false` (never delete it; listings and providers keep pointing at it).
+- `iconKey` is a Material icon name resolved in the app (`lib/core/utils/category_icon.dart`); an unknown key falls back to a generic icon, so a category can be added without an app update.
+- `featured` (exactly 8) are the only ones Home shows, followed by "Voir tout" (Explorer lists all active ones). `autres` always has the last `order`.
+- `synonyms`: 4–8 words per language in `fr` and `en` (`ln` and `sw` stay empty for now). `onListingWritten` adds them (with the names) to the listing's `searchKeywords` through the usual normalise/keywords code, so searching "plombier" finds Plomberie. Existing listings pick up changed synonyms the next time they are written.
+- A provider picks at most 3 categories (`Limits.maxCategoriesPerProvider`); the listing form picks exactly one. Both use the active list.
+- An empty category shows "Soyez le premier à proposer ce service", which opens the listing form with that category pre-selected (`/provider/listings/new?cat={slug}`).
 
-| id | fr | en | icon |
-|---|---|---|---|
-| plomberie | Plomberie | Plumbing | `wrench` |
-| electricite | Électricité | Electrical | `zap` |
-| coiffure_beaute | Coiffure & beauté | Hair & beauty | `scissors` |
-| couture | Couture | Tailoring | `shirt` |
-| menuiserie | Menuiserie | Carpentry | `hammer` |
-| maconnerie | Maçonnerie & construction | Masonry & building | `brick-wall` |
-| peinture | Peinture | Painting | `paint-roller` |
-| mecanique_auto | Mécanique auto | Car mechanics | `car` |
-| reparation_telephones | Réparation téléphones & électronique | Phone & electronics repair | `smartphone` |
-| informatique | Informatique | IT services | `laptop` |
-| cours_particuliers | Cours particuliers | Tutoring | `graduation-cap` |
-| menage | Ménage & nettoyage | Cleaning | `sparkles` |
-| cuisine_traiteur | Cuisine & traiteur | Cooking & catering | `chef-hat` |
-| transport_demenagement | Transport & déménagement | Transport & moving | `truck` |
-| evenementiel | Événementiel | Events (DJ, décor, photo) | `party-popper` |
-| climatisation | Climatisation & froid | Air-con & refrigeration | `snowflake` |
-| soudure | Soudure | Welding | `flame` |
-| jardinage | Jardinage | Gardening | `sprout` |
-| garde_enfants | Garde d'enfants | Childcare | `baby` |
-| autres | Autres services | Other services | `ellipsis` |
+**One source of truth: [`assets/data/categories.json`](../assets/data/categories.json)**, read by `scripts/seed-categories.ts` (via `shared/categories.ts`, which validates it) and bundled in the app as its offline fallback. Seeding is idempotent and keeps `listingCount`; in dev it also removes the old placeholder categories and `demo_*` data and remaps placeholder ids on dev providers/listings. It refuses `kazi-prod`.
+
+| id | fr | en | iconKey | featured |
+|---|---|---|---|---|
+| plomberie | Plomberie | Plumbing | `plumbing` | yes |
+| electricite | Électricité | Electrical | `electrical_services` | yes |
+| maconnerie | Maçonnerie & carrelage | Masonry & tiling | `construction` |  |
+| peinture | Peinture & décoration | Painting & decoration | `format_paint` |  |
+| menuiserie | Menuiserie & meubles | Carpentry & furniture | `carpenter` |  |
+| soudure | Soudure & métallerie | Welding & metalwork | `hardware` |  |
+| froid-clim | Frigo & climatisation | Fridge & air conditioning | `ac_unit` |  |
+| menage | Ménage & nettoyage | Cleaning | `cleaning_services` | yes |
+| jardinage | Jardinage | Gardening | `yard` |  |
+| coiffure | Coiffure & tresses | Hairdressing & braiding | `content_cut` | yes |
+| beaute | Beauté & ongles | Beauty & nails | `face_retouching_natural` |  |
+| couture | Couture & mode | Tailoring & fashion | `checkroom` | yes |
+| telephones | Réparation de téléphones | Phone repair | `phone_android` | yes |
+| informatique | Informatique & réseaux | IT & networks | `computer` |  |
+| electromenager | Réparation électroménager | Appliance repair | `home_repair_service` |  |
+| mecanique-auto | Mécanique auto | Auto repair | `car_repair` | yes |
+| transport | Transport & déménagement | Transport & moving | `local_shipping` |  |
+| livraison | Livraison & coursier | Delivery & courier | `delivery_dining` |  |
+| cours | Cours particuliers | Tutoring | `school` | yes |
+| evenements | Événements, traiteur & DJ | Events, catering & DJ | `celebration` |  |
+| photo-video | Photo & vidéo | Photo & video | `photo_camera` |  |
+| securite | Sécurité & gardiennage | Security | `security` |  |
+| autres | Autres services | Other services | `more_horiz` |  |
 
 ### 4.11 `config/locations`
 
@@ -473,9 +486,9 @@ All functions use `region: config.REGION` and are 2nd gen. Callables use `enforc
 
 | Function | Trigger | Behaviour |
 |---|---|---|
-| `onProviderWritten` | `providers/{uid}` written | (1) Recompute `searchKeywords`. (2) If `displayName`, `photoUrl`, `verified`, `ratingAvg`, `ratingCount` or `status` changed → batch-update the provider's listings (denormalised fields + recompute `visible`). (3) **v1 auto-approval:** if `status == pending` on create (or `rejected → pending`) and `config/moderation.autoApproveProviders == true`, set `status = approved`, `approvedAt`. (3b) On create: set `users/{uid}.isProvider = true` *(not yet implemented)*. (4) Guard against infinite loops: compare before/after, and only write when values differ |
+| `onProviderWritten` | `providers/{uid}` written | (1) Recompute `searchKeywords`. (2) If `displayName`, `photoUrl`, `verified`, `ratingAvg`, `ratingCount`, `ratingScore` or `status` changed → batch-update the provider's listings (denormalised fields + recompute `visible`). (3) **v1 auto-approval:** if `status == pending` on create (or `rejected → pending`) and `config/moderation.autoApproveProviders == true`, set `status = approved`, `approvedAt`. (3b) On create: set `users/{uid}.isProvider = true` *(not yet implemented)*. (4) Guard against infinite loops: compare before/after, and only write when values differ |
 | `onListingWritten` | `listings/{id}` written | (1) On create/update: fill denormalised provider + category fields, compute `searchKeywords`, `visible`, set `publishedAt` the first time it becomes visible. (2) Validate content (no phone numbers in title; profanity list) → set `moderation = hidden`, `moderationReason = 'auto_content'` if it fails. (3) Maintain `providers.listingCount` through `countsTowardLimit` (state-based, idempotent: +1 when a listing becomes active/paused with a free slot, −1 when it goes to draft or is deleted); with no free slot the listing is hidden with `over_limit` instead of counted. `providers.headline` and `categories.listingCount` are **not yet implemented**. (4) On delete: delete the listing's Storage objects (also on update when photos are removed); only paths under `media/{providerId}/listings/` are ever deleted (the `photos` array is client-written). Server writes happen only when a computed value differs, so the invocation caused by the function's own write is a no-op (logged as `wrote: false`) |
-| `onReviewWritten` | `providers/{pid}/reviews/{rid}` written | In a transaction, apply the delta to `ratingSum` / `ratingCount`; set `ratingAvg = round(sum / count, 1)` |
+| `onReviewWritten` | `providers/{pid}/reviews/{rid}` written (rating added, edited or deleted) | In a transaction, **recompute** `ratingSum` / `ratingCount` from the reviews, then `ratingAvg = round(sum / count, 1)` (0 when no review) and `ratingScore`. Recomputing (not applying a delta) makes it idempotent on re-delivery and makes the anonymising move of `deleteAccount` (delete + create, same rating) net zero. Writes only when a value changed; never creates the provider; the provider write then reaches the listings through `onProviderWritten` |
 | `onContactWritten` | `contacts/{id}` written | Increment `providers.stats.contactsTotal`, `stats.contactsByMonth[YYYY-MM]` and `listings.contactCount`. **Ignore** updates where `lastAt - before.lastAt < 10 min` (anti-inflation) |
 | `onReportCreated` | `reports/{id}` created | **Implemented.** Count open reports for the target (`where targetType, targetKey, status == open`). If ≥ `AUTO_HIDE_THRESHOLD` (3): hide the listing (`moderation = hidden`, reason `auto_reports`) or, for a provider, set every listing to `hidden` (the provider stays approved until an admin decides). Write `adminLogs` |
 
@@ -499,7 +512,7 @@ All functions use `region: config.REGION` and are 2nd gen. Callables use `enforc
 | `moderator_suspendProvider` | `{ providerId, reason }` | **Implemented.** `providers.status = suspended` (`onProviderWritten` then hides their listings); open reports on the provider → `actioned`; `adminLogs` |
 | `moderator_dismissReport` | `{ reportId, note? }` | **Implemented.** Dismisses the report and every other open report on the same target; `adminLogs` |
 | `admin_resolveReport` | `{ reportId, action: dismiss\|hide_target\|unhide_target\|suspend_provider\|delete_review, note? }` | Apply the action; mark all open reports on the same target as resolved; `adminLogs` |
-| `admin_upsertCategory` | `{ id, name: {fr,en}, icon, order, active }` | `adminLogs` |
+| `admin_upsertCategory` | `{ id, names: {fr,en}, iconKey, order, featured, active, synonyms }` | `adminLogs` |
 | `admin_setRole` | `{ uid, role: admin\|moderator, enabled }` | **superAdmin claim only**. Sets custom claims |
 
 ### 6.4 Scheduled
@@ -523,7 +536,7 @@ The app asks the user to type the confirmation word, **re-confirms with a fresh 
 7. Delete Storage prefixes `media/{uid}/` and `private/verification/{uid}/`.
 8. Delete `users/{uid}` with `favorites`, `blocks`, `devices`, and **last** the Auth user (`admin.auth().deleteUser`, "not found" ignored). Until the Auth user is gone the user can sign in again and retry.
 
-Nothing creates a document: triggers touch `providers/{uid}` with `update()` only after checking it exists (`syncListingSlot`, `releaseSlotOnDelete`, `approveProviderIfExists`), so deleting listings or racing writes cannot recreate a deleted provider. Logs contain counts only. Collection-group queries on `reviews.authorUid` and `favorites.providerId` have field overrides in `firestore.indexes.json`. Known gap: when KZ-073 (`onReviewWritten`) lands it must treat the anonymising move (delete + create, same rating) as net zero.
+Nothing creates a document: triggers touch `providers/{uid}` with `update()` only after checking it exists (`syncListingSlot`, `releaseSlotOnDelete`, `approveProviderIfExists`), so deleting listings or racing writes cannot recreate a deleted provider. Logs contain counts only. Collection-group queries on `reviews.authorUid` and `favorites.providerId` have field overrides in `firestore.indexes.json`. `onReviewWritten` recomputes from the reviews, so the anonymising move (delete + create, same rating) is net zero.
 
 **Operator deletion on request** (`scripts/delete-account.ts`, logic in `functions/src/lib/operatorDelete.ts`): staff only (the `--operator` Auth user must have `admin` or `moderator`), finds the account by phone number (Auth user, else a `users` doc with that phone), dry-run unless `--execute` (`--confirm-prod` for prod), reuses `deleteAccountData`, writes `adminLogs` (`operator_delete_account` / `_failed`) with the uid and a reason that may not contain phone numbers or emails. See the runbook §G.
 
@@ -590,7 +603,7 @@ Firestore allows **one** `array-contains` per query. `SearchResultsController` b
 2. If keyword present → `where('searchKeywords', 'array-contains', firstTokenPrefix)` (use the longest token in the query, truncated to 15 chars). The commune filter is then applied **client-side**.
 3. Else if commune selected → `where('communes', 'array-contains', commune)`.
 4. Optional equality filters: `categoryId`, `providerVerified == true`.
-5. Order: `ratingAvg desc` (default) or `publishedAt desc` ("Récents"). `minRating` is applied client-side.
+5. Order: `ratingScore desc` (default; the smoothed "best rated" score, see §4.4) or `publishedAt desc` ("Récents"). `minRating` is applied client-side.
 6. Page size 20; if client-side filtering leaves < 10 results and more pages exist, fetch up to 2 more pages automatically.
 
 All combinations must have composite indexes in [`firebase/firestore.indexes.json`](firebase/firestore.indexes.json).
@@ -774,7 +787,8 @@ The admin panel is not part of the Flutter app: it lives in `/admin` (React). Th
 | `SearchResultsController` | screen | `SearchQuery` (keyword, category, commune, verifiedOnly, minRating, sort), debounced 400 ms, `PagedState<Listing>` |
 | `ProviderProfileController` | screen | Provider, their listings, first page of reviews, `hasContacted`, my review |
 | `ContactController` | screen-level helper | Ensures sign-in, records the contact, launches WhatsApp/tel, logs analytics |
-| `ReviewFormController` | screen | Rating, text, validation, submit |
+| `WriteReviewController` | screen | Gate (sign-in / own profile / no contact yet / ready), rating 1–5, comment ≤ 300, publish, edit, delete |
+| `ProviderReviewsController` | screen | Rating summary (from the provider document) + paged reviews, newest first |
 | `ReportController` | sheet | Reason, details, submit |
 | `ProviderOnboardingController` | screen (multi-step) | Steps: identity → categories → area → contact numbers → photos → review & submit |
 | `ListingFormController` | screen | Create/edit; photo upload queue with progress; validation; publish/pause |
@@ -966,7 +980,7 @@ A separate **React + TypeScript** web app in `/admin` (Vite, Firebase JS SDK, no
 
 | Script | Purpose |
 |---|---|
-| `scripts/seed-categories.ts` | Upsert §4.10 categories |
+| `scripts/seed-categories.ts` | Upsert §4.10 categories from `assets/data/categories.json` (dev only; idempotent; dev wipe of placeholder data) |
 | `scripts/seed-locations.ts` | Write `config/locations` (§4.11) |
 | `scripts/seed-demo.ts` | **dev/emulator only**: 10 fake providers, 25 listings, reviews and contacts with placeholder images |
 | `scripts/set-claims.ts` | Grant/revoke `superAdmin`, `admin`, `moderator` |

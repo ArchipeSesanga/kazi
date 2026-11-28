@@ -50,3 +50,13 @@ export function buildSearchKeywords(
   }
   return [...out];
 }
+
+/** Synonyms of a category in every language (fr, en, ln, sw). */
+export function categorySynonyms(category?: {
+  synonyms?: Partial<Record<"fr" | "en" | "ln" | "sw", string[]>>;
+}): string[] {
+  const s = category?.synonyms ?? {};
+  return [...(s.fr ?? []), ...(s.en ?? []), ...(s.ln ?? []), ...(s.sw ?? [])].filter(
+    (x): x is string => typeof x === "string" && x !== "",
+  );
+}

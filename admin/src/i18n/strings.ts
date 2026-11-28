@@ -29,6 +29,7 @@ export interface Strings {
     latest: string;
     listing: string;
     provider: string;
+    review: string;
     deletedTarget: string;
     reasons: Record<ReportReason, string>;
     status: { hidden: string; visible: string; suspended: string; approved: string; pending: string; rejected: string };
@@ -98,6 +99,7 @@ export const fr: Strings = {
     latest: "Dernier",
     listing: "Annonce",
     provider: "Prestataire",
+    review: "Avis",
     deletedTarget: "Contenu supprimé",
     reasons: {
       scam: "Arnaque",
@@ -190,6 +192,7 @@ export const en: Strings = {
     latest: "Latest",
     listing: "Listing",
     provider: "Provider",
+    review: "Review",
     deletedTarget: "Content deleted",
     reasons: {
       scam: "Scam",
